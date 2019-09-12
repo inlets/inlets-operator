@@ -19,14 +19,14 @@ limitations under the License.
 package fake
 
 import (
+	clientset "github.com/alexellis/inlets-operator/pkg/generated/clientset/versioned"
+	inletsoperatorv1alpha1 "github.com/alexellis/inlets-operator/pkg/generated/clientset/versioned/typed/inletsoperator/v1alpha1"
+	fakeinletsoperatorv1alpha1 "github.com/alexellis/inlets-operator/pkg/generated/clientset/versioned/typed/inletsoperator/v1alpha1/fake"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/watch"
 	"k8s.io/client-go/discovery"
 	fakediscovery "k8s.io/client-go/discovery/fake"
 	"k8s.io/client-go/testing"
-	clientset "github.com/alexellis/inlets-operator/pkg/generated/clientset/versioned"
-	samplecontrollerv1alpha1 "github.com/alexellis/inlets-operator/pkg/generated/clientset/versioned/typed/samplecontroller/v1alpha1"
-	fakesamplecontrollerv1alpha1 "github.com/alexellis/inlets-operator/pkg/generated/clientset/versioned/typed/samplecontroller/v1alpha1/fake"
 )
 
 // NewSimpleClientset returns a clientset that will respond with the provided objects.
@@ -71,7 +71,7 @@ func (c *Clientset) Discovery() discovery.DiscoveryInterface {
 
 var _ clientset.Interface = &Clientset{}
 
-// SamplecontrollerV1alpha1 retrieves the SamplecontrollerV1alpha1Client
-func (c *Clientset) SamplecontrollerV1alpha1() samplecontrollerv1alpha1.SamplecontrollerV1alpha1Interface {
-	return &fakesamplecontrollerv1alpha1.FakeSamplecontrollerV1alpha1{Fake: &c.Fake}
+// InletsoperatorV1alpha1 retrieves the InletsoperatorV1alpha1Client
+func (c *Clientset) InletsoperatorV1alpha1() inletsoperatorv1alpha1.InletsoperatorV1alpha1Interface {
+	return &fakeinletsoperatorv1alpha1.FakeInletsoperatorV1alpha1{Fake: &c.Fake}
 }

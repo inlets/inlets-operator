@@ -49,26 +49,26 @@ type TunnelInterface interface {
 	TunnelExpansion
 }
 
-// foos implements TunnelInterface
-type foos struct {
+// tunnels implements TunnelInterface
+type tunnels struct {
 	client rest.Interface
 	ns     string
 }
 
 // newTunnels returns a Tunnels
-func newTunnels(c *SamplecontrollerV1alpha1Client, namespace string) *foos {
-	return &foos{
+func newTunnels(c *InletsoperatorV1alpha1Client, namespace string) *tunnels {
+	return &tunnels{
 		client: c.RESTClient(),
 		ns:     namespace,
 	}
 }
 
-// Get takes name of the foo, and returns the corresponding foo object, and an error if there is any.
-func (c *foos) Get(name string, options v1.GetOptions) (result *v1alpha1.Tunnel, err error) {
+// Get takes name of the tunnel, and returns the corresponding tunnel object, and an error if there is any.
+func (c *tunnels) Get(name string, options v1.GetOptions) (result *v1alpha1.Tunnel, err error) {
 	result = &v1alpha1.Tunnel{}
 	err = c.client.Get().
 		Namespace(c.ns).
-		Resource("foos").
+		Resource("tunnels").
 		Name(name).
 		VersionedParams(&options, scheme.ParameterCodec).
 		Do().
@@ -77,7 +77,7 @@ func (c *foos) Get(name string, options v1.GetOptions) (result *v1alpha1.Tunnel,
 }
 
 // List takes label and field selectors, and returns the list of Tunnels that match those selectors.
-func (c *foos) List(opts v1.ListOptions) (result *v1alpha1.TunnelList, err error) {
+func (c *tunnels) List(opts v1.ListOptions) (result *v1alpha1.TunnelList, err error) {
 	var timeout time.Duration
 	if opts.TimeoutSeconds != nil {
 		timeout = time.Duration(*opts.TimeoutSeconds) * time.Second
@@ -85,7 +85,7 @@ func (c *foos) List(opts v1.ListOptions) (result *v1alpha1.TunnelList, err error
 	result = &v1alpha1.TunnelList{}
 	err = c.client.Get().
 		Namespace(c.ns).
-		Resource("foos").
+		Resource("tunnels").
 		VersionedParams(&opts, scheme.ParameterCodec).
 		Timeout(timeout).
 		Do().
@@ -93,8 +93,8 @@ func (c *foos) List(opts v1.ListOptions) (result *v1alpha1.TunnelList, err error
 	return
 }
 
-// Watch returns a watch.Interface that watches the requested foos.
-func (c *foos) Watch(opts v1.ListOptions) (watch.Interface, error) {
+// Watch returns a watch.Interface that watches the requested tunnels.
+func (c *tunnels) Watch(opts v1.ListOptions) (watch.Interface, error) {
 	var timeout time.Duration
 	if opts.TimeoutSeconds != nil {
 		timeout = time.Duration(*opts.TimeoutSeconds) * time.Second
@@ -102,32 +102,32 @@ func (c *foos) Watch(opts v1.ListOptions) (watch.Interface, error) {
 	opts.Watch = true
 	return c.client.Get().
 		Namespace(c.ns).
-		Resource("foos").
+		Resource("tunnels").
 		VersionedParams(&opts, scheme.ParameterCodec).
 		Timeout(timeout).
 		Watch()
 }
 
-// Create takes the representation of a foo and creates it.  Returns the server's representation of the foo, and an error, if there is any.
-func (c *foos) Create(foo *v1alpha1.Tunnel) (result *v1alpha1.Tunnel, err error) {
+// Create takes the representation of a tunnel and creates it.  Returns the server's representation of the tunnel, and an error, if there is any.
+func (c *tunnels) Create(tunnel *v1alpha1.Tunnel) (result *v1alpha1.Tunnel, err error) {
 	result = &v1alpha1.Tunnel{}
 	err = c.client.Post().
 		Namespace(c.ns).
-		Resource("foos").
-		Body(foo).
+		Resource("tunnels").
+		Body(tunnel).
 		Do().
 		Into(result)
 	return
 }
 
-// Update takes the representation of a foo and updates it. Returns the server's representation of the foo, and an error, if there is any.
-func (c *foos) Update(foo *v1alpha1.Tunnel) (result *v1alpha1.Tunnel, err error) {
+// Update takes the representation of a tunnel and updates it. Returns the server's representation of the tunnel, and an error, if there is any.
+func (c *tunnels) Update(tunnel *v1alpha1.Tunnel) (result *v1alpha1.Tunnel, err error) {
 	result = &v1alpha1.Tunnel{}
 	err = c.client.Put().
 		Namespace(c.ns).
-		Resource("foos").
-		Name(foo.Name).
-		Body(foo).
+		Resource("tunnels").
+		Name(tunnel.Name).
+		Body(tunnel).
 		Do().
 		Into(result)
 	return
@@ -136,24 +136,24 @@ func (c *foos) Update(foo *v1alpha1.Tunnel) (result *v1alpha1.Tunnel, err error)
 // UpdateStatus was generated because the type contains a Status member.
 // Add a +genclient:noStatus comment above the type to avoid generating UpdateStatus().
 
-func (c *foos) UpdateStatus(foo *v1alpha1.Tunnel) (result *v1alpha1.Tunnel, err error) {
+func (c *tunnels) UpdateStatus(tunnel *v1alpha1.Tunnel) (result *v1alpha1.Tunnel, err error) {
 	result = &v1alpha1.Tunnel{}
 	err = c.client.Put().
 		Namespace(c.ns).
-		Resource("foos").
-		Name(foo.Name).
+		Resource("tunnels").
+		Name(tunnel.Name).
 		SubResource("status").
-		Body(foo).
+		Body(tunnel).
 		Do().
 		Into(result)
 	return
 }
 
-// Delete takes name of the foo and deletes it. Returns an error if one occurs.
-func (c *foos) Delete(name string, options *v1.DeleteOptions) error {
+// Delete takes name of the tunnel and deletes it. Returns an error if one occurs.
+func (c *tunnels) Delete(name string, options *v1.DeleteOptions) error {
 	return c.client.Delete().
 		Namespace(c.ns).
-		Resource("foos").
+		Resource("tunnels").
 		Name(name).
 		Body(options).
 		Do().
@@ -161,14 +161,14 @@ func (c *foos) Delete(name string, options *v1.DeleteOptions) error {
 }
 
 // DeleteCollection deletes a collection of objects.
-func (c *foos) DeleteCollection(options *v1.DeleteOptions, listOptions v1.ListOptions) error {
+func (c *tunnels) DeleteCollection(options *v1.DeleteOptions, listOptions v1.ListOptions) error {
 	var timeout time.Duration
 	if listOptions.TimeoutSeconds != nil {
 		timeout = time.Duration(*listOptions.TimeoutSeconds) * time.Second
 	}
 	return c.client.Delete().
 		Namespace(c.ns).
-		Resource("foos").
+		Resource("tunnels").
 		VersionedParams(&listOptions, scheme.ParameterCodec).
 		Timeout(timeout).
 		Body(options).
@@ -176,12 +176,12 @@ func (c *foos) DeleteCollection(options *v1.DeleteOptions, listOptions v1.ListOp
 		Error()
 }
 
-// Patch applies the patch and returns the patched foo.
-func (c *foos) Patch(name string, pt types.PatchType, data []byte, subresources ...string) (result *v1alpha1.Tunnel, err error) {
+// Patch applies the patch and returns the patched tunnel.
+func (c *tunnels) Patch(name string, pt types.PatchType, data []byte, subresources ...string) (result *v1alpha1.Tunnel, err error) {
 	result = &v1alpha1.Tunnel{}
 	err = c.client.Patch(pt).
 		Namespace(c.ns).
-		Resource("foos").
+		Resource("tunnels").
 		SubResource(subresources...).
 		Name(name).
 		Body(data).

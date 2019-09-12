@@ -24,8 +24,8 @@ import (
 	time "time"
 
 	versioned "github.com/alexellis/inlets-operator/pkg/generated/clientset/versioned"
+	inletsoperator "github.com/alexellis/inlets-operator/pkg/generated/informers/externalversions/inletsoperator"
 	internalinterfaces "github.com/alexellis/inlets-operator/pkg/generated/informers/externalversions/internalinterfaces"
-	inletsoperator "github.com/alexellis/inlets-operator/pkg/generated/informers/externalversions/samplecontroller"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	runtime "k8s.io/apimachinery/pkg/runtime"
 	schema "k8s.io/apimachinery/pkg/runtime/schema"

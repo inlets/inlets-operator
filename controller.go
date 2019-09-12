@@ -40,8 +40,8 @@ import (
 	samplev1alpha1 "github.com/alexellis/inlets-operator/pkg/apis/inletsoperator/v1alpha1"
 	clientset "github.com/alexellis/inlets-operator/pkg/generated/clientset/versioned"
 	samplescheme "github.com/alexellis/inlets-operator/pkg/generated/clientset/versioned/scheme"
-	informers "github.com/alexellis/inlets-operator/pkg/generated/informers/externalversions/samplecontroller/v1alpha1"
-	listers "github.com/alexellis/inlets-operator/pkg/generated/listers/samplecontroller/v1alpha1"
+	informers "github.com/alexellis/inlets-operator/pkg/generated/informers/externalversions/inletsoperator/v1alpha1"
+	listers "github.com/alexellis/inlets-operator/pkg/generated/listers/inletsoperator/v1alpha1"
 )
 
 const controllerAgentName = "sample-controller"
@@ -70,8 +70,8 @@ type Controller struct {
 
 	deploymentsLister appslisters.DeploymentLister
 	deploymentsSynced cache.InformerSynced
-	foosLister        listers.TunnelLister
-	foosSynced        cache.InformerSynced
+	tunnelsLister     listers.TunnelLister
+	tunnelsSynced     cache.InformerSynced
 
 	// workqueue is a rate limited work queue. This is used to queue work to be
 	// processed instead of performing it as soon as a change happens. This
@@ -89,7 +89,7 @@ func NewController(
 	kubeclientset kubernetes.Interface,
 	sampleclientset clientset.Interface,
 	deploymentInformer appsinformers.DeploymentInformer,
-	fooInformer informers.TunnelInformer) *Controller {
+	tunnelInformer informers.TunnelInformer) *Controller {
 
 	// Create event broadcaster
 	// Add sample-controller types to the default Kubernetes Scheme so Events can be
@@ -106,15 +106,15 @@ func NewController(
 		sampleclientset:   sampleclientset,
 		deploymentsLister: deploymentInformer.Lister(),
 		deploymentsSynced: deploymentInformer.Informer().HasSynced,
-		foosLister:        fooInformer.Lister(),
-		foosSynced:        fooInformer.Informer().HasSynced,
+		tunnelsLister:     tunnelInformer.Lister(),
+		tunnelsSynced:     tunnelInformer.Informer().HasSynced,
 		workqueue:         workqueue.NewNamedRateLimitingQueue(workqueue.DefaultControllerRateLimiter(), "Tunnels"),
 		recorder:          recorder,
 	}
 
 	klog.Info("Setting up event handlers")
 	// Set up an event handler for when Tunnel resources change
-	fooInformer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{
+	tunnelInformer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{
 		AddFunc: controller.enqueueTunnel,
 		UpdateFunc: func(old, new interface{}) {
 			controller.enqueueTunnel(new)
@@ -157,7 +157,7 @@ func (c *Controller) Run(threadiness int, stopCh <-chan struct{}) error {
 
 	// Wait for the caches to be synced before starting workers
 	klog.Info("Waiting for informer caches to sync")
-	if ok := cache.WaitForCacheSync(stopCh, c.deploymentsSynced, c.foosSynced); !ok {
+	if ok := cache.WaitForCacheSync(stopCh, c.deploymentsSynced, c.tunnelsSynced); !ok {
 		return fmt.Errorf("failed to wait for caches to sync")
 	}
 
@@ -249,19 +249,19 @@ func (c *Controller) syncHandler(key string) error {
 	}
 
 	// Get the Tunnel resource with this namespace/name
-	foo, err := c.foosLister.Tunnels(namespace).Get(name)
+	tunnel, err := c.tunnelsLister.Tunnels(namespace).Get(name)
 	if err != nil {
 		// The Tunnel resource may no longer exist, in which case we stop
 		// processing.
 		if errors.IsNotFound(err) {
-			utilruntime.HandleError(fmt.Errorf("foo '%s' in work queue no longer exists", key))
+			utilruntime.HandleError(fmt.Errorf("tunnel '%s' in work queue no longer exists", key))
 			return nil
 		}
 
 		return err
 	}
 
-	deploymentName := foo.Spec.DeploymentName
+	deploymentName := tunnel.Spec.DeploymentName
 	if deploymentName == "" {
 		// We choose to absorb the error here as the worker would requeue the
 		// resource otherwise. Instead, the next time the resource is updated
@@ -271,10 +271,10 @@ func (c *Controller) syncHandler(key string) error {
 	}
 
 	// Get the deployment with the name specified in Tunnel.spec
-	deployment, err := c.deploymentsLister.Deployments(foo.Namespace).Get(deploymentName)
+	deployment, err := c.deploymentsLister.Deployments(tunnel.Namespace).Get(deploymentName)
 	// If the resource doesn't exist, we'll create it
 	if errors.IsNotFound(err) {
-		deployment, err = c.kubeclientset.AppsV1().Deployments(foo.Namespace).Create(newDeployment(foo))
+		deployment, err = c.kubeclientset.AppsV1().Deployments(tunnel.Namespace).Create(newDeployment(tunnel))
 	}
 
 	// If an error occurs during Get/Create, we'll requeue the item so we can
@@ -286,18 +286,18 @@ func (c *Controller) syncHandler(key string) error {
 
 	// If the Deployment is not controlled by this Tunnel resource, we should log
 	// a warning to the event recorder and ret
-	if !metav1.IsControlledBy(deployment, foo) {
+	if !metav1.IsControlledBy(deployment, tunnel) {
 		msg := fmt.Sprintf(MessageResourceExists, deployment.Name)
-		c.recorder.Event(foo, corev1.EventTypeWarning, ErrResourceExists, msg)
+		c.recorder.Event(tunnel, corev1.EventTypeWarning, ErrResourceExists, msg)
 		return fmt.Errorf(msg)
 	}
 
 	// If this number of the replicas on the Tunnel resource is specified, and the
 	// number does not equal the current desired replicas on the Deployment, we
 	// should update the Deployment resource.
-	if foo.Spec.Replicas != nil && *foo.Spec.Replicas != *deployment.Spec.Replicas {
-		klog.V(4).Infof("Tunnel %s replicas: %d, deployment replicas: %d", name, *foo.Spec.Replicas, *deployment.Spec.Replicas)
-		deployment, err = c.kubeclientset.AppsV1().Deployments(foo.Namespace).Update(newDeployment(foo))
+	if tunnel.Spec.Replicas != nil && *tunnel.Spec.Replicas != *deployment.Spec.Replicas {
+		klog.V(4).Infof("Tunnel %s replicas: %d, deployment replicas: %d", name, *tunnel.Spec.Replicas, *deployment.Spec.Replicas)
+		deployment, err = c.kubeclientset.AppsV1().Deployments(tunnel.Namespace).Update(newDeployment(tunnel))
 	}
 
 	// If an error occurs during Update, we'll requeue the item so we can
@@ -309,26 +309,26 @@ func (c *Controller) syncHandler(key string) error {
 
 	// Finally, we update the status block of the Tunnel resource to reflect the
 	// current state of the world
-	err = c.updateTunnelStatus(foo, deployment)
+	err = c.updateTunnelStatus(tunnel, deployment)
 	if err != nil {
 		return err
 	}
 
-	c.recorder.Event(foo, corev1.EventTypeNormal, SuccessSynced, MessageResourceSynced)
+	c.recorder.Event(tunnel, corev1.EventTypeNormal, SuccessSynced, MessageResourceSynced)
 	return nil
 }
 
-func (c *Controller) updateTunnelStatus(foo *samplev1alpha1.Tunnel, deployment *appsv1.Deployment) error {
+func (c *Controller) updateTunnelStatus(tunnel *samplev1alpha1.Tunnel, deployment *appsv1.Deployment) error {
 	// NEVER modify objects from the store. It's a read-only, local cache.
 	// You can use DeepCopy() to make a deep copy of original object and modify this copy
 	// Or create a copy manually for better performance
-	fooCopy := foo.DeepCopy()
-	fooCopy.Status.AvailableReplicas = deployment.Status.AvailableReplicas
+	tunnelCopy := tunnel.DeepCopy()
+	tunnelCopy.Status.AvailableReplicas = deployment.Status.AvailableReplicas
 	// If the CustomResourceSubresources feature gate is not enabled,
 	// we must use Update instead of UpdateStatus to update the Status block of the Tunnel resource.
 	// UpdateStatus will not allow changes to the Spec of the resource,
 	// which is ideal for ensuring nothing other than resource status has been updated.
-	_, err := c.sampleclientset.SamplecontrollerV1alpha1().Tunnels(foo.Namespace).Update(fooCopy)
+	_, err := c.sampleclientset.InletsoperatorV1alpha1().Tunnels(tunnel.Namespace).Update(tunnelCopy)
 	return err
 }
 
@@ -374,13 +374,13 @@ func (c *Controller) handleObject(obj interface{}) {
 			return
 		}
 
-		foo, err := c.foosLister.Tunnels(object.GetNamespace()).Get(ownerRef.Name)
+		tunnel, err := c.tunnelsLister.Tunnels(object.GetNamespace()).Get(ownerRef.Name)
 		if err != nil {
-			klog.V(4).Infof("ignoring orphaned object '%s' of foo '%s'", object.GetSelfLink(), ownerRef.Name)
+			klog.V(4).Infof("ignoring orphaned object '%s' of tunnel '%s'", object.GetSelfLink(), ownerRef.Name)
 			return
 		}
 
-		c.enqueueTunnel(foo)
+		c.enqueueTunnel(tunnel)
 		return
 	}
 }
@@ -388,17 +388,17 @@ func (c *Controller) handleObject(obj interface{}) {
 // newDeployment creates a new Deployment for a Tunnel resource. It also sets
 // the appropriate OwnerReferences on the resource so handleObject can discover
 // the Tunnel resource that 'owns' it.
-func newDeployment(foo *samplev1alpha1.Tunnel) *appsv1.Deployment {
+func newDeployment(tunnel *samplev1alpha1.Tunnel) *appsv1.Deployment {
 	labels := map[string]string{
 		"app":        "nginx",
-		"controller": foo.Name,
+		"controller": tunnel.Name,
 	}
 	return &appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      foo.Spec.DeploymentName,
-			Namespace: foo.Namespace,
+			Name:      tunnel.Spec.DeploymentName,
+			Namespace: tunnel.Namespace,
 			OwnerReferences: []metav1.OwnerReference{
-				*metav1.NewControllerRef(foo, schema.GroupVersionKind{
+				*metav1.NewControllerRef(tunnel, schema.GroupVersionKind{
 					Group:   samplev1alpha1.SchemeGroupVersion.Group,
 					Version: samplev1alpha1.SchemeGroupVersion.Version,
 					Kind:    "Tunnel",
@@ -406,7 +406,7 @@ func newDeployment(foo *samplev1alpha1.Tunnel) *appsv1.Deployment {
 			},
 		},
 		Spec: appsv1.DeploymentSpec{
-			Replicas: foo.Spec.Replicas,
+			Replicas: tunnel.Spec.Replicas,
 			Selector: &metav1.LabelSelector{
 				MatchLabels: labels,
 			},

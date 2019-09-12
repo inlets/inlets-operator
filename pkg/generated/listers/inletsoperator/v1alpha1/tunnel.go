@@ -34,18 +34,18 @@ type TunnelLister interface {
 	TunnelListerExpansion
 }
 
-// fooLister implements the TunnelLister interface.
-type fooLister struct {
+// tunnelLister implements the TunnelLister interface.
+type tunnelLister struct {
 	indexer cache.Indexer
 }
 
 // NewTunnelLister returns a new TunnelLister.
 func NewTunnelLister(indexer cache.Indexer) TunnelLister {
-	return &fooLister{indexer: indexer}
+	return &tunnelLister{indexer: indexer}
 }
 
 // List lists all Tunnels in the indexer.
-func (s *fooLister) List(selector labels.Selector) (ret []*v1alpha1.Tunnel, err error) {
+func (s *tunnelLister) List(selector labels.Selector) (ret []*v1alpha1.Tunnel, err error) {
 	err = cache.ListAll(s.indexer, selector, func(m interface{}) {
 		ret = append(ret, m.(*v1alpha1.Tunnel))
 	})
@@ -53,8 +53,8 @@ func (s *fooLister) List(selector labels.Selector) (ret []*v1alpha1.Tunnel, err 
 }
 
 // Tunnels returns an object that can list and get Tunnels.
-func (s *fooLister) Tunnels(namespace string) TunnelNamespaceLister {
-	return fooNamespaceLister{indexer: s.indexer, namespace: namespace}
+func (s *tunnelLister) Tunnels(namespace string) TunnelNamespaceLister {
+	return tunnelNamespaceLister{indexer: s.indexer, namespace: namespace}
 }
 
 // TunnelNamespaceLister helps list and get Tunnels.
@@ -66,15 +66,15 @@ type TunnelNamespaceLister interface {
 	TunnelNamespaceListerExpansion
 }
 
-// fooNamespaceLister implements the TunnelNamespaceLister
+// tunnelNamespaceLister implements the TunnelNamespaceLister
 // interface.
-type fooNamespaceLister struct {
+type tunnelNamespaceLister struct {
 	indexer   cache.Indexer
 	namespace string
 }
 
 // List lists all Tunnels in the indexer for a given namespace.
-func (s fooNamespaceLister) List(selector labels.Selector) (ret []*v1alpha1.Tunnel, err error) {
+func (s tunnelNamespaceLister) List(selector labels.Selector) (ret []*v1alpha1.Tunnel, err error) {
 	err = cache.ListAllByNamespace(s.indexer, s.namespace, selector, func(m interface{}) {
 		ret = append(ret, m.(*v1alpha1.Tunnel))
 	})
@@ -82,13 +82,13 @@ func (s fooNamespaceLister) List(selector labels.Selector) (ret []*v1alpha1.Tunn
 }
 
 // Get retrieves the Tunnel from the indexer for a given namespace and name.
-func (s fooNamespaceLister) Get(name string) (*v1alpha1.Tunnel, error) {
+func (s tunnelNamespaceLister) Get(name string) (*v1alpha1.Tunnel, error) {
 	obj, exists, err := s.indexer.GetByKey(s.namespace + "/" + name)
 	if err != nil {
 		return nil, err
 	}
 	if !exists {
-		return nil, errors.NewNotFound(v1alpha1.Resource("foo"), name)
+		return nil, errors.NewNotFound(v1alpha1.Resource("tunnel"), name)
 	}
 	return obj.(*v1alpha1.Tunnel), nil
 }

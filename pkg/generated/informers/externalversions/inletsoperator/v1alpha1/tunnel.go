@@ -38,7 +38,7 @@ type TunnelInformer interface {
 	Lister() v1alpha1.TunnelLister
 }
 
-type fooInformer struct {
+type tunnelInformer struct {
 	factory          internalinterfaces.SharedInformerFactory
 	tweakListOptions internalinterfaces.TweakListOptionsFunc
 	namespace        string
@@ -61,13 +61,13 @@ func NewFilteredTunnelInformer(client versioned.Interface, namespace string, res
 				if tweakListOptions != nil {
 					tweakListOptions(&options)
 				}
-				return client.SamplecontrollerV1alpha1().Tunnels(namespace).List(options)
+				return client.InletsoperatorV1alpha1().Tunnels(namespace).List(options)
 			},
 			WatchFunc: func(options v1.ListOptions) (watch.Interface, error) {
 				if tweakListOptions != nil {
 					tweakListOptions(&options)
 				}
-				return client.SamplecontrollerV1alpha1().Tunnels(namespace).Watch(options)
+				return client.InletsoperatorV1alpha1().Tunnels(namespace).Watch(options)
 			},
 		},
 		&inletsoperatorv1alpha1.Tunnel{},
@@ -76,14 +76,14 @@ func NewFilteredTunnelInformer(client versioned.Interface, namespace string, res
 	)
 }
 
-func (f *fooInformer) defaultInformer(client versioned.Interface, resyncPeriod time.Duration) cache.SharedIndexInformer {
+func (f *tunnelInformer) defaultInformer(client versioned.Interface, resyncPeriod time.Duration) cache.SharedIndexInformer {
 	return NewFilteredTunnelInformer(client, f.namespace, resyncPeriod, cache.Indexers{cache.NamespaceIndex: cache.MetaNamespaceIndexFunc}, f.tweakListOptions)
 }
 
-func (f *fooInformer) Informer() cache.SharedIndexInformer {
+func (f *tunnelInformer) Informer() cache.SharedIndexInformer {
 	return f.factory.InformerFor(&inletsoperatorv1alpha1.Tunnel{}, f.defaultInformer)
 }
 
-func (f *fooInformer) Lister() v1alpha1.TunnelLister {
+func (f *tunnelInformer) Lister() v1alpha1.TunnelLister {
 	return v1alpha1.NewTunnelLister(f.Informer().GetIndexer())
 }
