@@ -23,6 +23,8 @@ Backlog:
 - [x] Automatically update Service type LoadBalancer with a public IP
 - [x] Tunnel `http` traffic
 - [x] In-cluster Role, Dockerfile and YAML files
+- [x] Raspberry Pi / armhf build and YAML file
+- [ ] ARM64 (Graviton/Odroid/Packet.com) build and YAML file
 - [ ] Automate `wss://` for control-port
 - [ ] Move control-port and `/tunnel` endpoint to high port i.e. `31111`
 - [ ] Garbage collect hosts when CRD is deleted
@@ -32,15 +34,49 @@ Backlog:
 
 ## Video demo
 
+This video demo shows a single-node VM running on k3s on Packet.com, and the inlets exit node also being provisioned on Packet's infrastructure.
+
 [![https://img.youtube.com/vi/LeKMSG7QFSk/0.jpg](https://img.youtube.com/vi/LeKMSG7QFSk/0.jpg)](https://www.youtube.com/watch?v=LeKMSG7QFSk&amp=&feature=youtu.be)
 
-Watch me get a LoadBalancer with a public IP for my KinD cluster and Nginx which is running there.
+See an alternative video showing my cluster running with KinD on my Mac and the exit node being provisioned on DigitalOcean:
+
+* [KinD & DigitalOcean](https://youtu.be/c6DTrNk9zRk).
 
 ## Step-by-step tutorial
 
 [Try the step-by-step tutorial](https://blog.alexellis.io/ingress-for-your-local-kubernetes-cluster/)
 
-## Try with Packet.com
+## Running in-cluster, using DigitalOcean for the exit node
+
+You can also run the operator in-cluster, a ClusterRole is used since Services can be created in any namespace, and may need a tunnel.
+
+```sh
+# Create a secret to store the access token
+
+kubectl create secret generic inlets-access-key \
+  --from-literal inlets-access-key="$(cat ~/Downloads/do-access-token)"
+
+# Apply the operator deployment and RBAC role
+kubectl apply -f ./artifacts/operator-rbac.yaml
+kubectl apply -f ./artifacts/operator-amd64.yaml
+```
+
+## Running on a Raspberry Pi (armhf), using DigitalOcean for the exit node
+
+To get a LoadBalancer for services running on your Raspberry Pi, use the armhf deployment file:
+
+```sh
+# Create a secret to store the access token
+
+kubectl create secret generic inlets-access-key \
+  --from-literal inlets-access-key="$(cat ~/Downloads/do-access-token)"
+
+# Apply the operator deployment and RBAC role
+kubectl apply -f ./artifacts/operator-rbac.yaml
+kubectl apply -f ./artifacts/operator-armhf.yaml
+```
+
+## Run the Go binary with Packet.com
 
 Assuming you're running a local cluster with [KinD](https://github.com/kubernetes-sigs/kind):
 
@@ -60,7 +96,7 @@ go get
 go build && ./inlets-operator  --kubeconfig "$(kind get kubeconfig-path --name="kind")" --access-key=$(cat ~/packet-token) --project-id="${PACKET_PROJECT_ID}"
 ```
 
-## Try with DigitalOcean
+## Run the Go binary with DigitalOcean
 
 Assuming you're running a local cluster with [KinD](https://github.com/kubernetes-sigs/kind):
 
@@ -76,23 +112,6 @@ cd $GOPATH/github.com/alexellis/inlets-operator
 go get
 
 go build && ./inlets-operator  --kubeconfig "$(kind get kubeconfig-path --name="kind")" --access-key=$(cat ~/do-access-token) --provider digitalocean
-```
-
-See a video demo of [DigitalOcean](https://youtu.be/c6DTrNk9zRk).
-
-## Running in-cluster
-
-You can also run the operator in-cluster, a ClusterRole is used since Services can be created in any namespace, and may need a tunnel.
-
-```sh
-# Create a secret to store the access token
-
-kubectl create secret generic inlets-access-key \
-  --from-literal inlets-access-key="$(cat ~/Downloads/do-access-token)"
-
-# Apply the operator deployment and RBAC role
-kubectl apply -f ./artifacts/operator-rbac.yaml
-kubectl apply -f ./artifacts/operator-amd64.yaml
 ```
 
 # Monitor/view logs
