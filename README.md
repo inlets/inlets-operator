@@ -17,12 +17,13 @@ This version of the inlets-operator is a early proof-of-concept, but it builds u
 Backlog:
 - [x] Provision VMs/exit-nodes on public cloud
 - [x] Provision to [Packet.com](https://packet.com)
+- [x] Provision to DigitalOcean
 - [x] Automatically update Service type LoadBalancer with a public IP
 - [x] Tunnel `http` traffic
 - [ ] Garbage collect hosts when CRD is deleted
 - [ ] Provision to EC2
 - [ ] Provision to GCP
-- [ ] Provision to DigitalOcean
+- [ ] Tunnel any `tcp` traffic (using `inlets-pro`)
 
 ## Video demo
 
@@ -30,25 +31,49 @@ Backlog:
 
 Watch me get a LoadBalancer with a public IP for my KinD cluster and Nginx which is running there.
 
-## Try the operator
+## Try with Packet.com
 
-Run the operator - example with KinD:
+Assuming you're running a local cluster with [KinD](https://github.com/kubernetes-sigs/kind):
 
-Sign up to Packet.com and get an access key, save it in `~/packet-token`
+Sign up to [Packet.com](https://packet.com) and get an access key, save it in `~/packet-token`
 
 ```sh
 kubectl apply ./aritifacts/crd.yaml
 
 export PACKET_PROJECT_ID=""	# Populate from dashboard
 
+export GOPATH=$HOME/go/
+go get -u github.com/alexellis/inlets-operator
+cd $GOPATH/github.com/alexellis/inlets-operator
+
+go get
+
 go build && ./inlets-operator  --kubeconfig "$(kind get kubeconfig-path --name="kind")" --access-key=$(cat ~/packet-token) --project-id="${PACKET_PROJECT_ID}"
 ```
 
-Example usage:
+## Try with DigitalOcean
+
+Assuming you're running a local cluster with [KinD](https://github.com/kubernetes-sigs/kind):
+
+Sign up to [DigitalOcean.com](https://DigitalOcean.com) and get an access key, save it in `~/do-access-token`.
 
 ```sh
-kubectl run nginx-1 --image=nginx --port=80 --restart=Never --restart=Always
-kubectl run nginx-2 --image=nginx --port=80 --restart=Never --restart=Always
+kubectl apply ./aritifacts/crd.yaml
+
+export GOPATH=$HOME/go/
+go get -u github.com/alexellis/inlets-operator
+cd $GOPATH/github.com/alexellis/inlets-operator
+
+go get
+
+go build && ./inlets-operator  --kubeconfig "$(kind get kubeconfig-path --name="kind")" --access-key=$(cat ~/do-access-token) --provider digitalocean
+```
+
+## Get a LoadBalancer provided by inlets
+
+```sh
+kubectl run nginx-1 --image=nginx --port=80 --restart=Always
+kubectl run nginx-2 --image=nginx --port=80 --restart=Always
 
 kubectl expose deployment nginx-1 --port=80 --type=LoadBalancer
 kubectl expose deployment nginx-2 --port=80 --type=LoadBalancer
