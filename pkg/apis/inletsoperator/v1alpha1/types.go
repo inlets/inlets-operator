@@ -34,15 +34,17 @@ type Tunnel struct {
 
 // TunnelSpec is the spec for a Tunnel resource
 type TunnelSpec struct {
-	DeploymentName string `json:"deploymentName"`
+	ServiceName string `json:"serviceName"`
 
-	PublicIP string `json:"public_ip"`
-	Replicas *int32 `json:"replicas"`
+	ClientDeploymentRef *metav1.ObjectMeta `json:"client_deployment"`
+	AuthToken           string             `json:"auth_token"`
 }
 
 // TunnelStatus is the status for a Tunnel resource
 type TunnelStatus struct {
-	AvailableReplicas int32 `json:"availableReplicas"`
+	HostStatus string `json:"hostStatus"`
+	HostIP     string `json:"hostIP"`
+	HostID     string `json:"hostId"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object

@@ -1,7 +1,0 @@
-apiVersion: inlets.alexellis.io/v1alpha1
-kind: Tunnel
-metadata:
-  name: example-tunnel
-spec:
-  deploymentName: example-tunnel
-  replicas: 1

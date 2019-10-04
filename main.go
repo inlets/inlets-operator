@@ -38,7 +38,22 @@ var (
 	kubeconfig string
 )
 
+// InfraConfig is the configuration for
+// creating Infrastructure Resources
+type InfraConfig struct {
+	Provider  string
+	Region    string
+	AccessKey string
+	ProjectID string
+}
+
 func main() {
+	infra := &InfraConfig{}
+	flag.StringVar(&infra.Provider, "provider", "packet", "Your infrastructure provider")
+	flag.StringVar(&infra.Region, "region", "ams1", "The region to provision hosts into")
+	flag.StringVar(&infra.AccessKey, "access-key", "", "The access key for your infrastructure provider")
+	flag.StringVar(&infra.ProjectID, "project-id", "", "The project ID if using Packet.com as the provider")
+
 	flag.Parse()
 
 	// set up signals so we handle the first shutdown signal gracefully
@@ -54,17 +69,19 @@ func main() {
 		klog.Fatalf("Error building kubernetes clientset: %s", err.Error())
 	}
 
-	exampleClient, err := clientset.NewForConfig(cfg)
+	operatorClient, err := clientset.NewForConfig(cfg)
 	if err != nil {
 		klog.Fatalf("Error building example clientset: %s", err.Error())
 	}
 
 	kubeInformerFactory := kubeinformers.NewSharedInformerFactory(kubeClient, time.Second*30)
-	exampleInformerFactory := informers.NewSharedInformerFactory(exampleClient, time.Second*30)
+	exampleInformerFactory := informers.NewSharedInformerFactory(operatorClient, time.Second*30)
 
-	controller := NewController(kubeClient, exampleClient,
+	controller := NewController(kubeClient, operatorClient,
 		kubeInformerFactory.Apps().V1().Deployments(),
-		exampleInformerFactory.Inletsoperator().V1alpha1().Tunnels())
+		exampleInformerFactory.Inletsoperator().V1alpha1().Tunnels(),
+		kubeInformerFactory.Core().V1().Services(),
+		infra)
 
 	// notice that there is no need to run Start methods in a separate goroutine. (i.e. go kubeInformerFactory.Start(stopCh)
 	// Start method is non-blocking and runs all registered informers in a dedicated goroutine.

@@ -18,7 +18,12 @@ package main
 
 import (
 	"fmt"
+	"log"
+	"net/http"
 	"time"
+
+	"github.com/packethost/packngo"
+	password "github.com/sethvargo/go-password/password"
 
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -28,16 +33,18 @@ import (
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	"k8s.io/apimachinery/pkg/util/wait"
 	appsinformers "k8s.io/client-go/informers/apps/v1"
+	coreinformers "k8s.io/client-go/informers/core/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/kubernetes/scheme"
 	typedcorev1 "k8s.io/client-go/kubernetes/typed/core/v1"
 	appslisters "k8s.io/client-go/listers/apps/v1"
+	corelisters "k8s.io/client-go/listers/core/v1"
 	"k8s.io/client-go/tools/cache"
 	"k8s.io/client-go/tools/record"
 	"k8s.io/client-go/util/workqueue"
 	"k8s.io/klog"
 
-	samplev1alpha1 "github.com/alexellis/inlets-operator/pkg/apis/inletsoperator/v1alpha1"
+	inletsv1alpha1 "github.com/alexellis/inlets-operator/pkg/apis/inletsoperator/v1alpha1"
 	clientset "github.com/alexellis/inlets-operator/pkg/generated/clientset/versioned"
 	samplescheme "github.com/alexellis/inlets-operator/pkg/generated/clientset/versioned/scheme"
 	informers "github.com/alexellis/inlets-operator/pkg/generated/informers/externalversions/inletsoperator/v1alpha1"
@@ -66,12 +73,14 @@ type Controller struct {
 	// kubeclientset is a standard kubernetes clientset
 	kubeclientset kubernetes.Interface
 	// sampleclientset is a clientset for our own API group
-	sampleclientset clientset.Interface
+	operatorclientset clientset.Interface
 
 	deploymentsLister appslisters.DeploymentLister
 	deploymentsSynced cache.InformerSynced
 	tunnelsLister     listers.TunnelLister
 	tunnelsSynced     cache.InformerSynced
+	serviceLister     corelisters.ServiceLister
+	infraConfig       *InfraConfig
 
 	// workqueue is a rate limited work queue. This is used to queue work to be
 	// processed instead of performing it as soon as a change happens. This
@@ -87,9 +96,11 @@ type Controller struct {
 // NewController returns a new sample controller
 func NewController(
 	kubeclientset kubernetes.Interface,
-	sampleclientset clientset.Interface,
+	operatorClient clientset.Interface,
 	deploymentInformer appsinformers.DeploymentInformer,
-	tunnelInformer informers.TunnelInformer) *Controller {
+	tunnelInformer informers.TunnelInformer,
+	serviceInformer coreinformers.ServiceInformer,
+	infra *InfraConfig) *Controller {
 
 	// Create event broadcaster
 	// Add sample-controller types to the default Kubernetes Scheme so Events can be
@@ -103,13 +114,15 @@ func NewController(
 
 	controller := &Controller{
 		kubeclientset:     kubeclientset,
-		sampleclientset:   sampleclientset,
+		operatorclientset: operatorClient,
 		deploymentsLister: deploymentInformer.Lister(),
 		deploymentsSynced: deploymentInformer.Informer().HasSynced,
 		tunnelsLister:     tunnelInformer.Lister(),
 		tunnelsSynced:     tunnelInformer.Informer().HasSynced,
+		serviceLister:     serviceInformer.Lister(),
 		workqueue:         workqueue.NewNamedRateLimitingQueue(workqueue.DefaultControllerRateLimiter(), "Tunnels"),
 		recorder:          recorder,
+		infraConfig:       infra,
 	}
 
 	klog.Info("Setting up event handlers")
@@ -120,6 +133,7 @@ func NewController(
 			controller.enqueueTunnel(new)
 		},
 	})
+
 	// Set up an event handler for when Deployment resources change. This
 	// handler will lookup the owner of the given Deployment, and if it is
 	// owned by a Tunnel resource will enqueue that Tunnel resource for
@@ -141,7 +155,27 @@ func NewController(
 		DeleteFunc: controller.handleObject,
 	})
 
+	serviceInformer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{
+		AddFunc: controller.enqueueService,
+		UpdateFunc: func(old, new interface{}) {
+			controller.enqueueService(new)
+		},
+	})
+
 	return controller
+}
+
+// enqueueInletsLoadBalancer takes a InletsLoadBalancer resource and converts it into a namespace/name
+// string which is then put onto the work queue. This method should *not* be
+// passed resources of any type other than InletsLoadBalancer.
+func (c *Controller) enqueueService(obj interface{}) {
+	var key string
+	var err error
+	if key, err = cache.MetaNamespaceKeyFunc(obj); err != nil {
+		utilruntime.HandleError(err)
+		return
+	}
+	c.workqueue.AddRateLimited(key)
 }
 
 // Run will set up the event handlers for types we are interested in, as well
@@ -248,56 +282,189 @@ func (c *Controller) syncHandler(key string) error {
 		return nil
 	}
 
+	service, _ := c.serviceLister.Services(namespace).Get(name)
+	// if err != nil {
+	// 	// The InletsLoadBalancer resource may no longer exist, in which case we stop
+	// 	// processing.
+	// 	if errors.IsNotFound(err) {
+	// 		utilruntime.HandleError(fmt.Errorf("service '%s' in work queue no longer exists", key))
+	// 		return nil
+	// 	}
+
+	// 	return err
+	// }
+
+	if service != nil {
+		if service.Spec.Type == "LoadBalancer" {
+
+			tunnels := c.operatorclientset.InletsoperatorV1alpha1().Tunnels(service.ObjectMeta.Namespace)
+			ops := metav1.GetOptions{}
+			name := service.Name + "-tunnel"
+			found, err := tunnels.Get(name, ops)
+
+			pwdRes, pwdErr := password.Generate(64, 10, 0, false, true)
+			if pwdErr != nil {
+				log.Fatalf("Error generating password for inlets server %s", pwdErr.Error())
+			}
+
+			if errors.IsNotFound(err) {
+				fmt.Printf("Creating tunnel %s\n", name)
+				tunnel := &inletsv1alpha1.Tunnel{
+					Spec: inletsv1alpha1.TunnelSpec{
+						ServiceName: service.Name,
+						AuthToken:   pwdRes,
+					},
+					ObjectMeta: metav1.ObjectMeta{
+						Name:      name,
+						Namespace: service.ObjectMeta.Namespace,
+						OwnerReferences: []metav1.OwnerReference{
+							*metav1.NewControllerRef(service, schema.GroupVersionKind{
+								Group:   inletsv1alpha1.SchemeGroupVersion.Group,
+								Version: inletsv1alpha1.SchemeGroupVersion.Version,
+								Kind:    "Tunnel",
+							}),
+						},
+					},
+				}
+
+				_, err := tunnels.Create(tunnel)
+
+				if err != nil {
+					log.Printf("Error creating tunnel: %s", err.Error())
+				}
+
+			} else {
+				log.Printf("Tunnel exists: %s\n", found.Name)
+			}
+
+		}
+	}
+
 	// Get the Tunnel resource with this namespace/name
 	tunnel, err := c.tunnelsLister.Tunnels(namespace).Get(name)
 	if err != nil {
 		// The Tunnel resource may no longer exist, in which case we stop
 		// processing.
 		if errors.IsNotFound(err) {
-			utilruntime.HandleError(fmt.Errorf("tunnel '%s' in work queue no longer exists", key))
+			// utilruntime.HandleError(fmt.Errorf("tunnel '%s' in work queue no longer exists", key))
 			return nil
 		}
 
 		return err
 	}
 
-	deploymentName := tunnel.Spec.DeploymentName
-	if deploymentName == "" {
-		// We choose to absorb the error here as the worker would requeue the
-		// resource otherwise. Instead, the next time the resource is updated
-		// the resource will be queued again.
-		utilruntime.HandleError(fmt.Errorf("%s: deployment name must be specified", key))
-		return nil
-	}
+	switch tunnel.Status.HostStatus {
+	case "":
 
-	// Get the deployment with the name specified in Tunnel.spec
-	deployment, err := c.deploymentsLister.Deployments(tunnel.Namespace).Get(deploymentName)
-	// If the resource doesn't exist, we'll create it
-	if errors.IsNotFound(err) {
-		deployment, err = c.kubeclientset.AppsV1().Deployments(tunnel.Namespace).Create(newDeployment(tunnel))
-	}
+		userData := `#!/bin/bash
+export INLETSTOKEN="` + tunnel.Spec.AuthToken + `"
 
-	// If an error occurs during Get/Create, we'll requeue the item so we can
-	// attempt processing again later. This could have been caused by a
-	// temporary network failure, or any other transient reason.
-	if err != nil {
-		return err
-	}
+curl -sLS https://get.inlets.dev | sudo sh
 
-	// If the Deployment is not controlled by this Tunnel resource, we should log
-	// a warning to the event recorder and ret
-	if !metav1.IsControlledBy(deployment, tunnel) {
-		msg := fmt.Sprintf(MessageResourceExists, deployment.Name)
-		c.recorder.Event(tunnel, corev1.EventTypeWarning, ErrResourceExists, msg)
-		return fmt.Errorf(msg)
-	}
+curl -sLO https://raw.githubusercontent.com/alexellis/inlets/master/hack/inlets.service  && \
+  mv inlets.service /etc/systemd/system/inlets.service && \
+  echo "AUTHTOKEN=$INLETSTOKEN" > /etc/default/inlets && \
+  systemctl start inlets && \
+  systemctl enable inlets`
 
-	// If this number of the replicas on the Tunnel resource is specified, and the
-	// number does not equal the current desired replicas on the Deployment, we
-	// should update the Deployment resource.
-	if tunnel.Spec.Replicas != nil && *tunnel.Spec.Replicas != *deployment.Spec.Replicas {
-		klog.V(4).Infof("Tunnel %s replicas: %d, deployment replicas: %d", name, *tunnel.Spec.Replicas, *deployment.Spec.Replicas)
-		deployment, err = c.kubeclientset.AppsV1().Deployments(tunnel.Namespace).Update(newDeployment(tunnel))
+		packetAPI := packngo.NewClientWithAuth("", c.infraConfig.AccessKey, http.DefaultClient)
+
+		createReq := &packngo.DeviceCreateRequest{
+			Plan:         "t1.small.x86",
+			Facility:     []string{c.infraConfig.Region},
+			Hostname:     tunnel.Name,
+			ProjectID:    c.infraConfig.ProjectID,
+			SpotInstance: false,
+			OS:           "ubuntu_16_04",
+			BillingCycle: "hourly",
+			UserData:     userData,
+		}
+
+		device, _, err := packetAPI.Devices.Create(createReq)
+
+		if err != nil {
+			err = c.updateTunnelProvisioningStatus(tunnel, "errored", "", "")
+			if err != nil {
+				return err
+			}
+		} else {
+			err = c.updateTunnelProvisioningStatus(tunnel, "provisioning", device.ID, "")
+		}
+
+		if err != nil {
+			return err
+		}
+		break
+	case "provisioning":
+		packetAPI := packngo.NewClientWithAuth("", c.infraConfig.AccessKey, http.DefaultClient)
+
+		device, _, err := packetAPI.Devices.Get(tunnel.Status.HostID, nil)
+
+		if err != nil {
+			fmt.Println(err)
+		}
+
+		if device.State == "active" {
+			log.Println("Device is now active")
+
+			ip := ""
+			for _, network := range device.Network {
+				if network.Public {
+					ip = network.IpAddressCommon.Address
+					break
+				}
+			}
+
+			err := c.updateTunnelProvisioningStatus(tunnel, "active", device.ID, ip)
+			if err != nil {
+				log.Printf("Error updating tunnel status: %s, %s", tunnel.Name, err.Error())
+			}
+
+			err = c.updateService(tunnel, ip)
+			if err != nil {
+				log.Printf("Error updating service: %s, %s", tunnel.Spec.ServiceName, err.Error())
+			}
+
+		} else {
+			log.Printf("Still provisioning: %s\n", tunnel.Name)
+		}
+
+		break
+	case "active":
+		if tunnel.Spec.ClientDeploymentRef == nil {
+			get := metav1.GetOptions{}
+			service, getServiceErr := c.kubeclientset.CoreV1().Services(tunnel.Namespace).Get(tunnel.Spec.ServiceName, get)
+
+			if getServiceErr != nil {
+				return getServiceErr
+			}
+
+			firstPort := int32(80)
+
+			for _, port := range service.Spec.Ports {
+				if port.Name == "http" {
+					firstPort = port.Port
+					break
+				}
+			}
+
+			deployment, createDeployErr := c.kubeclientset.AppsV1().Deployments(tunnel.Namespace).Create(makeClient(tunnel, firstPort))
+			if createDeployErr != nil {
+				log.Println(createDeployErr)
+			}
+
+			tunnel.Spec.ClientDeploymentRef = &metav1.ObjectMeta{
+				Name:      deployment.Name,
+				Namespace: deployment.Namespace,
+			}
+
+			updateErr, _ := c.operatorclientset.InletsoperatorV1alpha1().Tunnels(tunnel.Namespace).Update(tunnel)
+			if updateErr != nil {
+				log.Println(updateErr)
+			}
+		}
+
+		break
 	}
 
 	// If an error occurs during Update, we'll requeue the item so we can
@@ -307,28 +474,91 @@ func (c *Controller) syncHandler(key string) error {
 		return err
 	}
 
-	// Finally, we update the status block of the Tunnel resource to reflect the
-	// current state of the world
-	err = c.updateTunnelStatus(tunnel, deployment)
-	if err != nil {
-		return err
-	}
-
 	c.recorder.Event(tunnel, corev1.EventTypeNormal, SuccessSynced, MessageResourceSynced)
 	return nil
 }
 
-func (c *Controller) updateTunnelStatus(tunnel *samplev1alpha1.Tunnel, deployment *appsv1.Deployment) error {
-	// NEVER modify objects from the store. It's a read-only, local cache.
-	// You can use DeepCopy() to make a deep copy of original object and modify this copy
-	// Or create a copy manually for better performance
+func makeClient(tunnel *inletsv1alpha1.Tunnel, targetPort int32) *appsv1.Deployment {
+	replicas := int32(1)
+	name := tunnel.Name + "-client"
+
+	inletsServicePort := 80
+
+	deployment := appsv1.Deployment{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      name,
+			Namespace: tunnel.Namespace,
+		},
+		Spec: appsv1.DeploymentSpec{
+			Replicas: &replicas,
+			Selector: &metav1.LabelSelector{
+				MatchLabels: map[string]string{
+					"app.kubernetes.io/name": name,
+				},
+			},
+			Template: corev1.PodTemplateSpec{
+				ObjectMeta: metav1.ObjectMeta{
+					Labels: map[string]string{
+						"app.kubernetes.io/name": name,
+					},
+					OwnerReferences: []metav1.OwnerReference{
+						*metav1.NewControllerRef(tunnel, schema.GroupVersionKind{
+							Group:   inletsv1alpha1.SchemeGroupVersion.Group,
+							Version: inletsv1alpha1.SchemeGroupVersion.Version,
+							Kind:    "Tunnel",
+						}),
+					},
+				},
+				Spec: corev1.PodSpec{
+					Containers: []corev1.Container{
+						{
+							Name:            "client",
+							Image:           "alexellis2/inlets:2.3.2",
+							Command:         []string{"inlets"},
+							ImagePullPolicy: corev1.PullIfNotPresent,
+							Args: []string{
+								"client",
+								"--upstream=" + fmt.Sprintf("http://%s:%d", tunnel.Spec.ServiceName, targetPort),
+								"--remote=" + fmt.Sprintf("%s:%d", tunnel.Status.HostIP, inletsServicePort),
+								"--token=" + tunnel.Spec.AuthToken,
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+
+	return &deployment
+}
+
+func (c *Controller) updateService(tunnel *inletsv1alpha1.Tunnel, ip string) error {
+
+	get := metav1.GetOptions{}
+	res, err := c.kubeclientset.CoreV1().Services(tunnel.Namespace).Get(tunnel.Spec.ServiceName, get)
+	if err != nil {
+		return err
+	}
+
+	copy := res.DeepCopy()
+	// copy.Status.LoadBalancer.Ingress = []corev1.LoadBalancerIngress{
+	// 	corev1.LoadBalancerIngress{IP: ip},
+	// }
+	copy.Spec.ExternalIPs = []string{ip}
+
+	_, err = c.kubeclientset.CoreV1().Services(tunnel.Namespace).Update(copy)
+	return err
+}
+
+func (c *Controller) updateTunnelProvisioningStatus(tunnel *inletsv1alpha1.Tunnel, status, id, ip string) error {
+	log.Printf("Status: %s, ID: %s, IP: %s\n", status, id, ip)
+
 	tunnelCopy := tunnel.DeepCopy()
-	tunnelCopy.Status.AvailableReplicas = deployment.Status.AvailableReplicas
-	// If the CustomResourceSubresources feature gate is not enabled,
-	// we must use Update instead of UpdateStatus to update the Status block of the Tunnel resource.
-	// UpdateStatus will not allow changes to the Spec of the resource,
-	// which is ideal for ensuring nothing other than resource status has been updated.
-	_, err := c.sampleclientset.InletsoperatorV1alpha1().Tunnels(tunnel.Namespace).Update(tunnelCopy)
+	tunnelCopy.Status.HostStatus = status
+	tunnelCopy.Status.HostID = id
+	tunnelCopy.Status.HostIP = ip
+
+	_, err := c.operatorclientset.InletsoperatorV1alpha1().Tunnels(tunnel.Namespace).Update(tunnelCopy)
 	return err
 }
 
@@ -382,47 +612,5 @@ func (c *Controller) handleObject(obj interface{}) {
 
 		c.enqueueTunnel(tunnel)
 		return
-	}
-}
-
-// newDeployment creates a new Deployment for a Tunnel resource. It also sets
-// the appropriate OwnerReferences on the resource so handleObject can discover
-// the Tunnel resource that 'owns' it.
-func newDeployment(tunnel *samplev1alpha1.Tunnel) *appsv1.Deployment {
-	labels := map[string]string{
-		"app":        "nginx",
-		"controller": tunnel.Name,
-	}
-	return &appsv1.Deployment{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      tunnel.Spec.DeploymentName,
-			Namespace: tunnel.Namespace,
-			OwnerReferences: []metav1.OwnerReference{
-				*metav1.NewControllerRef(tunnel, schema.GroupVersionKind{
-					Group:   samplev1alpha1.SchemeGroupVersion.Group,
-					Version: samplev1alpha1.SchemeGroupVersion.Version,
-					Kind:    "Tunnel",
-				}),
-			},
-		},
-		Spec: appsv1.DeploymentSpec{
-			Replicas: tunnel.Spec.Replicas,
-			Selector: &metav1.LabelSelector{
-				MatchLabels: labels,
-			},
-			Template: corev1.PodTemplateSpec{
-				ObjectMeta: metav1.ObjectMeta{
-					Labels: labels,
-				},
-				Spec: corev1.PodSpec{
-					Containers: []corev1.Container{
-						{
-							Name:  "nginx",
-							Image: "nginx:latest",
-						},
-					},
-				},
-			},
-		},
 	}
 }
