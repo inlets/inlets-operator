@@ -2,7 +2,7 @@
 
 Get a Kubernetes LoadBalancer where you never thought it was possible.
 
-inlets-operator provisions an inlets VM or bare-metal host with an IaaS provider such as Packet, GCP, AWS or DigitalOcean, then runs the inlets server there. The inlets client runs within your cluster.
+inlets-operator provisions an [inlets](https://inlets.dev) VM or bare-metal host with an IaaS provider such as Packet, GCP, AWS or DigitalOcean, then runs the inlets server there. The inlets client runs within your cluster.
 
 ## Status
 
