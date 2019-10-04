@@ -20,6 +20,7 @@ Backlog:
 - [x] Provision to DigitalOcean
 - [x] Automatically update Service type LoadBalancer with a public IP
 - [x] Tunnel `http` traffic
+- [x] In-cluster Role, Dockerfile and YAML files 
 - [ ] Garbage collect hosts when CRD is deleted
 - [ ] Provision to EC2
 - [ ] Provision to GCP
