@@ -36,6 +36,10 @@ Backlog:
 
 Watch me get a LoadBalancer with a public IP for my KinD cluster and Nginx which is running there.
 
+## Step-by-step tutorial
+
+[Try the step-by-step tutorial](https://blog.alexellis.io/ingress-for-your-local-kubernetes-cluster/)
+
 ## Try with Packet.com
 
 Assuming you're running a local cluster with [KinD](https://github.com/kubernetes-sigs/kind):
