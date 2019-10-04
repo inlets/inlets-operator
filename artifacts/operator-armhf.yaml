@@ -26,7 +26,7 @@ spec:
           - "-access-key-file=/var/secrets/inlets/inlets-access-key"
         env:
         - name: client_image
-          value: alexellis/inlets:2.4.1-armhf
+          value: alexellis2/inlets:2.4.1-armhf
         resources:
           limits:
             memory: 128Mi

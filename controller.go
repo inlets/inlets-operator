@@ -503,7 +503,7 @@ func (c *Controller) syncHandler(key string) error {
 
 			deployment, createDeployErr := c.kubeclientset.AppsV1().
 				Deployments(tunnel.Namespace).
-				Create(makeClient(tunnel, firstPort))
+				Create(makeClient(tunnel, firstPort, c.infraConfig.GetInletsClientImage()))
 
 			if createDeployErr != nil {
 				log.Println(createDeployErr)
@@ -537,7 +537,7 @@ func (c *Controller) syncHandler(key string) error {
 	return nil
 }
 
-func makeClient(tunnel *inletsv1alpha1.Tunnel, targetPort int32) *appsv1.Deployment {
+func makeClient(tunnel *inletsv1alpha1.Tunnel, targetPort int32, clientImage string) *appsv1.Deployment {
 	replicas := int32(1)
 	name := tunnel.Name + "-client"
 
@@ -572,7 +572,7 @@ func makeClient(tunnel *inletsv1alpha1.Tunnel, targetPort int32) *appsv1.Deploym
 					Containers: []corev1.Container{
 						{
 							Name:            "client",
-							Image:           "alexellis2/inlets:2.4.1",
+							Image:           clientImage,
 							Command:         []string{"inlets"},
 							ImagePullPolicy: corev1.PullIfNotPresent,
 							Args: []string{
