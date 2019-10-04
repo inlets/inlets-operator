@@ -22,7 +22,9 @@ Backlog:
 - [x] Provision to DigitalOcean
 - [x] Automatically update Service type LoadBalancer with a public IP
 - [x] Tunnel `http` traffic
-- [x] In-cluster Role, Dockerfile and YAML files 
+- [x] In-cluster Role, Dockerfile and YAML files
+- [ ] Automate `wss://` for control-port
+- [ ] Move control-port and `/tunnel` endpoint to high port i.e. `31111`
 - [ ] Garbage collect hosts when CRD is deleted
 - [ ] Provision to EC2
 - [ ] Provision to GCP
