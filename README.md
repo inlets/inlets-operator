@@ -2,7 +2,9 @@
 
 Get a Kubernetes LoadBalancer where you never thought it was possible.
 
-inlets-operator provisions an [inlets](https://inlets.dev) VM or bare-metal host with an IaaS provider such as Packet, GCP, AWS or DigitalOcean, then runs the inlets server there. The inlets client runs within your cluster.
+In cloud-based Kubernetes solutions, Services can be exposed as type "LoadBalancer" and your cloud provider will provision a LoadBalancer and start routing traffic, in another word: you get ingress to your service.
+
+inlets-operator brings that same experience to your local Kubernetes or k3s cluster (k3s/k3d/minikube/microk8s/Docker Desktop/KinD). The operator automates the creation of an [inlets](https://inlets.dev) exit-node on public cloud, and runs the client as a Pod inside your cluster. Your Kubernetes `Service` will be updated with the public IP of the exit-node and you can start receiving incoming traffic immediately.
 
 ## Who is this for?
 
