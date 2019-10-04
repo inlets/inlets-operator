@@ -22,8 +22,8 @@ spec:
         imagePullPolicy: Always
         command:
           - ./inlets-operator
-          - "-access-key=TOKEN"
           - "-provider=digitalocean"
+          - "-access-key-file=/var/secrets/inlets/inlets-access-key"
         env:
         - name: test_env
           value: populate_this
@@ -32,3 +32,12 @@ spec:
             memory: 128Mi
           requests:
             memory: 25Mi
+        volumeMounts:
+        - mountPath: /var/secrets/inlets/
+          name: inlets-access-key
+          readOnly: true
+      volumes:
+      - name: inlets-access-key
+        secret:
+          defaultMode: 420
+          secretName: inlets-access-key

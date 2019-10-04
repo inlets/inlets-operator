@@ -18,6 +18,8 @@ package main
 
 import (
 	"flag"
+	"io/ioutil"
+	"log"
 	"time"
 
 	kubeinformers "k8s.io/client-go/informers"
@@ -41,17 +43,34 @@ var (
 // InfraConfig is the configuration for
 // creating Infrastructure Resources
 type InfraConfig struct {
-	Provider  string
-	Region    string
-	AccessKey string
-	ProjectID string
+	Provider      string
+	Region        string
+	AccessKey     string
+	AccessKeyFile string
+	ProjectID     string
+}
+
+// GetAccessKey from parameter or file
+func (i *InfraConfig) GetAccessKey() string {
+	if len(i.AccessKeyFile) > 0 {
+		data, err := ioutil.ReadFile(i.AccessKeyFile)
+
+		if err != nil {
+			log.Fatalln(err)
+		}
+		return string(data)
+	}
+
+	return i.AccessKey
 }
 
 func main() {
 	infra := &InfraConfig{}
-	flag.StringVar(&infra.Provider, "provider", "packet", "Your infrastructure provider")
+	flag.StringVar(&infra.Provider, "provider", "packet", "Your infrastructure provider - 'packet' or 'digitalocean'")
 	flag.StringVar(&infra.Region, "region", "ams1", "The region to provision hosts into")
 	flag.StringVar(&infra.AccessKey, "access-key", "", "The access key for your infrastructure provider")
+	flag.StringVar(&infra.AccessKeyFile, "access-key-file", "", "Read the access key for your infrastructure provider from a file (recommended)")
+
 	flag.StringVar(&infra.ProjectID, "project-id", "", "The project ID if using Packet.com as the provider")
 
 	flag.Parse()

@@ -351,7 +351,7 @@ func (c *Controller) syncHandler(key string) error {
 		if c.infraConfig.Provider == "packet" {
 			userData := makeUserdata(tunnel.Spec.AuthToken)
 
-			packetAPI := packngo.NewClientWithAuth("", c.infraConfig.AccessKey, http.DefaultClient)
+			packetAPI := packngo.NewClientWithAuth("", c.infraConfig.GetAccessKey(), http.DefaultClient)
 
 			createReq := &packngo.DeviceCreateRequest{
 				Plan:         "t1.small.x86",
@@ -371,7 +371,7 @@ func (c *Controller) syncHandler(key string) error {
 			id = device.ID
 		} else if c.infraConfig.Provider == "digitalocean" {
 			tokenSource := &TokenSource{
-				AccessToken: c.infraConfig.AccessKey,
+				AccessToken: c.infraConfig.GetAccessKey(),
 			}
 			oauthClient := oauth2.NewClient(context.Background(), tokenSource)
 			client := godo.NewClient(oauthClient)
@@ -412,7 +412,7 @@ func (c *Controller) syncHandler(key string) error {
 		break
 	case "provisioning":
 		if c.infraConfig.Provider == "packet" {
-			packetAPI := packngo.NewClientWithAuth("", c.infraConfig.AccessKey, http.DefaultClient)
+			packetAPI := packngo.NewClientWithAuth("", c.infraConfig.GetAccessKey(), http.DefaultClient)
 
 			device, _, err := packetAPI.Devices.Get(tunnel.Status.HostID, nil)
 
@@ -447,7 +447,7 @@ func (c *Controller) syncHandler(key string) error {
 
 		} else if c.infraConfig.Provider == "digitalocean" {
 			tokenSource := &TokenSource{
-				AccessToken: c.infraConfig.AccessKey,
+				AccessToken: c.infraConfig.GetAccessKey(),
 			}
 			oauthClient := oauth2.NewClient(context.Background(), tokenSource)
 			client := godo.NewClient(oauthClient)
@@ -514,7 +514,7 @@ func (c *Controller) syncHandler(key string) error {
 				Namespace: deployment.Namespace,
 			}
 
-			updateErr, _ := c.operatorclientset.InletsoperatorV1alpha1().
+			_, updateErr := c.operatorclientset.InletsoperatorV1alpha1().
 				Tunnels(tunnel.Namespace).
 				Update(tunnel)
 

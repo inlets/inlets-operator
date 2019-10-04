@@ -77,14 +77,15 @@ See a video demo of [DigitalOcean](https://youtu.be/c6DTrNk9zRk).
 You can also run the operator in-cluster, a ClusterRole is used since Services can be created in any namespace, and may need a tunnel.
 
 ```sh
-# Edit ./artifacts/operator-amd64.yaml
+# Create a secret to store the access token
 
-#        command:
-#          - ./inlets-operator
-#          - "-access-key=ENTER-DIGITALOCEAN-KEY_HERE"
-#          - "-provider=digitalocean"
+kubectl create secret generic inlets-access-key \
+  --from-literal inlets-access-key="$(cat ~/Downloads/do-access-token)"
 
-kubectl apply -f ./artifacts
+# Apply the operator deployment and RBAC role
+kubectl apply -f ./artifacts/operator-rbac.yaml
+kubectl apply -f ./artifacts/operator-amd64.yaml
+```
 
 # Monitor/view logs
 kubectl logs deploy/inlets-operator -f
