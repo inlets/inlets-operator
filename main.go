@@ -20,6 +20,7 @@ import (
 	"flag"
 	"io/ioutil"
 	"log"
+	"os"
 	"time"
 
 	kubeinformers "k8s.io/client-go/informers"
@@ -43,11 +44,20 @@ var (
 // InfraConfig is the configuration for
 // creating Infrastructure Resources
 type InfraConfig struct {
-	Provider      string
-	Region        string
-	AccessKey     string
-	AccessKeyFile string
-	ProjectID     string
+	Provider          string
+	Region            string
+	AccessKey         string
+	AccessKeyFile     string
+	ProjectID         string
+	InletsClientImage string
+}
+
+// GetInletsClientImage returns the image for the client-side tunnel
+func (i *InfraConfig) GetInletsClientImage() string {
+	if i.InletsClientImage == "" {
+		return "alexellis2/inlets:2.4.1"
+	}
+	return i.InletsClientImage
 }
 
 // GetAccessKey from parameter or file
@@ -74,6 +84,8 @@ func main() {
 	flag.StringVar(&infra.ProjectID, "project-id", "", "The project ID if using Packet.com as the provider")
 
 	flag.Parse()
+
+	infra.InletsClientImage = os.Getenv("client_image")
 
 	// set up signals so we handle the first shutdown signal gracefully
 	stopCh := signals.SetupSignalHandler()
