@@ -13,12 +13,12 @@ spec:
       labels:
         app: inlets-operator
       annotations:
-        prometheus.io.scrape: 'true'
+        prometheus.io.scrape: "false"
     spec:
       serviceAccountName: inlets-operator
       containers:
       - name: operator
-        image: alexellis/inlets-operator:latest
+        image: alexellis/inlets-operator:0.2.0
         imagePullPolicy: Always
         command:
           - ./inlets-operator

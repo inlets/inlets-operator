@@ -572,13 +572,13 @@ func makeClient(tunnel *inletsv1alpha1.Tunnel, targetPort int32) *appsv1.Deploym
 					Containers: []corev1.Container{
 						{
 							Name:            "client",
-							Image:           "alexellis2/inlets:2.3.2",
+							Image:           "alexellis2/inlets:2.4.1",
 							Command:         []string{"inlets"},
 							ImagePullPolicy: corev1.PullIfNotPresent,
 							Args: []string{
 								"client",
 								"--upstream=" + fmt.Sprintf("http://%s:%d", tunnel.Spec.ServiceName, targetPort),
-								"--remote=" + fmt.Sprintf("%s:%d", tunnel.Status.HostIP, inletsServicePort),
+								"--remote=" + fmt.Sprintf("ws://%s:%d", tunnel.Status.HostIP, inletsServicePort),
 								"--token=" + tunnel.Spec.AuthToken,
 							},
 						},
