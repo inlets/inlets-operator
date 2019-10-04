@@ -69,6 +69,8 @@ go get
 go build && ./inlets-operator  --kubeconfig "$(kind get kubeconfig-path --name="kind")" --access-key=$(cat ~/do-access-token) --provider digitalocean
 ```
 
+See a video demo of [DigitalOcean](https://youtu.be/c6DTrNk9zRk).
+
 ## Get a LoadBalancer provided by inlets
 
 ```sh
