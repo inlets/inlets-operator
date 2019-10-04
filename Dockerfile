@@ -14,7 +14,7 @@ RUN gofmt -l -d $(find . -type f -name '*.go' -not -path "./vendor/*") && \
   -X github.com/alexellis/inlets-operator/pkg/version.SHA=${GIT_COMMIT}" \
   -a -installsuffix cgo -o inlets-operator .
 
-FROM alpine:3.9
+FROM alpine:3.10
 
 RUN addgroup -S app \
     && adduser -S -g app app \

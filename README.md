@@ -71,6 +71,24 @@ go build && ./inlets-operator  --kubeconfig "$(kind get kubeconfig-path --name="
 
 See a video demo of [DigitalOcean](https://youtu.be/c6DTrNk9zRk).
 
+## Running in-cluster
+
+You can also run the operator in-cluster, a ClusterRole is used since Services can be created in any namespace, and may need a tunnel.
+
+```sh
+# Edit ./artifacts/operator-amd64.yaml
+
+#        command:
+#          - ./inlets-operator
+#          - "-access-key=ENTER-DIGITALOCEAN-KEY_HERE"
+#          - "-provider=digitalocean"
+
+kubectl apply -f ./artifacts
+
+# Monitor/view logs
+kubectl logs deploy/inlets-operator -f
+```
+
 ## Get a LoadBalancer provided by inlets
 
 ```sh
