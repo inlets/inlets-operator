@@ -87,6 +87,8 @@ func main() {
 
 	infra.InletsClientImage = os.Getenv("client_image")
 
+	log.Printf("Inlets client: %s\n", infra.GetInletsClientImage())
+
 	// set up signals so we handle the first shutdown signal gracefully
 	stopCh := signals.SetupSignalHandler()
 
