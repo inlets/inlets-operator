@@ -18,7 +18,7 @@ spec:
       serviceAccountName: inlets-operator
       containers:
       - name: operator
-        image: alexellis/inlets-operator:0.2.1-armhf
+        image: alexellis/inlets-operator:0.2.2-armhf
         imagePullPolicy: Always
         command:
           - ./inlets-operator
