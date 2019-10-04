@@ -1,0 +1,16 @@
+maintainers:
+ - alexellis
+ 
+features:
+ - dco_check
+ - comments
+ - pr_description_required
+
+custom_messages:
+  - name: slack
+    value: |
+           --
+           Join Slack to connect with the community using the `#inlets` channel
+           within the OpenFaaS Slack workspace.
+           https://docs.openfaas.com/community
+
