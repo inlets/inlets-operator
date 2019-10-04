@@ -18,15 +18,15 @@ spec:
       serviceAccountName: inlets-operator
       containers:
       - name: operator
-        image: alexellis/inlets-operator:0.2.0
+        image: alexellis/inlets-operator:0.2.1
         imagePullPolicy: Always
         command:
           - ./inlets-operator
           - "-provider=digitalocean"
           - "-access-key-file=/var/secrets/inlets/inlets-access-key"
         env:
-        - name: test_env
-          value: populate_this
+        - name: client_image
+          value: alexellis/inlets:2.4.1
         resources:
           limits:
             memory: 128Mi
