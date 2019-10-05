@@ -12,7 +12,7 @@ This solution is for users who want to gain incoming network access (ingress) to
 
 Whilst 5 USD is cheaper than a "Cloud Load Balancer", this tool is for users who cannot get incoming ingress, not for saving money on public cloud.
 
-## Status
+## Status and backlog
 
 This version of the inlets-operator is a early proof-of-concept, but it builds upon inlets, which is stable and widely used.
 
@@ -31,6 +31,12 @@ Backlog:
 - [ ] Provision to EC2
 - [ ] Provision to GCP
 - [ ] Tunnel any `tcp` traffic (using `inlets-pro`)
+
+## Author
+
+inlets and inlets-operator are brought to you by [Alex Ellis](https://twitter.com/alexellisuk). Alex is a [CNCF Ambassador](https://www.cncf.io/people/ambassadors/) and the founder of [OpenFaaS](https://github.com/openfaas/faas/).
+
+If you like this project, then join dozens of other developers by Sponsoring Alex and his OSS work through [GitHub Sponsors](https://github.com/users/alexellis/sponsorship) today.
 
 ## Video demo
 
@@ -159,3 +165,7 @@ spec:
     app: gateway
   type: LoadBalancer
   ```
+
+## Contributing
+
+Contributions are welcome, see the [CONTRIBUTING.md](CONTRIBUTING.md) guide.
