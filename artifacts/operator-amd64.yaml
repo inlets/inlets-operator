@@ -23,6 +23,8 @@ spec:
         command:
           - ./inlets-operator
           - "-provider=digitalocean"
+          # - "-provider=packet"
+          # - "-project-PACKET-ID"
           - "-access-key-file=/var/secrets/inlets/inlets-access-key"
         env:
         - name: client_image
