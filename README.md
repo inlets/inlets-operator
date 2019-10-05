@@ -24,6 +24,7 @@ Backlog:
 - [x] Tunnel `http` traffic
 - [x] In-cluster Role, Dockerfile and YAML files
 - [x] Raspberry Pi / armhf build and YAML file
+- [ ] CI with Travis (use openfaas-incubator/openfaas-operator as a sample)
 - [ ] ARM64 (Graviton/Odroid/Packet.com) build and YAML file
 - [ ] Automate `wss://` for control-port
 - [ ] Move control-port and `/tunnel` endpoint to high port i.e. `31111`
@@ -31,6 +32,8 @@ Backlog:
 - [ ] Provision to EC2
 - [ ] Provision to GCP
 - [ ] Tunnel any `tcp` traffic (using `inlets-pro`)
+
+Inlets tunnels HTTP traffic at L7, so the inlets-operator can be used to tunnel HTTP traffic. A new project I'm working on called inlets-pro tunnels any TCP traffic at L4 i.e. Mongo, Redis, NATS, SSH, TLS, whatever you like.
 
 ## Author
 
