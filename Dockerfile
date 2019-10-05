@@ -1,15 +1,20 @@
-FROM golang:1.11
+FROM golang:1.13 as builder
 
 RUN mkdir -p /go/src/github.com/alexellis/inlets-operator/
 
-WORKDIR /go/src/github.com/alexellis/inlets-operator
+WORKDIR /workspace
+
+COPY go.mod go.mod
+COPY go.sum go.sum
+
+RUN go mod download
 
 COPY . .
 
-RUN gofmt -l -d $(find . -type f -name '*.go' -not -path "./vendor/*") && \
+RUN gofmt -l -d $(find . -type f -name '*.go') && \
   VERSION=$(git describe --all --exact-match `git rev-parse HEAD` | grep tags | sed 's/tags\///') && \
   GIT_COMMIT=$(git rev-list -1 HEAD) && \
-  CGO_ENABLED=0 GOOS=linux go build -ldflags "-s -w \
+  CGO_ENABLED=0 GOOS=linux GO111MODULE=on go build -ldflags "-s -w \
   -X github.com/alexellis/inlets-operator/pkg/version.Release=${VERSION} \
   -X github.com/alexellis/inlets-operator/pkg/version.SHA=${GIT_COMMIT}" \
   -a -installsuffix cgo -o inlets-operator .
@@ -22,7 +27,7 @@ RUN addgroup -S app \
 
 WORKDIR /home/app
 
-COPY --from=0 /go/src/github.com/alexellis/inlets-operator/inlets-operator .
+COPY --from=0 /workspace/inlets-operator .
 
 RUN chown -R app:app ./
 

@@ -1,11 +1,12 @@
 .PHONY: build build-armhf push test verify-codegen
 TAG?=latest
+REGISTRY?=alexellis
 
 build:
-	docker build -t alexellis/inlets-operator:$(TAG) . -f Dockerfile
+	docker build -t $(REGISTRY)/inlets-operator:$(TAG) . -f Dockerfile
 
 push:
-	docker push alexellis/inlets-operator:$(TAG)
+	docker push $(REGISTRY)/inlets-operator:$(TAG)
 
 test:
 	go test ./...
