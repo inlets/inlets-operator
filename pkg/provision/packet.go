@@ -6,10 +6,12 @@ import (
 	"github.com/packethost/packngo"
 )
 
+// PacketProvisioner provision a host on Packet.com
 type PacketProvisioner struct {
 	client *packngo.Client
 }
 
+// NewPacketProvisioner with an accessKey
 func NewPacketProvisioner(accessKey string) (*PacketProvisioner, error) {
 	return &PacketProvisioner{
 		client: packngo.NewClientWithAuth("", accessKey, http.DefaultClient),

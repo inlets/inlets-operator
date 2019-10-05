@@ -9,10 +9,12 @@ import (
 	"golang.org/x/oauth2"
 )
 
+// DigitalOceanProvisioner provision a VM on digitalocean.com
 type DigitalOceanProvisioner struct {
 	client *godo.Client
 }
 
+// NewDigitalOceanProvisioner with an accessKey
 func NewDigitalOceanProvisioner(accessKey string) (*DigitalOceanProvisioner, error) {
 
 	tokenSource := &TokenSource{
@@ -45,7 +47,7 @@ func (p *DigitalOceanProvisioner) Status(id string) (*ProvisionedHost, error) {
 	}
 
 	return &ProvisionedHost{
-		ID:     fmt.Sprintf("%s", droplet.ID),
+		ID:     id,
 		Status: state,
 		IP:     ip,
 	}, nil
@@ -66,6 +68,7 @@ func (p *DigitalOceanProvisioner) Provision(host BasicHost) (*ProvisionedHost, e
 		},
 		UserData: host.UserData,
 	}
+
 	droplet, _, err := p.client.Droplets.Create(context.Background(), createReq)
 
 	if err != nil {
@@ -73,9 +76,8 @@ func (p *DigitalOceanProvisioner) Provision(host BasicHost) (*ProvisionedHost, e
 	}
 
 	return &ProvisionedHost{
-		ID: fmt.Sprintf("%s", droplet.ID),
+		ID: fmt.Sprintf("%d", droplet.ID),
 	}, nil
-
 }
 
 type TokenSource struct {

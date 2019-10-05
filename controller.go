@@ -370,14 +370,12 @@ func (c *Controller) syncHandler(key string) error {
 			userData := makeUserdata(tunnel.Spec.AuthToken)
 
 			res, err := provisioner.Provision(provision.BasicHost{
-				Name:     tunnel.Name,
-				OS:       "ubuntu-16-04-x64",
-				Plan:     "512mb",
-				Region:   c.infraConfig.Region,
-				UserData: userData,
-				Additional: map[string]string{
-					"project_id": c.infraConfig.ProjectID,
-				},
+				Name:       tunnel.Name,
+				OS:         "ubuntu-16-04-x64",
+				Plan:       "512mb",
+				Region:     c.infraConfig.Region,
+				UserData:   userData,
+				Additional: map[string]string{},
 			})
 
 			if err != nil {
