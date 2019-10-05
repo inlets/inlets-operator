@@ -1,18 +1,10 @@
 package main
 
 import (
-	"context"
 	"fmt"
 	"log"
-	"net/http"
-	"strconv"
 	"time"
 
-	"golang.org/x/oauth2"
-
-	"github.com/digitalocean/godo"
-
-	"github.com/packethost/packngo"
 	password "github.com/sethvargo/go-password/password"
 
 	appsv1 "k8s.io/api/apps/v1"
@@ -33,6 +25,8 @@ import (
 	"k8s.io/client-go/tools/record"
 	"k8s.io/client-go/util/workqueue"
 	"k8s.io/klog"
+
+	provision "github.com/alexellis/inlets-operator/pkg/provision"
 
 	inletsv1alpha1 "github.com/alexellis/inlets-operator/pkg/apis/inletsoperator/v1alpha1"
 	clientset "github.com/alexellis/inlets-operator/pkg/generated/clientset/versioned"
@@ -351,50 +345,46 @@ func (c *Controller) syncHandler(key string) error {
 		if c.infraConfig.Provider == "packet" {
 			userData := makeUserdata(tunnel.Spec.AuthToken)
 
-			packetAPI := packngo.NewClientWithAuth("", c.infraConfig.GetAccessKey(), http.DefaultClient)
+			provisioner, _ := provision.NewPacketProvisioner(c.infraConfig.GetAccessKey())
 
-			createReq := &packngo.DeviceCreateRequest{
-				Plan:         "t1.small.x86",
-				Facility:     []string{c.infraConfig.Region},
-				Hostname:     tunnel.Name,
-				ProjectID:    c.infraConfig.ProjectID,
-				SpotInstance: false,
-				OS:           "ubuntu_16_04",
-				BillingCycle: "hourly",
-				UserData:     userData,
-			}
+			res, err := provisioner.Provision(provision.BasicHost{
+				Name:     tunnel.Name,
+				OS:       "ubuntu_16_04",
+				Plan:     "t1.small.x86",
+				Region:   c.infraConfig.Region,
+				UserData: userData,
+				Additional: map[string]string{
+					"project_id": c.infraConfig.ProjectID,
+				},
+			})
 
-			device, _, err := packetAPI.Devices.Create(createReq)
 			if err != nil {
 				return err
 			}
-			id = device.ID
+			id = res.ID
+
 		} else if c.infraConfig.Provider == "digitalocean" {
-			tokenSource := &TokenSource{
-				AccessToken: c.infraConfig.GetAccessKey(),
-			}
-			oauthClient := oauth2.NewClient(context.Background(), tokenSource)
-			client := godo.NewClient(oauthClient)
+
+			provisioner, _ := provision.NewDigitalOceanProvisioner(c.infraConfig.GetAccessKey())
 
 			userData := makeUserdata(tunnel.Spec.AuthToken)
 
-			createReq := &godo.DropletCreateRequest{
-				Name:   tunnel.Name,
-				Region: "lon1",
-				Size:   "512mb",
-				Image: godo.DropletCreateImage{
-					Slug: "ubuntu-16-04-x64",
-				},
+			res, err := provisioner.Provision(provision.BasicHost{
+				Name:     tunnel.Name,
+				OS:       "ubuntu-16-04-x64",
+				Plan:     "512mb",
+				Region:   c.infraConfig.Region,
 				UserData: userData,
-			}
-
-			droplet, _, err := client.Droplets.Create(context.Background(), createReq)
+				Additional: map[string]string{
+					"project_id": c.infraConfig.ProjectID,
+				},
+			})
 
 			if err != nil {
 				return err
 			}
 
-			id = fmt.Sprintf("%d", droplet.ID)
+			id = res.ID
 		}
 
 		if err != nil {
@@ -409,34 +399,29 @@ func (c *Controller) syncHandler(key string) error {
 		if err != nil {
 			return err
 		}
-		break
-	case "provisioning":
-		if c.infraConfig.Provider == "packet" {
-			packetAPI := packngo.NewClientWithAuth("", c.infraConfig.GetAccessKey(), http.DefaultClient)
 
-			device, _, err := packetAPI.Devices.Get(tunnel.Status.HostID, nil)
+		break
+
+	case "provisioning":
+
+		if c.infraConfig.Provider == "packet" {
+
+			provisioner, _ := provision.NewPacketProvisioner(c.infraConfig.GetAccessKey())
+			host, err := provisioner.Status(tunnel.Status.HostID)
 
 			if err != nil {
 				fmt.Println(err)
 			}
 
-			if device.State == "active" {
+			if host.Status == "active" {
 				log.Println("Device is now active")
 
-				ip := ""
-				for _, network := range device.Network {
-					if network.Public {
-						ip = network.IpAddressCommon.Address
-						break
-					}
-				}
-
-				err := c.updateTunnelProvisioningStatus(tunnel, "active", device.ID, ip)
+				err := c.updateTunnelProvisioningStatus(tunnel, "active", host.ID, host.IP)
 				if err != nil {
 					log.Printf("Error updating tunnel status: %s, %s", tunnel.Name, err.Error())
 				}
 
-				err = c.updateService(tunnel, ip)
+				err = c.updateService(tunnel, host.IP)
 				if err != nil {
 					log.Printf("Error updating service: %s, %s", tunnel.Spec.ServiceName, err.Error())
 				}
@@ -446,34 +431,22 @@ func (c *Controller) syncHandler(key string) error {
 			}
 
 		} else if c.infraConfig.Provider == "digitalocean" {
-			tokenSource := &TokenSource{
-				AccessToken: c.infraConfig.GetAccessKey(),
-			}
-			oauthClient := oauth2.NewClient(context.Background(), tokenSource)
-			client := godo.NewClient(oauthClient)
 
-			id, _ := strconv.Atoi(tunnel.Status.HostID)
-
-			droplet, _, err := client.Droplets.Get(context.Background(), id)
+			provisioner, _ := provision.NewDigitalOceanProvisioner(c.infraConfig.GetAccessKey())
+			host, err := provisioner.Status(tunnel.Status.HostID)
 
 			if err != nil {
 				return err
 			}
-			if droplet.Status == "active" {
-				ip := ""
-				for _, network := range droplet.Networks.V4 {
-					if network.Type == "public" {
-						ip = network.IPAddress
-					}
-				}
+			if host.Status == "active" {
 
-				if ip != "" {
-					err := c.updateTunnelProvisioningStatus(tunnel, "active", fmt.Sprintf("%d", id), ip)
+				if host.IP != "" {
+					err := c.updateTunnelProvisioningStatus(tunnel, "active", host.ID, host.IP)
 					if err != nil {
 						return err
 					}
 
-					err = c.updateService(tunnel, ip)
+					err = c.updateService(tunnel, host.IP)
 					if err != nil {
 						log.Printf("Error updating service: %s, %s", tunnel.Spec.ServiceName, err.Error())
 					}
@@ -685,15 +658,4 @@ func makeUserdata(authToken string) string {
 	  echo "AUTHTOKEN=$INLETSTOKEN" > /etc/default/inlets && \
 	  systemctl start inlets && \
 	  systemctl enable inlets`
-}
-
-type TokenSource struct {
-	AccessToken string
-}
-
-func (t *TokenSource) Token() (*oauth2.Token, error) {
-	token := &oauth2.Token{
-		AccessToken: t.AccessToken,
-	}
-	return token, nil
 }

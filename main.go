@@ -77,7 +77,7 @@ func (i *InfraConfig) GetAccessKey() string {
 func main() {
 	infra := &InfraConfig{}
 	flag.StringVar(&infra.Provider, "provider", "packet", "Your infrastructure provider - 'packet' or 'digitalocean'")
-	flag.StringVar(&infra.Region, "region", "ams1", "The region to provision hosts into")
+	flag.StringVar(&infra.Region, "region", "", "The region to provision hosts into")
 	flag.StringVar(&infra.AccessKey, "access-key", "", "The access key for your infrastructure provider")
 	flag.StringVar(&infra.AccessKeyFile, "access-key-file", "", "Read the access key for your infrastructure provider from a file (recommended)")
 
