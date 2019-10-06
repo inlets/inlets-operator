@@ -36,6 +36,7 @@ import (
 )
 
 const controllerAgentName = "sample-controller"
+const inletsControlPort = 8080
 
 const (
 	// SuccessSynced is used as part of the Event 'reason' when a Tunnel is synced
@@ -537,8 +538,6 @@ func makeClient(tunnel *inletsv1alpha1.Tunnel, targetPort int32, clientImage str
 	replicas := int32(1)
 	name := tunnel.Name + "-client"
 
-	inletsServicePort := 80
-
 	deployment := appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      name,
@@ -574,7 +573,7 @@ func makeClient(tunnel *inletsv1alpha1.Tunnel, targetPort int32, clientImage str
 							Args: []string{
 								"client",
 								"--upstream=" + fmt.Sprintf("http://%s:%d", tunnel.Spec.ServiceName, targetPort),
-								"--remote=" + fmt.Sprintf("ws://%s:%d", tunnel.Status.HostIP, inletsServicePort),
+								"--remote=" + fmt.Sprintf("ws://%s:%d", tunnel.Status.HostIP, inletsControlPort),
 								"--token=" + tunnel.Spec.AuthToken,
 							},
 						},
@@ -672,16 +671,19 @@ func (c *Controller) handleObject(obj interface{}) {
 }
 
 func makeUserdata(authToken string) string {
+	controlPort := fmt.Sprintf("%d", inletsControlPort)
+
 	return `#!/bin/bash
-	export INLETSTOKEN="` + authToken + `"
-	
-	curl -sLS https://get.inlets.dev | sudo sh
-	
-	curl -sLO https://raw.githubusercontent.com/alexellis/inlets/master/hack/inlets.service  && \
-	  mv inlets.service /etc/systemd/system/inlets.service && \
-	  echo "AUTHTOKEN=$INLETSTOKEN" > /etc/default/inlets && \
-	  systemctl start inlets && \
-	  systemctl enable inlets`
+export INLETSTOKEN="` + authToken + `"
+export CONTROLPORT="` + controlPort + `"
+curl -sLS https://get.inlets.dev | sudo sh
+
+curl -sLO https://raw.githubusercontent.com/alexellis/inlets/master/hack/inlets-operator.service  && \
+	mv inlets-operator.service /etc/systemd/system/inlets.service && \
+	echo "AUTHTOKEN=$INLETSTOKEN" > /etc/default/inlets && \
+	echo "CONTROLPORT=$CONTROLPORT" > /etc/default/inlets && \
+	systemctl start inlets && \
+	systemctl enable inlets`
 }
 
 func hasIgnoreAnnotation(annotations map[string]string) bool {
