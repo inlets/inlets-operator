@@ -53,6 +53,12 @@ func (p *DigitalOceanProvisioner) Status(id string) (*ProvisionedHost, error) {
 	}, nil
 }
 
+func (p *DigitalOceanProvisioner) Delete(id string) error {
+	sid, _ := strconv.Atoi(id)
+	_, err := p.client.Droplets.Delete(context.Background(), sid)
+	return err
+}
+
 func (p *DigitalOceanProvisioner) Provision(host BasicHost) (*ProvisionedHost, error) {
 
 	if host.Region == "" {
