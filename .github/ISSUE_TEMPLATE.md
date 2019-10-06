@@ -28,11 +28,17 @@
 ## Your Environment
 <!--- Include as many relevant details about the environment you experienced the bug in -->
 
-* inlets version `inlets --version` 
+* inlets version, find via `kubectl get deploy inlets-operator -o wide`
 
-* Docker/Kubernetes version `docker version` / `kubectl version`:
+
+* Kubernetes distribution i.e. minikube v0.29.0., KinD v0.5.1, Docker Desktop:
+
+
+* Kubernetes version `kubectl version`:
+
 
 * Operating System and version (e.g. Linux, Windows, MacOS):
 
-* Link to your project or a code example to reproduce issue:
+
+* Cloud provisioner: (DigitalOcean.com / Packet.com)
 
