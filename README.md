@@ -2,7 +2,7 @@
 
 Get a Kubernetes LoadBalancer where you never thought it was possible.
 
-In cloud-based Kubernetes solutions, Services can be exposed as type "LoadBalancer" and your cloud provider will provision a LoadBalancer and start routing traffic, in another word: you get ingress to your service.
+In cloud-based [Kubernetes](https://kubernetes.io/) solutions, Services can be exposed as type "LoadBalancer" and your cloud provider will provision a LoadBalancer and start routing traffic, in another word: you get ingress to your service.
 
 inlets-operator brings that same experience to your local Kubernetes or k3s cluster (k3s/k3d/minikube/microk8s/Docker Desktop/KinD). The operator automates the creation of an [inlets](https://inlets.dev) exit-node on public cloud, and runs the client as a Pod inside your cluster. Your Kubernetes `Service` will be updated with the public IP of the exit-node and you can start receiving incoming traffic immediately.
 
@@ -10,25 +10,28 @@ inlets-operator brings that same experience to your local Kubernetes or k3s clus
 
 This solution is for users who want to gain incoming network access (ingress) to their private Kubernetes clusters running on their laptops, VMs, within a Docker container, on-premises, or behind NAT. The cost of the LoadBalancer with a IaaS like DigitalOcean is around 5 USD / mo, which is 10 USD cheaper than an AWS ELB or GCP LoadBalancer.
 
-Whilst 5 USD is cheaper than a "Cloud Load Balancer", this tool is for users who cannot get incoming ingress, not for saving money on public cloud.
+Whilst 5 USD is cheaper than a "Cloud Load Balancer", this tool is for users who cannot get incoming connections due to their network configuration, not for saving money vs. public cloud.
 
 ## Status and backlog
 
 This version of the inlets-operator is a early proof-of-concept, but it builds upon inlets, which is stable and widely used.
 
-Backlog:
+Backlog completed:
 - [x] Provision VMs/exit-nodes on public cloud
 - [x] Provision to [Packet.com](https://packet.com)
 - [x] Provision to DigitalOcean
 - [x] Automatically update Service type LoadBalancer with a public IP
-- [x] Tunnel `http` traffic
+- [x] Tunnel L7 `http` traffic
 - [x] In-cluster Role, Dockerfile and YAML files
 - [x] Raspberry Pi / armhf build and YAML file
+- [ ] Ignore Services with `dev.inlets.manage: false` annotation
+
+Backlog pending:
+- [ ] Garbage collect hosts when CRD is deleted
 - [ ] CI with Travis (use openfaas-incubator/openfaas-operator as a sample)
-- [ ] ARM64 (Graviton/Odroid/Packet.com) build and YAML file
+- [ ] ARM64 (Graviton/Odroid/Packet.com) Dockerfile/build and K8s YAML files
 - [ ] Automate `wss://` for control-port
 - [ ] Move control-port and `/tunnel` endpoint to high port i.e. `31111`
-- [ ] Garbage collect hosts when CRD is deleted
 - [ ] Provision to EC2
 - [ ] Provision to GCP
 - [ ] Tunnel any `tcp` traffic (using `inlets-pro`)
@@ -124,6 +127,8 @@ go build && ./inlets-operator  --kubeconfig "$(kind get kubeconfig-path --name="
 ```
 
 # Monitor/view logs
+
+```sh
 kubectl logs deploy/inlets-operator -f
 ```
 
@@ -147,7 +152,7 @@ kubectl logs deploy/nginx-1-tunnel-client
 
 Check the IP of the LoadBalancer and then access it via the Internet.
 
-Example with OpenFaaS, make sure you give the port a name of `http`:
+Example with OpenFaaS, make sure you give the `port` a `name` of `http`, otherwise a default of `80` will be used incorrectly.
 
 ```yaml
 apiVersion: v1
@@ -168,6 +173,9 @@ spec:
     app: gateway
   type: LoadBalancer
   ```
+
+To ignore a service such as `traefik` type in: `kubectl annotate svc/traefik -n kube-system dev.in
+lets.manage=false`
 
 ## Contributing
 

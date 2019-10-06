@@ -267,19 +267,10 @@ func (c *Controller) syncHandler(key string) error {
 	}
 
 	service, _ := c.serviceLister.Services(namespace).Get(name)
-	// if err != nil {
-	// 	// The InletsLoadBalancer resource may no longer exist, in which case we stop
-	// 	// processing.
-	// 	if errors.IsNotFound(err) {
-	// 		utilruntime.HandleError(fmt.Errorf("service '%s' in work queue no longer exists", key))
-	// 		return nil
-	// 	}
-
-	// 	return err
-	// }
 
 	if service != nil {
-		if service.Spec.Type == "LoadBalancer" {
+		if service.Spec.Type == "LoadBalancer" &&
+			hasIgnoreAnnotation(service.Annotations) == false {
 
 			tunnels := c.operatorclientset.InletsoperatorV1alpha1().Tunnels(service.ObjectMeta.Namespace)
 			ops := metav1.GetOptions{}
@@ -626,6 +617,7 @@ func (c *Controller) handleObject(obj interface{}) {
 		}
 		klog.V(4).Infof("Recovered deleted object '%s' from tombstone", object.GetName())
 	}
+
 	klog.V(4).Infof("Processing object: %s", object.GetName())
 	if ownerRef := metav1.GetControllerOf(object); ownerRef != nil {
 		// If this object is not owned by a Tunnel, we should not do anything more
@@ -656,4 +648,11 @@ func makeUserdata(authToken string) string {
 	  echo "AUTHTOKEN=$INLETSTOKEN" > /etc/default/inlets && \
 	  systemctl start inlets && \
 	  systemctl enable inlets`
+}
+
+func hasIgnoreAnnotation(annotations map[string]string) bool {
+	if v, ok := annotations["dev.inlets.manage"]; ok && v == "false" {
+		return true
+	}
+	return false
 }
