@@ -42,6 +42,11 @@ func (p *PacketProvisioner) Status(id string) (*ProvisionedHost, error) {
 	}, nil
 }
 
+func (p *PacketProvisioner) Delete(id string) error {
+	_, err := p.client.Devices.Delete(id)
+	return err
+}
+
 func (p *PacketProvisioner) Provision(host BasicHost) (*ProvisionedHost, error) {
 	if host.Region == "" {
 		host.Region = "ams1"

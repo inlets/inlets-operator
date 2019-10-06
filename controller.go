@@ -116,6 +116,31 @@ func NewController(
 		UpdateFunc: func(old, new interface{}) {
 			controller.enqueueTunnel(new)
 		},
+		DeleteFunc: func(old interface{}) {
+			r, ok := checkCustomResourceType(old)
+			if ok {
+				if len(r.Status.HostID) > 0 {
+					var provisioner provision.Provisioner
+
+					switch controller.infraConfig.Provider {
+					case "digitalocean":
+						provisioner, _ = provision.NewDigitalOceanProvisioner(controller.infraConfig.GetAccessKey())
+						break
+					case "packet":
+						provisioner, _ = provision.NewPacketProvisioner(controller.infraConfig.GetAccessKey())
+						break
+					}
+
+					if provisioner != nil {
+						log.Printf("Deleting exit-node: %s, ip: %s\n", r.Status.HostID, r.Status.HostIP)
+						err := provisioner.Delete(r.Status.HostID)
+						if err != nil {
+							log.Println(err)
+						}
+					}
+				}
+			}
+		},
 	})
 
 	// Set up an event handler for when Deployment resources change. This
@@ -147,6 +172,15 @@ func NewController(
 	})
 
 	return controller
+}
+
+func checkCustomResourceType(obj interface{}) (inletsv1alpha1.Tunnel, bool) {
+	var roll *inletsv1alpha1.Tunnel
+	var ok bool
+	if roll, ok = obj.(*inletsv1alpha1.Tunnel); !ok {
+		return inletsv1alpha1.Tunnel{}, false
+	}
+	return *roll, true
 }
 
 // enqueueInletsLoadBalancer takes a InletsLoadBalancer resource and converts it into a namespace/name

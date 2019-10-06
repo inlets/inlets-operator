@@ -3,6 +3,7 @@ package provision
 type Provisioner interface {
 	Provision(BasicHost) (*ProvisionedHost, error)
 	Status(id string) (*ProvisionedHost, error)
+	Delete(id string) error
 }
 
 type ProvisionedHost struct {
