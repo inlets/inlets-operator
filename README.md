@@ -174,8 +174,7 @@ spec:
   type: LoadBalancer
   ```
 
-To ignore a service such as `traefik` type in: `kubectl annotate svc/traefik -n kube-system dev.in
-lets.manage=false`
+To ignore a service such as `traefik` type in: `kubectl annotate svc/traefik -n kube-system dev.inlets.manage=false`
 
 ## Contributing
 
