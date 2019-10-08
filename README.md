@@ -176,6 +176,13 @@ spec:
 
 To ignore a service such as `traefik` type in: `kubectl annotate svc/traefik -n kube-system dev.inlets.manage=false`
 
+# Provider Pricing
+
+| Provider                                                       | Price per month | Price per hour |  OS image    | CPU | Memory |
+| -------------------------------------------------------------- | --------------: | -------------: | -----------: | --: | -----: |
+| [Packet](https://www.packet.com/cloud/servers/t1-small/)       | ~$51            | $0.07          | Ubuntu 16.04 | 4   | 8GB    |
+| [Digital Ocean](https://www.digitalocean.com/pricing/#Compute) | $5              | ~$0.0068       | Ubuntu 16.04 | 1   | 512MB  |
+
 ## Contributing
 
 Contributions are welcome, see the [CONTRIBUTING.md](CONTRIBUTING.md) guide.
@@ -187,3 +194,4 @@ Contributions are welcome, see the [CONTRIBUTING.md](CONTRIBUTING.md) guide.
 * inlets pro - L4 TCP tunnel, which can tunnel any TCP traffic and is on the roadmap for the inlets-operator
 * [Cloudflare Argo](https://www.cloudflare.com/en-gb/products/argo-tunnel/) - paid SaaS product from Cloudflare for Cloudflare customers and domains - K8s integration available through Ingress
 * [ngrok](https://ngrok.com) - a popular tunnelling tool, restarts every 7 hours, limits connections per minute, paid SaaS product with no K8s integration available
+
