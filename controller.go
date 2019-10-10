@@ -307,7 +307,9 @@ func (c *Controller) syncHandler(key string) error {
 		if service.Spec.Type == "LoadBalancer" &&
 			hasIgnoreAnnotation(service.Annotations) == false {
 
-			tunnels := c.operatorclientset.InletsoperatorV1alpha1().Tunnels(service.ObjectMeta.Namespace)
+			tunnels := c.operatorclientset.InletsoperatorV1alpha1().
+				Tunnels(service.ObjectMeta.Namespace)
+
 			ops := metav1.GetOptions{}
 			name := service.Name + "-tunnel"
 			found, err := tunnels.Get(name, ops)
@@ -368,6 +370,7 @@ func (c *Controller) syncHandler(key string) error {
 
 		var id string
 
+		start := time.Now()
 		if c.infraConfig.Provider == "packet" {
 			userData := makeUserdata(tunnel.Spec.AuthToken)
 
@@ -411,6 +414,8 @@ func (c *Controller) syncHandler(key string) error {
 			id = res.ID
 		}
 
+		log.Printf("Provisioning call took: %fs\n", time.Since(start).Seconds())
+
 		if err != nil {
 			err = c.updateTunnelProvisioningStatus(tunnel, "error", "", "")
 			if err != nil {
@@ -421,7 +426,7 @@ func (c *Controller) syncHandler(key string) error {
 		}
 
 		if err != nil {
-			return err
+			return fmt.Errorf("tunnel update error %s", err)
 		}
 
 		break
@@ -450,6 +455,10 @@ func (c *Controller) syncHandler(key string) error {
 					log.Printf("Error updating service: %s, %s", tunnel.Spec.ServiceName, err.Error())
 				}
 
+				if err != nil {
+					return fmt.Errorf("tunnel update error %s", err)
+				}
+
 			} else {
 				log.Printf("Still provisioning: %s\n", tunnel.Name)
 			}
@@ -474,9 +483,11 @@ func (c *Controller) syncHandler(key string) error {
 					if err != nil {
 						log.Printf("Error updating service: %s, %s", tunnel.Spec.ServiceName, err.Error())
 					}
+					if err != nil {
+						return fmt.Errorf("tunnel update error %s", err)
+					}
 				}
 			}
-
 		}
 
 		break
@@ -518,6 +529,11 @@ func (c *Controller) syncHandler(key string) error {
 			if updateErr != nil {
 				log.Println(updateErr)
 			}
+
+			if updateErr != nil {
+				return fmt.Errorf("tunnel update error %s", updateErr)
+			}
+
 		}
 
 		break

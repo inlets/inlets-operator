@@ -3,6 +3,7 @@ package provision
 import (
 	"context"
 	"fmt"
+	"log"
 	"strconv"
 
 	"github.com/digitalocean/godo"
@@ -60,6 +61,8 @@ func (p *DigitalOceanProvisioner) Delete(id string) error {
 }
 
 func (p *DigitalOceanProvisioner) Provision(host BasicHost) (*ProvisionedHost, error) {
+
+	log.Printf("Provisioning host with DigitalOcean\n")
 
 	if host.Region == "" {
 		host.Region = "lon1"
