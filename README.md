@@ -68,6 +68,8 @@ You can also run the operator in-cluster, a ClusterRole is used since Services c
 kubectl create secret generic inlets-access-key \
   --from-literal inlets-access-key="$(cat ~/Downloads/do-access-token)"
 
+kubectl apply -f ./aritifacts/crd.yaml
+
 # Apply the operator deployment and RBAC role
 kubectl apply -f ./artifacts/operator-rbac.yaml
 kubectl apply -f ./artifacts/operator-amd64.yaml
@@ -83,6 +85,8 @@ To get a LoadBalancer for services running on your Raspberry Pi, use the armhf d
 kubectl create secret generic inlets-access-key \
   --from-literal inlets-access-key="$(cat ~/Downloads/do-access-token)"
 
+kubectl apply -f ./aritifacts/crd.yaml
+
 # Apply the operator deployment and RBAC role
 kubectl apply -f ./artifacts/operator-rbac.yaml
 kubectl apply -f ./artifacts/operator-armhf.yaml
@@ -95,7 +99,7 @@ Assuming you're running a local cluster with [KinD](https://github.com/kubernete
 Sign up to [Packet.com](https://packet.com) and get an access key, save it in `~/packet-token`
 
 ```sh
-kubectl apply ./aritifacts/crd.yaml
+kubectl apply -f ./aritifacts/crd.yaml
 
 export PACKET_PROJECT_ID=""	# Populate from dashboard
 
