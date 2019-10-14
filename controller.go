@@ -142,6 +142,11 @@ func NewController(
 						err := provisioner.Delete(r.Status.HostID)
 						if err != nil {
 							log.Println(err)
+						} else {
+							err = controller.updateService(&r, "")
+							if err != nil {
+								log.Printf("Error updating service: %s, %s", r.Spec.ServiceName, err.Error())
+							}
 						}
 					}
 				}
@@ -685,7 +690,18 @@ func (c *Controller) updateService(tunnel *inletsv1alpha1.Tunnel, ip string) err
 	// copy.Status.LoadBalancer.Ingress = []corev1.LoadBalancerIngress{
 	// 	corev1.LoadBalancerIngress{IP: ip},
 	// }
-	copy.Spec.ExternalIPs = []string{ip}
+
+	if ip == "" {
+		ips := []string{}
+		for _, v := range copy.Spec.ExternalIPs {
+			if v != tunnel.Status.HostIP {
+				ips = append(ips, v)
+			}
+		}
+		copy.Spec.ExternalIPs = ips
+	} else {
+		copy.Spec.ExternalIPs = append(copy.Spec.ExternalIPs, ip)
+	}
 
 	_, err = c.kubeclientset.CoreV1().Services(tunnel.Namespace).Update(copy)
 	return err
