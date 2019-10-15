@@ -1,4 +1,4 @@
-.PHONY: build build-armhf push manifest test verify-codegen
+.PHONY: build push manifest test verify-codegen
 TAG?=latest
 
 # docker manifest command will work with Docker CLI 18.03 or newer
