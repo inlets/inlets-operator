@@ -24,12 +24,12 @@ Backlog completed:
 - [x] Tunnel L7 `http` traffic
 - [x] In-cluster Role, Dockerfile and YAML files
 - [x] Raspberry Pi / armhf build and YAML file
+- [x] ARM64 (Graviton/Odroid/Packet.com) Dockerfile/build and K8s YAML files
 - [ ] Ignore Services with `dev.inlets.manage: false` annotation
 
 Backlog pending:
 - [ ] Garbage collect hosts when CRD is deleted
 - [ ] CI with Travis (use openfaas-incubator/openfaas-operator as a sample)
-- [ ] ARM64 (Graviton/Odroid/Packet.com) Dockerfile/build and K8s YAML files
 - [ ] Automate `wss://` for control-port
 - [ ] Move control-port and `/tunnel` endpoint to high port i.e. `31111`
 - [ ] Provision to EC2
@@ -68,28 +68,11 @@ You can also run the operator in-cluster, a ClusterRole is used since Services c
 kubectl create secret generic inlets-access-key \
   --from-literal inlets-access-key="$(cat ~/Downloads/do-access-token)"
 
-kubectl apply -f ./aritifacts/crd.yaml
+kubectl apply -f ./artifacts/crd.yaml
 
 # Apply the operator deployment and RBAC role
 kubectl apply -f ./artifacts/operator-rbac.yaml
-kubectl apply -f ./artifacts/operator-amd64.yaml
-```
-
-## Running on a Raspberry Pi (armhf), using DigitalOcean for the exit node
-
-To get a LoadBalancer for services running on your Raspberry Pi, use the armhf deployment file:
-
-```sh
-# Create a secret to store the access token
-
-kubectl create secret generic inlets-access-key \
-  --from-literal inlets-access-key="$(cat ~/Downloads/do-access-token)"
-
-kubectl apply -f ./aritifacts/crd.yaml
-
-# Apply the operator deployment and RBAC role
-kubectl apply -f ./artifacts/operator-rbac.yaml
-kubectl apply -f ./artifacts/operator-armhf.yaml
+kubectl apply -f ./artifacts/operator.yaml
 ```
 
 ## Run the Go binary with Packet.com
