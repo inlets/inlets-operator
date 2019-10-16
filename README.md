@@ -25,7 +25,10 @@ Backlog completed:
 - [x] In-cluster Role, Dockerfile and YAML files
 - [x] Raspberry Pi / armhf build and YAML file
 - [x] ARM64 (Graviton/Odroid/Packet.com) Dockerfile/build and K8s YAML files
-- [ ] Ignore Services with `dev.inlets.manage: false` annotation
+- [x] Ignore Services with `dev.inlets.manage: false` annotation
+- [x] Move to inlets GitHub org
+- [x] Get a logo
+- [x] Get a place on the CNCF Landscape
 
 Backlog pending:
 - [ ] Garbage collect hosts when CRD is deleted
