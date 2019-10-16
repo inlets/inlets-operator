@@ -115,8 +115,10 @@ go build && ./inlets-operator  --kubeconfig "$(kind get kubeconfig-path --name="
 
 # Monitor/view logs
 
+The operator deployment is in the `kube-system` namespace.
+
 ```sh
-kubectl logs deploy/inlets-operator -f
+kubectl logs deploy/inlets-operator -n kube-system -f
 ```
 
 ## Get a LoadBalancer provided by inlets
@@ -130,9 +132,7 @@ kubectl expose deployment nginx-2 --port=80 --type=LoadBalancer
 
 kubectl get svc
 
-kubectl get tunnel nginx-tunnel-1 -o yaml
-
-kubectl get svc
+kubectl get tunnel/nginx-1-tunnel -o yaml
 
 kubectl logs deploy/nginx-1-tunnel-client
 ```
