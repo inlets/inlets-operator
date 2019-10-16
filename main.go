@@ -55,8 +55,9 @@ type InfraConfig struct {
 // GetInletsClientImage returns the image for the client-side tunnel
 func (i *InfraConfig) GetInletsClientImage() string {
 	if i.InletsClientImage == "" {
-		return "alexellis2/inlets:2.4.1"
+		return "inlets/inlets:2.6.1"
 	}
+
 	return i.InletsClientImage
 }
 
