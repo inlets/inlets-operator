@@ -19,7 +19,7 @@ limitations under the License.
 package versioned
 
 import (
-	inletsoperatorv1alpha1 "github.com/alexellis/inlets-operator/pkg/generated/clientset/versioned/typed/inletsoperator/v1alpha1"
+	inletsoperatorv1alpha1 "github.com/inlets/inlets-operator/pkg/generated/clientset/versioned/typed/inletsoperator/v1alpha1"
 	discovery "k8s.io/client-go/discovery"
 	rest "k8s.io/client-go/rest"
 	flowcontrol "k8s.io/client-go/util/flowcontrol"

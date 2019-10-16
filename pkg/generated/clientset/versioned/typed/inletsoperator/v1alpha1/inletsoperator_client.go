@@ -19,8 +19,8 @@ limitations under the License.
 package v1alpha1
 
 import (
-	v1alpha1 "github.com/alexellis/inlets-operator/pkg/apis/inletsoperator/v1alpha1"
-	"github.com/alexellis/inlets-operator/pkg/generated/clientset/versioned/scheme"
+	v1alpha1 "github.com/inlets/inlets-operator/pkg/apis/inletsoperator/v1alpha1"
+	"github.com/inlets/inlets-operator/pkg/generated/clientset/versioned/scheme"
 	serializer "k8s.io/apimachinery/pkg/runtime/serializer"
 	rest "k8s.io/client-go/rest"
 )

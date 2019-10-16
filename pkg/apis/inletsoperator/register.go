@@ -17,5 +17,5 @@ limitations under the License.
 package inletsoperator
 
 const (
-	GroupName = "inlets.alexellis.io"
+	GroupName = "inlets.inlets.dev"
 )

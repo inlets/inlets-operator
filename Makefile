@@ -6,23 +6,23 @@ TAG?=latest
 export DOCKER_CLI_EXPERIMENTAL=enabled
 
 build:
-	docker build -t alexellis/inlets-operator:$(TAG)-amd64 . -f Dockerfile
-	docker build --build-arg OPTS="GOARCH=arm64" -t alexellis/inlets-operator:$(TAG)-arm64 . -f Dockerfile
-	docker build --build-arg OPTS="GOARCH=arm GOARM=6" -t alexellis/inlets-operator:$(TAG)-armhf . -f Dockerfile
+	docker build -t inlets/inlets-operator:$(TAG)-amd64 . -f Dockerfile
+	docker build --build-arg OPTS="GOARCH=arm64" -t inlets/inlets-operator:$(TAG)-arm64 . -f Dockerfile
+	docker build --build-arg OPTS="GOARCH=arm GOARM=6" -t inlets/inlets-operator:$(TAG)-armhf . -f Dockerfile
 
 push:
-	docker push alexellis/inlets-operator:$(TAG)-amd64
-	docker push alexellis/inlets-operator:$(TAG)-arm64
-	docker push alexellis/inlets-operator:$(TAG)-armhf
+	docker push inlets/inlets-operator:$(TAG)-amd64
+	docker push inlets/inlets-operator:$(TAG)-arm64
+	docker push inlets/inlets-operator:$(TAG)-armhf
 
 manifest:
-	docker manifest create --amend alexellis/inlets-operator:$(TAG) \
-		alexellis/inlets-operator:$(TAG)-amd64 \
-		alexellis/inlets-operator:$(TAG)-arm64 \
-		alexellis/inlets-operator:$(TAG)-armhf
-	docker manifest annotate alexellis/inlets-operator:$(TAG) alexellis/inlets-operator:$(TAG)-arm64 --os linux --arch arm64
-	docker manifest annotate alexellis/inlets-operator:$(TAG) alexellis/inlets-operator:$(TAG)-armhf --os linux --arch arm --variant v6
-	docker manifest push alexellis/inlets-operator:$(TAG)
+	docker manifest create --amend inlets/inlets-operator:$(TAG) \
+		inlets/inlets-operator:$(TAG)-amd64 \
+		inlets/inlets-operator:$(TAG)-arm64 \
+		inlets/inlets-operator:$(TAG)-armhf
+	docker manifest annotate inlets/inlets-operator:$(TAG) inlets/inlets-operator:$(TAG)-arm64 --os linux --arch arm64
+	docker manifest annotate inlets/inlets-operator:$(TAG) inlets/inlets-operator:$(TAG)-armhf --os linux --arch arm --variant v6
+	docker manifest push inlets/inlets-operator:$(TAG)
 
 test:
 	go test ./...

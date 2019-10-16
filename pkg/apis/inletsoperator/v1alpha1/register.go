@@ -21,7 +21,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 
-	inletsoperator "github.com/alexellis/inlets-operator/pkg/apis/inletsoperator"
+	inletsoperator "github.com/inlets/inlets-operator/pkg/apis/inletsoperator"
 )
 
 // SchemeGroupVersion is group version used to register these objects

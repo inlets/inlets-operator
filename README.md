@@ -87,8 +87,8 @@ kubectl apply -f ./aritifacts/crd.yaml
 export PACKET_PROJECT_ID=""	# Populate from dashboard
 
 export GOPATH=$HOME/go/
-go get -u github.com/alexellis/inlets-operator
-cd $GOPATH/github.com/alexellis/inlets-operator
+go get -u github.com/inlets/inlets-operator
+cd $GOPATH/github.com/inlets/inlets-operator
 
 go get
 
@@ -105,8 +105,8 @@ Sign up to [DigitalOcean.com](https://DigitalOcean.com) and get an access key, s
 kubectl apply ./aritifacts/crd.yaml
 
 export GOPATH=$HOME/go/
-go get -u github.com/alexellis/inlets-operator
-cd $GOPATH/github.com/alexellis/inlets-operator
+go get -u github.com/inlets/inlets-operator
+cd $GOPATH/github.com/inlets/inlets-operator
 
 go get
 

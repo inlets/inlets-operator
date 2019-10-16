@@ -19,8 +19,8 @@ limitations under the License.
 package inletsoperator
 
 import (
-	v1alpha1 "github.com/alexellis/inlets-operator/pkg/generated/informers/externalversions/inletsoperator/v1alpha1"
-	internalinterfaces "github.com/alexellis/inlets-operator/pkg/generated/informers/externalversions/internalinterfaces"
+	v1alpha1 "github.com/inlets/inlets-operator/pkg/generated/informers/externalversions/inletsoperator/v1alpha1"
+	internalinterfaces "github.com/inlets/inlets-operator/pkg/generated/informers/externalversions/internalinterfaces"
 )
 
 // Interface provides access to each of this group's versions.

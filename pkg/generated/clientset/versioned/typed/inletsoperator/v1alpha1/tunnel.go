@@ -21,8 +21,8 @@ package v1alpha1
 import (
 	"time"
 
-	v1alpha1 "github.com/alexellis/inlets-operator/pkg/apis/inletsoperator/v1alpha1"
-	scheme "github.com/alexellis/inlets-operator/pkg/generated/clientset/versioned/scheme"
+	v1alpha1 "github.com/inlets/inlets-operator/pkg/apis/inletsoperator/v1alpha1"
+	scheme "github.com/inlets/inlets-operator/pkg/generated/clientset/versioned/scheme"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	types "k8s.io/apimachinery/pkg/types"
 	watch "k8s.io/apimachinery/pkg/watch"

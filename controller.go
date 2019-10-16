@@ -26,13 +26,13 @@ import (
 	"k8s.io/client-go/util/workqueue"
 	"k8s.io/klog"
 
-	provision "github.com/alexellis/inlets-operator/pkg/provision"
+	provision "github.com/inlets/inlets-operator/pkg/provision"
 
-	inletsv1alpha1 "github.com/alexellis/inlets-operator/pkg/apis/inletsoperator/v1alpha1"
-	clientset "github.com/alexellis/inlets-operator/pkg/generated/clientset/versioned"
-	samplescheme "github.com/alexellis/inlets-operator/pkg/generated/clientset/versioned/scheme"
-	informers "github.com/alexellis/inlets-operator/pkg/generated/informers/externalversions/inletsoperator/v1alpha1"
-	listers "github.com/alexellis/inlets-operator/pkg/generated/listers/inletsoperator/v1alpha1"
+	inletsv1alpha1 "github.com/inlets/inlets-operator/pkg/apis/inletsoperator/v1alpha1"
+	clientset "github.com/inlets/inlets-operator/pkg/generated/clientset/versioned"
+	samplescheme "github.com/inlets/inlets-operator/pkg/generated/clientset/versioned/scheme"
+	informers "github.com/inlets/inlets-operator/pkg/generated/informers/externalversions/inletsoperator/v1alpha1"
+	listers "github.com/inlets/inlets-operator/pkg/generated/listers/inletsoperator/v1alpha1"
 )
 
 const controllerAgentName = "sample-controller"
@@ -694,7 +694,7 @@ export INLETSTOKEN="` + authToken + `"
 export CONTROLPORT="` + controlPort + `"
 curl -sLS https://get.inlets.dev | sudo sh
 
-curl -sLO https://raw.githubusercontent.com/alexellis/inlets/master/hack/inlets-operator.service  && \
+curl -sLO https://raw.githubusercontent.com/inlets/inlets/master/hack/inlets-operator.service  && \
 	mv inlets-operator.service /etc/systemd/system/inlets.service && \
 	echo "AUTHTOKEN=$INLETSTOKEN" > /etc/default/inlets && \
 	echo "CONTROLPORT=$CONTROLPORT" > /etc/default/inlets && \

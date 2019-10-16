@@ -18,7 +18,7 @@ spec:
       serviceAccountName: inlets-operator
       containers:
       - name: operator
-        image: alexellis/inlets-operator:0.2.7
+        image: inlets/inlets-operator:0.3.0
         imagePullPolicy: Always
         command:
           - ./inlets-operator
@@ -28,7 +28,7 @@ spec:
           - "-access-key-file=/var/secrets/inlets/inlets-access-key"
         env:
         - name: client_image
-          value: alexellis2/inlets:2.5.2
+          value: inlets/inlets:2.6.0
         resources:
           limits:
             memory: 128Mi

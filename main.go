@@ -31,9 +31,9 @@ import (
 	// Uncomment the following line to load the gcp plugin (only required to authenticate against GKE clusters).
 	// _ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 
-	clientset "github.com/alexellis/inlets-operator/pkg/generated/clientset/versioned"
-	informers "github.com/alexellis/inlets-operator/pkg/generated/informers/externalversions"
-	"github.com/alexellis/inlets-operator/pkg/signals"
+	clientset "github.com/inlets/inlets-operator/pkg/generated/clientset/versioned"
+	informers "github.com/inlets/inlets-operator/pkg/generated/informers/externalversions"
+	"github.com/inlets/inlets-operator/pkg/signals"
 )
 
 var (

@@ -19,7 +19,7 @@ limitations under the License.
 package fake
 
 import (
-	v1alpha1 "github.com/alexellis/inlets-operator/pkg/generated/clientset/versioned/typed/inletsoperator/v1alpha1"
+	v1alpha1 "github.com/inlets/inlets-operator/pkg/generated/clientset/versioned/typed/inletsoperator/v1alpha1"
 	rest "k8s.io/client-go/rest"
 	testing "k8s.io/client-go/testing"
 )

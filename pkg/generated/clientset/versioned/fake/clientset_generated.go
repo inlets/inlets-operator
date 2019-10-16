@@ -19,9 +19,9 @@ limitations under the License.
 package fake
 
 import (
-	clientset "github.com/alexellis/inlets-operator/pkg/generated/clientset/versioned"
-	inletsoperatorv1alpha1 "github.com/alexellis/inlets-operator/pkg/generated/clientset/versioned/typed/inletsoperator/v1alpha1"
-	fakeinletsoperatorv1alpha1 "github.com/alexellis/inlets-operator/pkg/generated/clientset/versioned/typed/inletsoperator/v1alpha1/fake"
+	clientset "github.com/inlets/inlets-operator/pkg/generated/clientset/versioned"
+	inletsoperatorv1alpha1 "github.com/inlets/inlets-operator/pkg/generated/clientset/versioned/typed/inletsoperator/v1alpha1"
+	fakeinletsoperatorv1alpha1 "github.com/inlets/inlets-operator/pkg/generated/clientset/versioned/typed/inletsoperator/v1alpha1/fake"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/watch"
 	"k8s.io/client-go/discovery"

@@ -11,7 +11,7 @@ metadata:
   name: inlets-operator-rw
   namespace: default
 rules:
-- apiGroups: ["inlets.alexellis.io"]
+- apiGroups: ["inlets.inlets.dev"]
   resources: ["tunnels"]
   verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
 - apiGroups: [""]

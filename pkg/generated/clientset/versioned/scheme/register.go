@@ -19,7 +19,7 @@ limitations under the License.
 package scheme
 
 import (
-	inletsoperatorv1alpha1 "github.com/alexellis/inlets-operator/pkg/apis/inletsoperator/v1alpha1"
+	inletsoperatorv1alpha1 "github.com/inlets/inlets-operator/pkg/apis/inletsoperator/v1alpha1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	runtime "k8s.io/apimachinery/pkg/runtime"
 	schema "k8s.io/apimachinery/pkg/runtime/schema"

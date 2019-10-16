@@ -33,9 +33,9 @@ import (
 	"k8s.io/client-go/tools/cache"
 	"k8s.io/client-go/tools/record"
 
-	inletsoperator "github.com/alexellis/inlets-operator/pkg/apis/inletsoperator/v1alpha1"
-	"github.com/alexellis/inlets-operator/pkg/generated/clientset/versioned/fake"
-	informers "github.com/alexellis/inlets-operator/pkg/generated/informers/externalversions"
+	inletsoperator "github.com/inlets/inlets-operator/pkg/apis/inletsoperator/v1alpha1"
+	"github.com/inlets/inlets-operator/pkg/generated/clientset/versioned/fake"
+	informers "github.com/inlets/inlets-operator/pkg/generated/informers/externalversions"
 )
 
 var (

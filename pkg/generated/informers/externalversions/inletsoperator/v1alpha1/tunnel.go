@@ -21,10 +21,10 @@ package v1alpha1
 import (
 	time "time"
 
-	inletsoperatorv1alpha1 "github.com/alexellis/inlets-operator/pkg/apis/inletsoperator/v1alpha1"
-	versioned "github.com/alexellis/inlets-operator/pkg/generated/clientset/versioned"
-	internalinterfaces "github.com/alexellis/inlets-operator/pkg/generated/informers/externalversions/internalinterfaces"
-	v1alpha1 "github.com/alexellis/inlets-operator/pkg/generated/listers/inletsoperator/v1alpha1"
+	inletsoperatorv1alpha1 "github.com/inlets/inlets-operator/pkg/apis/inletsoperator/v1alpha1"
+	versioned "github.com/inlets/inlets-operator/pkg/generated/clientset/versioned"
+	internalinterfaces "github.com/inlets/inlets-operator/pkg/generated/informers/externalversions/internalinterfaces"
+	v1alpha1 "github.com/inlets/inlets-operator/pkg/generated/listers/inletsoperator/v1alpha1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	runtime "k8s.io/apimachinery/pkg/runtime"
 	watch "k8s.io/apimachinery/pkg/watch"

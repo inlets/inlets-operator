@@ -20,6 +20,6 @@
 I have:
 
 - [ ] updated the documentation and/or roadmap (if required)
-- [ ] read the [CONTRIBUTION](https://github.com/alexellis/inlets/blob/master/CONTRIBUTING.md) guide
+- [ ] read the [CONTRIBUTION](https://github.com/inlets/inlets/blob/master/CONTRIBUTING.md) guide
 - [ ] signed-off my commits with `git commit -s`
 - [ ] added unit tests
