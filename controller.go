@@ -697,7 +697,7 @@ curl -sLS https://get.inlets.dev | sudo sh
 curl -sLO https://raw.githubusercontent.com/inlets/inlets/master/hack/inlets-operator.service  && \
 	mv inlets-operator.service /etc/systemd/system/inlets.service && \
 	echo "AUTHTOKEN=$INLETSTOKEN" > /etc/default/inlets && \
-	echo "CONTROLPORT=$CONTROLPORT" > /etc/default/inlets && \
+	echo "CONTROLPORT=$CONTROLPORT" >> /etc/default/inlets && \
 	systemctl start inlets && \
 	systemctl enable inlets`
 }
