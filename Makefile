@@ -22,7 +22,7 @@ manifest:
 		inlets/inlets-operator:$(TAG)-armhf
 	docker manifest annotate inlets/inlets-operator:$(TAG) inlets/inlets-operator:$(TAG)-arm64 --os linux --arch arm64
 	docker manifest annotate inlets/inlets-operator:$(TAG) inlets/inlets-operator:$(TAG)-armhf --os linux --arch arm --variant v6
-	docker manifest push inlets/inlets-operator:$(TAG)
+	docker manifest push -p inlets/inlets-operator:$(TAG)
 
 test:
 	go test ./...
