@@ -1,0 +1,11 @@
+sudo: required
+language: go
+
+go:
+- "1.11"
+
+services:
+- docker
+
+script:
+- make build
