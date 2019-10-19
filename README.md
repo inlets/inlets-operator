@@ -35,7 +35,7 @@ Backlog pending:
 - [ ] CI with Travis (use openfaas-incubator/openfaas-operator as a sample)
 - [ ] Automate `wss://` for control-port
 - [ ] Move control-port and `/tunnel` endpoint to high port i.e. `31111`
-- [ ] Provision to EC2
+- [ ] Provision to AWS EC2
 - [ ] Provision to GCP
 - [ ] Tunnel any `tcp` traffic (using `inlets-pro`)
 
