@@ -21,6 +21,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"strings"
 	"time"
 
 	kubeinformers "k8s.io/client-go/informers"
@@ -61,7 +62,8 @@ func (i *InfraConfig) GetInletsClientImage() string {
 	return i.InletsClientImage
 }
 
-// GetAccessKey from parameter or file
+// GetAccessKey from parameter or file trimming
+// any whitespace found.
 func (i *InfraConfig) GetAccessKey() string {
 	if len(i.AccessKeyFile) > 0 {
 		data, err := ioutil.ReadFile(i.AccessKeyFile)
@@ -69,10 +71,11 @@ func (i *InfraConfig) GetAccessKey() string {
 		if err != nil {
 			log.Fatalln(err)
 		}
-		return string(data)
+
+		return strings.TrimSpace(string(data))
 	}
 
-	return i.AccessKey
+	return strings.TrimSpace(i.AccessKey)
 }
 
 func main() {
