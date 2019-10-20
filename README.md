@@ -29,15 +29,16 @@ Backlog completed:
 - [x] Move to inlets GitHub org
 - [x] Get a logo
 - [x] Get a place on the CNCF Landscape
+- [ ] Garbage collect hosts when Service or CRD is deleted
+- [ ] CI with Travis (use openfaas-incubator/openfaas-operator as a sample)
 
 Backlog pending:
-- [ ] Garbage collect hosts when CRD is deleted
-- [ ] CI with Travis (use openfaas-incubator/openfaas-operator as a sample)
-- [ ] Automate `wss://` for control-port
+- [ ] Automate `wss://` for control-port using self-signed certs or LetsEncrypt and nip.io
 - [ ] Move control-port and `/tunnel` endpoint to high port i.e. `31111`
 - [ ] Provision to AWS EC2
 - [ ] Provision to GCP
-- [ ] Tunnel any `tcp` traffic (using `inlets-pro`)
+- [ ] Provision to Scaleway
+- [ ] Automate `inlets-pro` for TCP traffic
 
 Inlets tunnels HTTP traffic at L7, so the inlets-operator can be used to tunnel HTTP traffic. A new project I'm working on called inlets-pro tunnels any TCP traffic at L4 i.e. Mongo, Redis, NATS, SSH, TLS, whatever you like.
 
