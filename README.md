@@ -29,8 +29,8 @@ Backlog completed:
 - [x] Move to inlets GitHub org
 - [x] Get a logo
 - [x] Get a place on the CNCF Landscape
-- [ ] Garbage collect hosts when Service or CRD is deleted
-- [ ] CI with Travis (use openfaas-incubator/openfaas-operator as a sample)
+- [x] Garbage collect hosts when Service or CRD is deleted
+- [x] CI with Travis (use openfaas-incubator/openfaas-operator as a sample)
 
 Backlog pending:
 - [ ] Automate `wss://` for control-port using self-signed certs or LetsEncrypt and nip.io
