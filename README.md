@@ -26,9 +26,6 @@ Backlog completed:
 - [x] Raspberry Pi / armhf build and YAML file
 - [x] ARM64 (Graviton/Odroid/Packet.com) Dockerfile/build and K8s YAML files
 - [x] Ignore Services with `dev.inlets.manage: false` annotation
-- [x] Move to inlets GitHub org
-- [x] Get a logo
-- [x] Get a place on the CNCF Landscape
 - [x] Garbage collect hosts when Service or CRD is deleted
 - [x] CI with Travis (use openfaas-incubator/openfaas-operator as a sample)
 
@@ -79,52 +76,6 @@ kubectl apply -f ./artifacts/operator-rbac.yaml
 kubectl apply -f ./artifacts/operator.yaml
 ```
 
-## Run the Go binary with Packet.com
-
-Assuming you're running a local cluster with [KinD](https://github.com/kubernetes-sigs/kind):
-
-Sign up to [Packet.com](https://packet.com) and get an access key, save it in `~/packet-token`
-
-```sh
-kubectl apply -f ./aritifacts/crd.yaml
-
-export PACKET_PROJECT_ID=""	# Populate from dashboard
-
-export GOPATH=$HOME/go/
-go get -u github.com/inlets/inlets-operator
-cd $GOPATH/github.com/inlets/inlets-operator
-
-go get
-
-go build && ./inlets-operator  --kubeconfig "$(kind get kubeconfig-path --name="kind")" --access-key=$(cat ~/packet-token) --project-id="${PACKET_PROJECT_ID}"
-```
-
-## Run the Go binary with DigitalOcean
-
-Assuming you're running a local cluster with [KinD](https://github.com/kubernetes-sigs/kind):
-
-Sign up to [DigitalOcean.com](https://DigitalOcean.com) and get an access key, save it in `~/do-access-token`.
-
-```sh
-kubectl apply ./aritifacts/crd.yaml
-
-export GOPATH=$HOME/go/
-go get -u github.com/inlets/inlets-operator
-cd $GOPATH/github.com/inlets/inlets-operator
-
-go get
-
-go build && ./inlets-operator  --kubeconfig "$(kind get kubeconfig-path --name="kind")" --access-key=$(cat ~/do-access-token) --provider digitalocean
-```
-
-# Monitor/view logs
-
-The operator deployment is in the `kube-system` namespace.
-
-```sh
-kubectl logs deploy/inlets-operator -n kube-system -f
-```
-
 ## Get a LoadBalancer provided by inlets
 
 ```sh
@@ -167,6 +118,14 @@ spec:
 
 To ignore a service such as `traefik` type in: `kubectl annotate svc/traefik -n kube-system dev.inlets.manage=false`
 
+## Monitor/view logs
+
+The operator deployment is in the `kube-system` namespace.
+
+```sh
+kubectl logs deploy/inlets-operator -n kube-system -f
+```
+
 # Provider Pricing
 
 | Provider                                                       | Price per month | Price per hour |  OS image    | CPU | Memory |
@@ -185,4 +144,3 @@ Contributions are welcome, see the [CONTRIBUTING.md](CONTRIBUTING.md) guide.
 * [inlets pro](https://github.com/inlets/inlets-pro-pkg) - L4 TCP tunnel, which can tunnel any TCP traffic and is on the roadmap for the inlets-operator
 * [Cloudflare Argo](https://www.cloudflare.com/en-gb/products/argo-tunnel/) - paid SaaS product from Cloudflare for Cloudflare customers and domains - K8s integration available through Ingress
 * [ngrok](https://ngrok.com) - a popular tunnelling tool, restarts every 7 hours, limits connections per minute, paid SaaS product with no K8s integration available
-
