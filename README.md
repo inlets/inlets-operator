@@ -61,6 +61,8 @@ See an alternative video showing my cluster running with KinD on my Mac and the 
 
 ## Running in-cluster, using DigitalOcean for the exit node
 
+> Note: this example is now multi-arch, so it's valid for `x86_64`, `ARMHF`, and `ARM64`.
+
 You can also run the operator in-cluster, a ClusterRole is used since Services can be created in any namespace, and may need a tunnel.
 
 ```sh
