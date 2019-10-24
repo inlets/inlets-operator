@@ -306,9 +306,7 @@ func (c *Controller) syncHandler(key string) error {
 	service, _ := c.serviceLister.Services(namespace).Get(name)
 
 	if service != nil {
-		if service.Spec.Type == "LoadBalancer" &&
-			hasIgnoreAnnotation(service.Annotations) == false {
-
+		if service.Spec.Type == "LoadBalancer" {
 			tunnels := c.operatorclientset.InletsoperatorV1alpha1().
 				Tunnels(service.ObjectMeta.Namespace)
 
@@ -317,40 +315,50 @@ func (c *Controller) syncHandler(key string) error {
 			found, err := tunnels.Get(name, ops)
 
 			if errors.IsNotFound(err) {
-				pwdRes, pwdErr := password.Generate(64, 10, 0, false, true)
-				if pwdErr != nil {
-					log.Fatalf("Error generating password for inlets server %s", pwdErr.Error())
-				}
+				if manageService(*service) {
+					pwdRes, pwdErr := password.Generate(64, 10, 0, false, true)
+					if pwdErr != nil {
+						log.Fatalf("Error generating password for inlets server %s", pwdErr.Error())
+					}
 
-				log.Printf("Creating tunnel for %s.%s\n", name, namespace)
-				tunnel := &inletsv1alpha1.Tunnel{
-					Spec: inletsv1alpha1.TunnelSpec{
-						ServiceName: service.Name,
-						AuthToken:   pwdRes,
-					},
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      name,
-						Namespace: service.ObjectMeta.Namespace,
-						OwnerReferences: []metav1.OwnerReference{
-							*metav1.NewControllerRef(service, schema.GroupVersionKind{
-								Group:   inletsv1alpha1.SchemeGroupVersion.Group,
-								Version: inletsv1alpha1.SchemeGroupVersion.Version,
-								Kind:    "Tunnel",
-							}),
+					log.Printf("Creating tunnel for %s.%s\n", name, namespace)
+					tunnel := &inletsv1alpha1.Tunnel{
+						Spec: inletsv1alpha1.TunnelSpec{
+							ServiceName: service.Name,
+							AuthToken:   pwdRes,
 						},
-					},
+						ObjectMeta: metav1.ObjectMeta{
+							Name:      name,
+							Namespace: service.ObjectMeta.Namespace,
+							OwnerReferences: []metav1.OwnerReference{
+								*metav1.NewControllerRef(service, schema.GroupVersionKind{
+									Group:   inletsv1alpha1.SchemeGroupVersion.Group,
+									Version: inletsv1alpha1.SchemeGroupVersion.Version,
+									Kind:    "Tunnel",
+								}),
+							},
+						},
+					}
+
+					_, err := tunnels.Create(tunnel)
+
+					if err != nil {
+						log.Printf("Error creating tunnel: %s", err.Error())
+					}
 				}
-
-				_, err := tunnels.Create(tunnel)
-
-				if err != nil {
-					log.Printf("Error creating tunnel: %s", err.Error())
-				}
-
 			} else {
 				log.Printf("Tunnel exists: %s\n", found.Name)
-			}
 
+				if manageService(*service) == false {
+					log.Printf("Removing tunnel: %s\n", found.Name)
+
+					err := tunnels.Delete(found.Name, &metav1.DeleteOptions{})
+
+					if err != nil {
+						log.Printf("Error deleting tunnel: %s", err.Error())
+					}
+				}
+			}
 		}
 	}
 
@@ -746,11 +754,12 @@ curl -sLO https://raw.githubusercontent.com/inlets/inlets/master/hack/inlets-pro
 	systemctl enable inlets-pro`
 }
 
-func hasIgnoreAnnotation(annotations map[string]string) bool {
+func manageService(service corev1.Service) bool {
+	annotations := service.Annotations
 	if v, ok := annotations["dev.inlets.manage"]; ok && v == "false" {
-		return true
+		return false
 	}
-	return false
+	return true
 }
 
 func getPortsString(service *corev1.Service) string {
