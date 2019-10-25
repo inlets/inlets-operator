@@ -43,7 +43,7 @@ Inlets tunnels HTTP traffic at L7, so the inlets-operator can be used to tunnel 
 
 inlets and inlets-operator are brought to you by [Alex Ellis](https://twitter.com/alexellisuk). Alex is a [CNCF Ambassador](https://www.cncf.io/people/ambassadors/) and the founder of [OpenFaaS](https://github.com/openfaas/faas/).
 
-If you like this project, then join dozens of other developers by Sponsoring Alex and his OSS work through [GitHub Sponsors](https://github.com/users/alexellis/sponsorship) today.
+> Note: `inlets` is made available free-of-charge, but you can support its ongoing development through [GitHub Sponsors](https://insiders.openfaas.io/) 💪
 
 ## Video demo
 
