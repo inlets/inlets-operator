@@ -78,6 +78,13 @@ kubectl apply -f ./artifacts/operator-rbac.yaml
 kubectl apply -f ./artifacts/operator.yaml
 ```
 
+## Running on a Raspberry Pi
+
+Use the same commands as described in the section above.
+
+> There used to be separate deployment files in `artifacts` folder called `operator-amd64.yaml` and `operator-armhf.yaml`.
+> Since version `0.2.7` Docker images get built for multiple architectures with the same tag which means that there is now just one deployment file called `operator.yaml` that can be used on all supported architecures. 
+
 ## Get a LoadBalancer provided by inlets
 
 ```sh
