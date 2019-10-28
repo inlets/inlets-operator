@@ -33,5 +33,5 @@ verify-codegen:
 charts:
 	cd chart && helm package inlets-operator/
 	mv chart/*.tgz docs/
-	helm repo index docs --url https://inlets.github.io/inlets/ --merge ./docs/index.yaml
+	helm repo index docs --url https://inlets.github.io/inlets-operator/ --merge ./docs/index.yaml
 
