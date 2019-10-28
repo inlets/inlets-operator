@@ -477,9 +477,6 @@ func (c *Controller) syncHandler(key string) error {
 				err = c.updateService(tunnel, host.IP)
 				if err != nil {
 					log.Printf("Error updating service: %s, %s", tunnel.Spec.ServiceName, err.Error())
-				}
-
-				if err != nil {
 					return fmt.Errorf("tunnel update error %s", err)
 				}
 
@@ -506,8 +503,6 @@ func (c *Controller) syncHandler(key string) error {
 					err = c.updateService(tunnel, host.IP)
 					if err != nil {
 						log.Printf("Error updating service: %s, %s", tunnel.Spec.ServiceName, err.Error())
-					}
-					if err != nil {
 						return fmt.Errorf("tunnel update error %s", err)
 					}
 				}
@@ -530,8 +525,6 @@ func (c *Controller) syncHandler(key string) error {
 					err = c.updateService(tunnel, host.IP)
 					if err != nil {
 						log.Printf("Error updating service: %s, %s", tunnel.Spec.ServiceName, err.Error())
-					}
-					if err != nil {
 						return fmt.Errorf("tunnel update error %s", err)
 					}
 				}
