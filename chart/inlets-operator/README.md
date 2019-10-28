@@ -7,7 +7,7 @@
 * Add the chart repo
 
   ```sh
-  helm repo add inlets-operator https://inlets.github.io/inlets-operator/
+  helm repo add inlets https://inlets.github.io/inlets-operator/
   helm repo update
   ```
 
@@ -32,25 +32,19 @@
 ### DigitalOcean with inlets OSS (recommended)
 
 ```sh
-git clone https://github.com/inlets/inlets-operator
-cd inlets-operator/chart
-helm install inlets-operator --name inlets-operator
+helm upgrade inlets-operator --install inlets/inlets-operator
 ```
 
 ### DigitalOcean with inlets-pro
 
 ```sh
-git clone https://github.com/inlets/inlets-operator
-cd inlets-operator/chart
-helm install inlets-operator --name inlets-operator \
+helm upgrade inlets-operator --install inlets/inlets-operator \
   --set license=JWT_GOES_HERE
 ```
 
 ### Packet.com with inlets OSS
 
 ```sh
-git clone https://github.com/inlets/inlets-operator
-cd inlets-operator/chart
-helm install inlets-operator --name inlets-operator \
+helm upgrade inlets-operator --install inlets/inlets-operator \
   --set provider=packet,region=ams1,packetProjectId=PACKETID
 ```
