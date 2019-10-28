@@ -1,4 +1,4 @@
-.PHONY: build push manifest test verify-codegen
+.PHONY: build push manifest test verify-codegen charts
 TAG?=latest
 
 # docker manifest command will work with Docker CLI 18.03 or newer
@@ -29,3 +29,9 @@ test:
 
 verify-codegen:
 	./hack/verify-codegen.sh
+
+charts:
+	cd chart && helm package inlets-operator/
+	mv chart/*.tgz docs/
+	helm repo index docs --url https://inlets.github.io/inlets/ --merge ./docs/index.yaml
+

@@ -1,0 +1,13 @@
+apiVersion: v1
+entries:
+  inlets-operator:
+  - apiVersion: v1
+    appVersion: "1.0"
+    created: "2019-10-28T17:54:55.100121Z"
+    description: inlets-operator for Kubernetes
+    digest: 5deed7c98de97e43a8b704d5902d080239782b779c0119701f7c1d562967de7d
+    name: inlets-operator
+    urls:
+    - https://inlets.github.io/inlets/inlets-operator-0.1.0.tgz
+    version: 0.1.0
+generated: "2019-10-28T17:54:55.099335Z"
