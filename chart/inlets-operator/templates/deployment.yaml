@@ -1,0 +1,61 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "inlets-operator.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+{{ include "inlets-operator.labels" . | indent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "inlets-operator.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ include "inlets-operator.name" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+      annotations:
+        prometheus.io.scrape: "false"
+    spec:
+      serviceAccountName: inlets-operator
+      containers:
+      - name: {{ .Chart.Name }}
+        image: "{{ .Values.image }}"
+        imagePullPolicy: {{ .Values.pullPolicy }}
+        command:
+        - ./inlets-operator
+        - "-provider={{.Values.provider}}"
+        - "-access-key-file={{.Values.accessKeyFile}}"
+        - "-license={{.Values.inletsProLicense}}"
+        - "-region={{.Values.region}}"
+        {{- if .Values.packetProjectId }}
+        - "-region={{.Values.packetProjectId}}"
+        {{- end }}
+        resources:
+          {{- toYaml .Values.resources | nindent 12 }}
+        env:
+        - name: client_image
+          value: "{{.Values.clientImage}}"
+        volumeMounts:
+        - mountPath: /var/secrets/inlets/
+          name: inlets-access-key
+          readOnly: true
+      volumes:
+      - name: inlets-access-key
+        secret:
+          defaultMode: 420
+          secretName: inlets-access-key
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+    {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
