@@ -20,7 +20,6 @@
     --from-literal inlets-access-key="$(cat ~/Downloads/do-access-token)"
     ```
 
-
 * Install the CRD:
 
     ```sh
