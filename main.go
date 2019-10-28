@@ -32,7 +32,10 @@ type InfraConfig struct {
 	Provider          string
 	Region            string
 	AccessKey         string
+	SecretKey         string
+	OrganizationID    string
 	AccessKeyFile     string
+	SecretKeyFile     string
 	ProjectID         string
 	InletsClientImage string
 	ProConfig         InletsProConfig
@@ -60,7 +63,9 @@ func main() {
 	flag.StringVar(&infra.Region, "region", "", "The region to provision hosts into")
 	flag.StringVar(&infra.AccessKey, "access-key", "", "The access key for your infrastructure provider")
 	flag.StringVar(&infra.AccessKeyFile, "access-key-file", "", "Read the access key for your infrastructure provider from a file (recommended)")
-
+	flag.StringVar(&infra.SecretKey, "secret-key", "", "The secret key if using Scaleway as the provider")
+	flag.StringVar(&infra.SecretKeyFile, "secret-key-file", "", "Read the access key for your infrastructure provider from a file (recommended)")
+	flag.StringVar(&infra.OrganizationID, "organization-id", "", "The organization id if using Scaleway as the provider")
 	flag.StringVar(&infra.ProjectID, "project-id", "", "The project ID if using Packet.com as the provider")
 	flag.StringVar(&infra.ProConfig.License, "license", "", "Supply a license for use with inlets-pro")
 
@@ -134,4 +139,20 @@ func (i *InfraConfig) GetAccessKey() string {
 	}
 
 	return strings.TrimSpace(i.AccessKey)
+}
+
+// GetSecretKey from parameter or file trimming
+// any whitespace found.
+func (i *InfraConfig) GetSecretKey() string {
+	if len(i.SecretKeyFile) > 0 {
+		data, err := ioutil.ReadFile(i.SecretKeyFile)
+
+		if err != nil {
+			log.Fatalln(err)
+		}
+
+		return strings.TrimSpace(string(data))
+	}
+
+	return strings.TrimSpace(i.SecretKey)
 }

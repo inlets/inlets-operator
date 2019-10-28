@@ -17,6 +17,7 @@ Whilst 5 USD is cheaper than a "Cloud Load Balancer", this tool is for users who
 This version of the inlets-operator is a early proof-of-concept, but it builds upon inlets, which is stable and widely used.
 
 Backlog completed:
+
 - [x] Provision VMs/exit-nodes on public cloud
 - [x] Provision to [Packet.com](https://packet.com)
 - [x] Provision to DigitalOcean
@@ -28,13 +29,15 @@ Backlog completed:
 - [x] Ignore Services with `dev.inlets.manage: false` annotation
 - [x] Garbage collect hosts when Service or CRD is deleted
 - [x] CI with Travis (use openfaas-incubator/openfaas-operator as a sample)
+- [x] Provision to Scaleway
 
 Backlog pending:
+
 - [ ] Automate `wss://` for control-port using self-signed certs or LetsEncrypt and nip.io
 - [ ] Move control-port and `/tunnel` endpoint to high port i.e. `31111`
 - [ ] Provision to AWS EC2
 - [ ] Provision to GCP
-- [ ] Provision to Scaleway
+
 - [ ] Automate [`inlets-pro`](https://github.com/inlets/inlets-pro-pkg) for TCP traffic
 
 Inlets tunnels HTTP traffic at L7, so the inlets-operator can be used to tunnel HTTP traffic. A new project I'm working on called [inlets-pro](https://github.com/inlets/inlets-pro-pkg) tunnels any TCP traffic at L4 i.e. Mongo, Redis, NATS, SSH, TLS, whatever you like.
@@ -62,7 +65,7 @@ This video demo shows a single-node VM running on k3s on Packet.com, and the inl
 
 See an alternative video showing my cluster running with KinD on my Mac and the exit node being provisioned on DigitalOcean:
 
-* [KinD & DigitalOcean](https://youtu.be/c6DTrNk9zRk).
+- [KinD & DigitalOcean](https://youtu.be/c6DTrNk9zRk).
 
 ## Step-by-step tutorial
 
@@ -92,7 +95,7 @@ kubectl apply -f ./artifacts/operator.yaml
 Use the same commands as described in the section above.
 
 > There used to be separate deployment files in `artifacts` folder called `operator-amd64.yaml` and `operator-armhf.yaml`.
-> Since version `0.2.7` Docker images get built for multiple architectures with the same tag which means that there is now just one deployment file called `operator.yaml` that can be used on all supported architecures. 
+> Since version `0.2.7` Docker images get built for multiple architectures with the same tag which means that there is now just one deployment file called `operator.yaml` that can be used on all supported architecures.
 
 ## Get a LoadBalancer provided by inlets
 
@@ -132,7 +135,7 @@ spec:
   selector:
     app: gateway
   type: LoadBalancer
-  ```
+```
 
 To ignore a service such as `traefik` type in: `kubectl annotate svc/traefik -n kube-system dev.inlets.manage=false`
 
@@ -146,10 +149,11 @@ kubectl logs deploy/inlets-operator -n kube-system -f
 
 # Provider Pricing
 
-| Provider                                                       | Price per month | Price per hour |  OS image    | CPU | Memory |
-| -------------------------------------------------------------- | --------------: | -------------: | -----------: | --: | -----: |
-| [Packet](https://www.packet.com/cloud/servers/t1-small/)       | ~$51            | $0.07          | Ubuntu 16.04 | 4   | 8GB    |
-| [Digital Ocean](https://www.digitalocean.com/pricing/#Compute) | $5              | ~$0.0068       | Ubuntu 16.04 | 1   | 512MB  |
+| Provider                                                           | Price per month | Price per hour |     OS image | CPU | Memory |
+| ------------------------------------------------------------------ | --------------: | -------------: | -----------: | --: | -----: |
+| [Packet](https://www.packet.com/cloud/servers/t1-small/)           |           ~\$51 |         \$0.07 | Ubuntu 16.04 |   4 |    8GB |
+| [Digital Ocean](https://www.digitalocean.com/pricing/#Compute)     |             \$5 |      ~\$0.0068 | Ubuntu 16.04 |   1 |  512MB |
+| [Scaleway](https://www.scaleway.com/en/pricing/#virtual-instances) |           2.99€ |         0.006€ | Ubuntu 18.04 |   2 |    2GB |
 
 ## Contributing
 
@@ -157,8 +161,8 @@ Contributions are welcome, see the [CONTRIBUTING.md](CONTRIBUTING.md) guide.
 
 ## Similar projects / products and alternatives
 
-* [metallb](https://github.com/danderson/metallb) - open source LoadBalancer for private Kubernetes clusters, no tunnelling.
-* [inlets](https://inlets.dev) - inlets provides an L7 HTTP tunnel for applications through the use of an exit node, it is used by the inlets operator
-* [inlets pro](https://github.com/inlets/inlets-pro-pkg) - L4 TCP tunnel, which can tunnel any TCP traffic and is on the roadmap for the inlets-operator
-* [Cloudflare Argo](https://www.cloudflare.com/en-gb/products/argo-tunnel/) - paid SaaS product from Cloudflare for Cloudflare customers and domains - K8s integration available through Ingress
-* [ngrok](https://ngrok.com) - a popular tunnelling tool, restarts every 7 hours, limits connections per minute, paid SaaS product with no K8s integration available
+- [metallb](https://github.com/danderson/metallb) - open source LoadBalancer for private Kubernetes clusters, no tunnelling.
+- [inlets](https://inlets.dev) - inlets provides an L7 HTTP tunnel for applications through the use of an exit node, it is used by the inlets operator
+- [inlets pro](https://github.com/inlets/inlets-pro-pkg) - L4 TCP tunnel, which can tunnel any TCP traffic and is on the roadmap for the inlets-operator
+- [Cloudflare Argo](https://www.cloudflare.com/en-gb/products/argo-tunnel/) - paid SaaS product from Cloudflare for Cloudflare customers and domains - K8s integration available through Ingress
+- [ngrok](https://ngrok.com) - a popular tunnelling tool, restarts every 7 hours, limits connections per minute, paid SaaS product with no K8s integration available
