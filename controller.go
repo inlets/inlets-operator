@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"strings"
 	"time"
 
 	password "github.com/sethvargo/go-password/password"
@@ -37,6 +38,7 @@ import (
 
 const controllerAgentName = "sample-controller"
 const inletsControlPort = 8080
+const inletsProControlPort = 8123
 
 const (
 	// SuccessSynced is used as part of the Event 'reason' when a Tunnel is synced
@@ -133,7 +135,7 @@ func NewController(
 					}
 
 					if provisioner != nil {
-						log.Printf("Deleting exit-node: %s, ip: %s\n", r.Status.HostID, r.Status.HostIP)
+						log.Printf("Deleting exit-node for %s: %s, ip: %s\n", r.Spec.ServiceName, r.Status.HostID, r.Status.HostIP)
 						err := provisioner.Delete(r.Status.HostID)
 						if err != nil {
 							log.Println(err)
@@ -314,13 +316,13 @@ func (c *Controller) syncHandler(key string) error {
 			name := service.Name + "-tunnel"
 			found, err := tunnels.Get(name, ops)
 
-			pwdRes, pwdErr := password.Generate(64, 10, 0, false, true)
-			if pwdErr != nil {
-				log.Fatalf("Error generating password for inlets server %s", pwdErr.Error())
-			}
-
 			if errors.IsNotFound(err) {
-				fmt.Printf("Creating tunnel %s\n", name)
+				pwdRes, pwdErr := password.Generate(64, 10, 0, false, true)
+				if pwdErr != nil {
+					log.Fatalf("Error generating password for inlets server %s", pwdErr.Error())
+				}
+
+				log.Printf("Creating tunnel for %s.%s\n", name, namespace)
 				tunnel := &inletsv1alpha1.Tunnel{
 					Spec: inletsv1alpha1.TunnelSpec{
 						ServiceName: service.Name,
@@ -372,7 +374,8 @@ func (c *Controller) syncHandler(key string) error {
 
 		start := time.Now()
 		if c.infraConfig.Provider == "packet" {
-			userData := makeUserdata(tunnel.Spec.AuthToken)
+
+			userData := makeUserdata(tunnel.Spec.AuthToken, c.infraConfig.UsePro(), tunnel.Spec.ServiceName)
 
 			provisioner, _ := provision.NewPacketProvisioner(c.infraConfig.GetAccessKey())
 
@@ -396,7 +399,7 @@ func (c *Controller) syncHandler(key string) error {
 
 			provisioner, _ := provision.NewDigitalOceanProvisioner(c.infraConfig.GetAccessKey())
 
-			userData := makeUserdata(tunnel.Spec.AuthToken)
+			userData := makeUserdata(tunnel.Spec.AuthToken, c.infraConfig.UsePro(), tunnel.Spec.ServiceName)
 
 			res, err := provisioner.Provision(provision.BasicHost{
 				Name:       tunnel.Name,
@@ -443,7 +446,7 @@ func (c *Controller) syncHandler(key string) error {
 			}
 
 			if host.Status == "active" {
-				log.Println("Device is now active")
+				log.Printf("Device %s is now active\n", tunnel.Spec.ServiceName)
 
 				err := c.updateTunnelProvisioningStatus(tunnel, "active", host.ID, host.IP)
 				if err != nil {
@@ -509,9 +512,12 @@ func (c *Controller) syncHandler(key string) error {
 				}
 			}
 
+			ports := getPortsString(service)
+
+			client := makeClient(tunnel, firstPort, c.infraConfig.GetInletsClientImage(), c.infraConfig.UsePro(), ports, c.infraConfig.ProConfig.License)
 			deployment, createDeployErr := c.kubeclientset.AppsV1().
 				Deployments(tunnel.Namespace).
-				Create(makeClient(tunnel, firstPort, c.infraConfig.GetInletsClientImage()))
+				Create(client)
 
 			if createDeployErr != nil {
 				log.Println(createDeployErr)
@@ -550,9 +556,39 @@ func (c *Controller) syncHandler(key string) error {
 	return nil
 }
 
-func makeClient(tunnel *inletsv1alpha1.Tunnel, targetPort int32, clientImage string) *appsv1.Deployment {
+func makeClient(tunnel *inletsv1alpha1.Tunnel, targetPort int32, clientImage string, usePro bool, ports, license string) *appsv1.Deployment {
 	replicas := int32(1)
 	name := tunnel.Name + "-client"
+	var container corev1.Container
+
+	if !usePro {
+		container = corev1.Container{
+			Name:            "client",
+			Image:           clientImage,
+			Command:         []string{"inlets"},
+			ImagePullPolicy: corev1.PullIfNotPresent,
+			Args: []string{
+				"client",
+				"--upstream=" + fmt.Sprintf("http://%s:%d", tunnel.Spec.ServiceName, targetPort),
+				"--remote=" + fmt.Sprintf("ws://%s:%d", tunnel.Status.HostIP, inletsControlPort),
+				"--token=" + tunnel.Spec.AuthToken,
+			},
+		}
+	} else {
+		container = corev1.Container{
+			Name:            "client",
+			Image:           clientImage,
+			Command:         []string{"inlets-pro"},
+			ImagePullPolicy: corev1.PullIfNotPresent,
+			Args: []string{
+				"client",
+				"--connect=" + fmt.Sprintf("wss://%s:%d/connect", tunnel.Status.HostIP, inletsProControlPort),
+				"--token=" + tunnel.Spec.AuthToken,
+				"--tcp-ports=" + ports,
+				"--license=" + license,
+			},
+		}
+	}
 
 	deployment := appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
@@ -581,18 +617,7 @@ func makeClient(tunnel *inletsv1alpha1.Tunnel, targetPort int32, clientImage str
 				},
 				Spec: corev1.PodSpec{
 					Containers: []corev1.Container{
-						{
-							Name:            "client",
-							Image:           clientImage,
-							Command:         []string{"inlets"},
-							ImagePullPolicy: corev1.PullIfNotPresent,
-							Args: []string{
-								"client",
-								"--upstream=" + fmt.Sprintf("http://%s:%d", tunnel.Spec.ServiceName, targetPort),
-								"--remote=" + fmt.Sprintf("ws://%s:%d", tunnel.Status.HostIP, inletsControlPort),
-								"--token=" + tunnel.Spec.AuthToken,
-							},
-						},
+						container,
 					},
 				},
 			},
@@ -621,7 +646,7 @@ func (c *Controller) updateService(tunnel *inletsv1alpha1.Tunnel, ip string) err
 }
 
 func (c *Controller) updateTunnelProvisioningStatus(tunnel *inletsv1alpha1.Tunnel, status, id, ip string) error {
-	log.Printf("Status: %s, ID: %s, IP: %s\n", status, id, ip)
+	log.Printf("Status (%s): %s, ID: %s, IP: %s\n", tunnel.Spec.ServiceName, status, id, ip)
 
 	tunnelCopy := tunnel.DeepCopy()
 	tunnelCopy.Status.HostStatus = status
@@ -686,20 +711,39 @@ func (c *Controller) handleObject(obj interface{}) {
 	}
 }
 
-func makeUserdata(authToken string) string {
-	controlPort := fmt.Sprintf("%d", inletsControlPort)
+func makeUserdata(authToken string, usePro bool, remoteTCP string) string {
+	if !usePro {
+		controlPort := fmt.Sprintf("%d", inletsControlPort)
 
-	return `#!/bin/bash
-export INLETSTOKEN="` + authToken + `"
+		return `#!/bin/bash
+export AUTHTOKEN="` + authToken + `"
 export CONTROLPORT="` + controlPort + `"
 curl -sLS https://get.inlets.dev | sudo sh
 
 curl -sLO https://raw.githubusercontent.com/inlets/inlets/master/hack/inlets-operator.service  && \
 	mv inlets-operator.service /etc/systemd/system/inlets.service && \
-	echo "AUTHTOKEN=$INLETSTOKEN" > /etc/default/inlets && \
+	echo "AUTHTOKEN=$AUTHTOKEN" > /etc/default/inlets && \
 	echo "CONTROLPORT=$CONTROLPORT" >> /etc/default/inlets && \
 	systemctl start inlets && \
 	systemctl enable inlets`
+	}
+
+	return `#!/bin/bash
+export AUTHTOKEN="` + authToken + `"
+export REMOTETCP="` + remoteTCP + `"
+export IP=$(curl -sfSL https://ifconfig.co)
+
+curl -SLsf https://github.com/inlets/inlets-pro-pkg/releases/download/0.4.0/inlets-pro-linux > inlets-pro-linux && \
+chmod +x ./inlets-pro-linux  && \
+mv ./inlets-pro-linux /usr/local/bin/inlets-pro
+
+curl -sLO https://raw.githubusercontent.com/inlets/inlets/master/hack/inlets-pro.service  && \
+	mv inlets-pro.service /etc/systemd/system/inlets-pro.service && \
+	echo "AUTHTOKEN=$AUTHTOKEN" >> /etc/default/inlets-pro && \
+	echo "REMOTETCP=$REMOTETCP" >> /etc/default/inlets-pro && \
+	echo "IP=$IP" >> /etc/default/inlets-pro && \
+	systemctl start inlets-pro && \
+	systemctl enable inlets-pro`
 }
 
 func hasIgnoreAnnotation(annotations map[string]string) bool {
@@ -707,4 +751,12 @@ func hasIgnoreAnnotation(annotations map[string]string) bool {
 		return true
 	}
 	return false
+}
+
+func getPortsString(service *corev1.Service) string {
+	ports := ""
+	for _, p := range service.Spec.Ports {
+		ports = ports + fmt.Sprintf("%d,", p.Port)
+	}
+	return strings.TrimRight(ports, ",")
 }

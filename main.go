@@ -1,19 +1,3 @@
-/*
-Copyright 2017 The Kubernetes Authors.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
-
 package main
 
 import (
@@ -51,47 +35,41 @@ type InfraConfig struct {
 	AccessKeyFile     string
 	ProjectID         string
 	InletsClientImage string
+	ProConfig         InletsProConfig
 }
 
-// GetInletsClientImage returns the image for the client-side tunnel
-func (i *InfraConfig) GetInletsClientImage() string {
-	if i.InletsClientImage == "" {
-		return "inlets/inlets:2.6.1"
-	}
-
-	return i.InletsClientImage
+func (i InfraConfig) UsePro() bool {
+	return len(i.ProConfig.License) > 0
 }
 
-// GetAccessKey from parameter or file trimming
-// any whitespace found.
-func (i *InfraConfig) GetAccessKey() string {
-	if len(i.AccessKeyFile) > 0 {
-		data, err := ioutil.ReadFile(i.AccessKeyFile)
+type InletsProConfig struct {
+	License string
+}
 
-		if err != nil {
-			log.Fatalln(err)
-		}
-
-		return strings.TrimSpace(string(data))
-	}
-
-	return strings.TrimSpace(i.AccessKey)
+func init() {
+	flag.StringVar(&kubeconfig, "kubeconfig", "", "Path to a kubeconfig. Only required if out-of-cluster.")
+	flag.StringVar(&masterURL, "master", "", "The address of the Kubernetes API server. Overrides any value in kubeconfig. Only required if out-of-cluster.")
 }
 
 func main() {
-	infra := &InfraConfig{}
+	infra := &InfraConfig{
+		ProConfig: InletsProConfig{},
+	}
+
 	flag.StringVar(&infra.Provider, "provider", "packet", "Your infrastructure provider - 'packet' or 'digitalocean'")
 	flag.StringVar(&infra.Region, "region", "", "The region to provision hosts into")
 	flag.StringVar(&infra.AccessKey, "access-key", "", "The access key for your infrastructure provider")
 	flag.StringVar(&infra.AccessKeyFile, "access-key-file", "", "Read the access key for your infrastructure provider from a file (recommended)")
 
 	flag.StringVar(&infra.ProjectID, "project-id", "", "The project ID if using Packet.com as the provider")
+	flag.StringVar(&infra.ProConfig.License, "license", "", "Supply a license for use with inlets-pro")
 
 	flag.Parse()
 
 	infra.InletsClientImage = os.Getenv("client_image")
 
 	log.Printf("Inlets client: %s\n", infra.GetInletsClientImage())
+	log.Printf("Inlets pro: %v\n", infra.UsePro())
 
 	// set up signals so we handle the first shutdown signal gracefully
 	stopCh := signals.SetupSignalHandler()
@@ -130,7 +108,30 @@ func main() {
 	}
 }
 
-func init() {
-	flag.StringVar(&kubeconfig, "kubeconfig", "", "Path to a kubeconfig. Only required if out-of-cluster.")
-	flag.StringVar(&masterURL, "master", "", "The address of the Kubernetes API server. Overrides any value in kubeconfig. Only required if out-of-cluster.")
+// GetInletsClientImage returns the image for the client-side tunnel
+func (i *InfraConfig) GetInletsClientImage() string {
+	if i.UsePro() {
+		return "alexellis2/inlets-pro:0.4"
+	}
+	if i.InletsClientImage == "" {
+		return "inlets/inlets:2.6.1"
+	}
+
+	return i.InletsClientImage
+}
+
+// GetAccessKey from parameter or file trimming
+// any whitespace found.
+func (i *InfraConfig) GetAccessKey() string {
+	if len(i.AccessKeyFile) > 0 {
+		data, err := ioutil.ReadFile(i.AccessKeyFile)
+
+		if err != nil {
+			log.Fatalln(err)
+		}
+
+		return strings.TrimSpace(string(data))
+	}
+
+	return strings.TrimSpace(i.AccessKey)
 }
