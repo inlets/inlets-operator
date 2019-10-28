@@ -3,3 +3,9 @@ appVersion: "1.0"
 description: inlets-operator for Kubernetes
 name: inlets-operator
 version: 0.1.0
+keywords:
+- networking
+- tunnels
+maintainers:
+- name: alexellis
+  email: alex@openfaas.com
