@@ -134,6 +134,26 @@
   version = "v0.2.0"
 
 [[projects]]
+  digest = "1:b033c6ced464cdb2ec23df0538fda18d26e0ebb840d71f82e114412629775cc2"
+  name = "github.com/scaleway/scaleway-sdk-go"
+  packages = [
+    "api/instance/v1",
+    "api/marketplace/v1",
+    "internal/async",
+    "internal/auth",
+    "internal/errors",
+    "internal/marshaler",
+    "internal/parameter",
+    "internal/uuid",
+    "logger",
+    "namegenerator",
+    "scw",
+  ]
+  pruneopts = "UT"
+  revision = "4633aaad6d18dc4ed101ef6734b989e66183d331"
+  version = "v1.0.0-beta.3"
+
+[[projects]]
   digest = "1:1af58d182e3b1008d25d7ba65ff7c2631a246023d3b814f9ba8c7919aded59f3"
   name = "github.com/sethvargo/go-password"
   packages = ["password"]
@@ -574,6 +594,8 @@
   input-imports = [
     "github.com/digitalocean/godo",
     "github.com/packethost/packngo",
+    "github.com/scaleway/scaleway-sdk-go/api/instance/v1",
+    "github.com/scaleway/scaleway-sdk-go/scw",
     "github.com/sethvargo/go-password/password",
     "golang.org/x/oauth2",
     "k8s.io/api/apps/v1",

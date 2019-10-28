@@ -132,6 +132,9 @@ func NewController(
 					case "packet":
 						provisioner, _ = provision.NewPacketProvisioner(controller.infraConfig.GetAccessKey())
 						break
+					case "scaleway":
+						provisioner, _ = provision.NewScalewayProvisioner(controller.infraConfig.GetAccessKey(), controller.infraConfig.GetSecretKey(), controller.infraConfig.OrganizationID, controller.infraConfig.Region)
+						break
 					}
 
 					if provisioner != nil {
@@ -415,6 +418,24 @@ func (c *Controller) syncHandler(key string) error {
 			}
 
 			id = res.ID
+		} else if c.infraConfig.Provider == "scaleway" {
+			provisioner, _ := provision.NewScalewayProvisioner(c.infraConfig.GetAccessKey(), c.infraConfig.GetSecretKey(), c.infraConfig.OrganizationID, c.infraConfig.Region)
+
+			userData := makeUserdata(tunnel.Spec.AuthToken, c.infraConfig.UsePro(), tunnel.Spec.ServiceName)
+
+			res, err := provisioner.Provision(provision.BasicHost{
+				Name:       tunnel.Name,
+				OS:         "ubuntu-bionic",
+				Plan:       "DEV1-S",
+				Region:     c.infraConfig.Region,
+				UserData:   userData,
+				Additional: map[string]string{},
+			})
+
+			if err != nil {
+				return err
+			}
+			id = res.ID
 		}
 
 		log.Printf("Provisioning call took: %fs\n", time.Since(start).Seconds())
@@ -475,6 +496,30 @@ func (c *Controller) syncHandler(key string) error {
 				return err
 			}
 			if host.Status == "active" {
+
+				if host.IP != "" {
+					err := c.updateTunnelProvisioningStatus(tunnel, "active", host.ID, host.IP)
+					if err != nil {
+						return err
+					}
+
+					err = c.updateService(tunnel, host.IP)
+					if err != nil {
+						log.Printf("Error updating service: %s, %s", tunnel.Spec.ServiceName, err.Error())
+					}
+					if err != nil {
+						return fmt.Errorf("tunnel update error %s", err)
+					}
+				}
+			}
+		} else if c.infraConfig.Provider == "scaleway" {
+			provisioner, _ := provision.NewScalewayProvisioner(c.infraConfig.GetAccessKey(), c.infraConfig.GetSecretKey(), c.infraConfig.OrganizationID, c.infraConfig.Region)
+			host, err := provisioner.Status(tunnel.Status.HostID)
+
+			if err != nil {
+				return err
+			}
+			if host.Status == "running" {
 
 				if host.IP != "" {
 					err := c.updateTunnelProvisioningStatus(tunnel, "active", host.ID, host.IP)
@@ -718,8 +763,7 @@ func makeUserdata(authToken string, usePro bool, remoteTCP string) string {
 		return `#!/bin/bash
 export AUTHTOKEN="` + authToken + `"
 export CONTROLPORT="` + controlPort + `"
-curl -sLS https://get.inlets.dev | sudo sh
-
+curl -sLS https://get.inlets.dev | sh
 curl -sLO https://raw.githubusercontent.com/inlets/inlets/master/hack/inlets-operator.service  && \
 	mv inlets-operator.service /etc/systemd/system/inlets.service && \
 	echo "AUTHTOKEN=$AUTHTOKEN" > /etc/default/inlets && \
@@ -732,11 +776,9 @@ curl -sLO https://raw.githubusercontent.com/inlets/inlets/master/hack/inlets-ope
 export AUTHTOKEN="` + authToken + `"
 export REMOTETCP="` + remoteTCP + `"
 export IP=$(curl -sfSL https://ifconfig.co)
-
 curl -SLsf https://github.com/inlets/inlets-pro-pkg/releases/download/0.4.0/inlets-pro-linux > inlets-pro-linux && \
 chmod +x ./inlets-pro-linux  && \
 mv ./inlets-pro-linux /usr/local/bin/inlets-pro
-
 curl -sLO https://raw.githubusercontent.com/inlets/inlets/master/hack/inlets-pro.service  && \
 	mv inlets-pro.service /etc/systemd/system/inlets-pro.service && \
 	echo "AUTHTOKEN=$AUTHTOKEN" >> /etc/default/inlets-pro && \
