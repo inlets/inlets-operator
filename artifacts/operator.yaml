@@ -20,14 +20,16 @@ spec:
       serviceAccountName: inlets-operator
       containers:
       - name: operator
-        image: inlets/inlets-operator:0.3.2
+        image: inlets/inlets-operator:0.4.0
         imagePullPolicy: Always
         command:
           - ./inlets-operator
           - "-provider=digitalocean"
-          # - "-provider=packet"
-          # - "-project-PACKET-ID"
           - "-access-key-file=/var/secrets/inlets/inlets-access-key"
+          # For Packet users
+          # - "-provider=packet"
+          # For inlets-pro
+          # - "-license=JWT-OBTAINED-FROM-https://github.com/alexellis/inlets-pro-pkg"
         env:
         - name: client_image
           value: inlets/inlets:2.6.1
