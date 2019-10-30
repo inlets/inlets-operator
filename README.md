@@ -39,6 +39,15 @@ Backlog pending:
 
 Inlets tunnels HTTP traffic at L7, so the inlets-operator can be used to tunnel HTTP traffic. A new project I'm working on called [inlets-pro](https://github.com/inlets/inlets-pro-pkg) tunnels any TCP traffic at L4 i.e. Mongo, Redis, NATS, SSH, TLS, whatever you like.
 
+### Related projects
+
+Inlets is [listed on the Cloud Native Landscape](https://landscape.cncf.io/category=service-proxy&format=card-mode&grouping=category&sort=stars) as a Service Proxy
+
+* [inlets](https://github.com/inlets/inlets) - open-source L7 HTTP tunnel and reverse proxy
+* [inlets-pro](https://github.com/inlets/inlets-pro-pkg) - L4 TCP load-balancer
+* [inlets-operator](https://github.com/inlets/inlets-operator) - deep integration for inlets in Kubernetes, expose Service type LoadBalancer
+* [inletsctl](https://github.com/inlets/inletsctl) - CLI tool to provision exit-nodes for use with inlets or inlets-pro
+
 ## Author
 
 inlets and inlets-operator are brought to you by [Alex Ellis](https://twitter.com/alexellisuk). Alex is a [CNCF Ambassador](https://www.cncf.io/people/ambassadors/) and the founder of [OpenFaaS](https://github.com/openfaas/faas/).
