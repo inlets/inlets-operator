@@ -602,6 +602,13 @@ func makeClient(tunnel *inletsv1alpha1.Tunnel, targetPort int32, clientImage str
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      name,
 			Namespace: tunnel.Namespace,
+			OwnerReferences: []metav1.OwnerReference{
+				*metav1.NewControllerRef(tunnel, schema.GroupVersionKind{
+					Group:   inletsv1alpha1.SchemeGroupVersion.Group,
+					Version: inletsv1alpha1.SchemeGroupVersion.Version,
+					Kind:    "Tunnel",
+				}),
+			},
 		},
 		Spec: appsv1.DeploymentSpec{
 			Replicas: &replicas,
@@ -614,13 +621,6 @@ func makeClient(tunnel *inletsv1alpha1.Tunnel, targetPort int32, clientImage str
 				ObjectMeta: metav1.ObjectMeta{
 					Labels: map[string]string{
 						"app.kubernetes.io/name": name,
-					},
-					OwnerReferences: []metav1.OwnerReference{
-						*metav1.NewControllerRef(tunnel, schema.GroupVersionKind{
-							Group:   inletsv1alpha1.SchemeGroupVersion.Group,
-							Version: inletsv1alpha1.SchemeGroupVersion.Version,
-							Kind:    "Tunnel",
-						}),
 					},
 				},
 				Spec: corev1.PodSpec{
