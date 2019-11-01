@@ -77,7 +77,7 @@ func (s *ScalewayProvisioner) Provision(host BasicHost) (*ProvisionedHost, error
 		return nil, err
 	}
 
-	err = s.instanceAPI.ServerActionAndWait(&instance.ServerActionAndWaitRequest{
+	_, err = s.instanceAPI.ServerAction(&instance.ServerActionRequest{
 		ServerID: server.ID,
 		Action:   instance.ServerActionPoweron,
 	})
@@ -148,9 +148,13 @@ func serverToProvisionedHost(server *instance.Server) *ProvisionedHost {
 	if server.PublicIP != nil {
 		ip = server.PublicIP.Address.String()
 	}
+	state := server.State.String()
+	if server.State.String() == "running" {
+		state = "active"
+	}
 	return &ProvisionedHost{
 		ID:     server.ID,
 		IP:     ip,
-		Status: server.State.String(),
+		Status: state,
 	}
 }

@@ -149,11 +149,11 @@ kubectl logs deploy/inlets-operator -n kube-system -f
 
 # Provider Pricing
 
-| Provider                                                           | Price per month | Price per hour |     OS image | CPU | Memory |
-| ------------------------------------------------------------------ | --------------: | -------------: | -----------: | --: | -----: |
-| [Packet](https://www.packet.com/cloud/servers/t1-small/)           |           ~\$51 |         \$0.07 | Ubuntu 16.04 |   4 |    8GB |
-| [Digital Ocean](https://www.digitalocean.com/pricing/#Compute)     |             \$5 |      ~\$0.0068 | Ubuntu 16.04 |   1 |  512MB |
-| [Scaleway](https://www.scaleway.com/en/pricing/#virtual-instances) |           2.99€ |         0.006€ | Ubuntu 18.04 |   2 |    2GB |
+| Provider                                                           | Price per month | Price per hour |     OS image | CPU | Memory | Boot time |
+| ------------------------------------------------------------------ | --------------: | -------------: | -----------: | --: | -----: | --------: |
+| [Packet](https://www.packet.com/cloud/servers/t1-small/)           |           ~\$51 |         \$0.07 | Ubuntu 16.04 |   4 |    8GB | ~45-60s  |
+| [Digital Ocean](https://www.digitalocean.com/pricing/#Compute)     |             \$5 |      ~\$0.0068 | Ubuntu 16.04 |   1 |  512MB | ~20-30s  |
+| [Scaleway](https://www.scaleway.com/en/pricing/#virtual-instances) |           2.99€ |         0.006€ | Ubuntu 18.04 |   2 |    2GB | 3-5m      |
 
 ## Contributing
 
