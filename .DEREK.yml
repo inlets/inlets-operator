@@ -5,6 +5,7 @@ features:
  - dco_check
  - comments
  - pr_description_required
+ - release_notes
 
 custom_messages:
   - name: slack
