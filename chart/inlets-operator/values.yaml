@@ -11,7 +11,7 @@ accessKeyFile: "/var/secrets/inlets/inlets-access-key"
 # Obtain from https://github.com/alexellis/inlets-pro-pkg
 inletsProLicense: ""
 
-image: "inlets/inlets-operator:0.4.0"
+image: "inlets/inlets-operator:0.4.2"
 pullPolicy: "IfNotPresent"
 clientImage: "inlets/inlets:2.6.1"
 
