@@ -137,7 +137,41 @@ spec:
   type: LoadBalancer
 ```
 
-To ignore a service such as `traefik` type in: `kubectl annotate svc/traefik -n kube-system dev.inlets.manage=false`
+## Annotations
+
+### `dev.inlets.manage`
+
+The manage annotation allows you to define if a particular service gets a tunnel and exit node provisioned.
+
+You can annotate the service on your manifest:
+
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: gateway
+  namespace: openfaas
+  labels:
+    app: gateway
+  annotations:
+    dev.inlets.manage: "false"
+spec:
+  ports:
+    - name: http
+      port: 8080
+      protocol: TCP
+      targetPort: 8080
+      nodePort: 31112
+  selector:
+    app: gateway
+  type: LoadBalancer
+```
+
+or after it's creation with:
+
+```
+kubectl annotate svc/gateway -n kube-system dev.inlets.manage=false
+```
 
 ## Monitor/view logs
 
