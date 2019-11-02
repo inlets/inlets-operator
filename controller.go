@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"strconv"
 	"strings"
 	"time"
 
@@ -87,7 +88,8 @@ func NewController(
 	deploymentInformer appsinformers.DeploymentInformer,
 	tunnelInformer informers.TunnelInformer,
 	serviceInformer coreinformers.ServiceInformer,
-	infra *InfraConfig) *Controller {
+	infra *InfraConfig,
+) *Controller {
 
 	// Create event broadcaster
 	// Add sample-controller types to the default Kubernetes Scheme so Events can be
@@ -323,7 +325,7 @@ func (c *Controller) syncHandler(key string) error {
 			found, err := tunnels.Get(name, ops)
 
 			if errors.IsNotFound(err) {
-				if manageService(*service) {
+				if manageService(*c, *service) {
 					pwdRes, pwdErr := password.Generate(64, 10, 0, false, true)
 					if pwdErr != nil {
 						log.Fatalf("Error generating password for inlets server %s", pwdErr.Error())
@@ -357,7 +359,7 @@ func (c *Controller) syncHandler(key string) error {
 			} else {
 				log.Printf("Tunnel exists: %s\n", found.Name)
 
-				if manageService(*service) == false {
+				if manageService(*c, *service) == false {
 					log.Printf("Removing tunnel: %s\n", found.Name)
 
 					err := tunnels.Delete(found.Name, &metav1.DeleteOptions{})
@@ -805,12 +807,16 @@ curl -sLO https://raw.githubusercontent.com/inlets/inlets/master/hack/inlets-pro
 	systemctl enable inlets-pro`
 }
 
-func manageService(service corev1.Service) bool {
+func manageService(controller Controller, service corev1.Service) bool {
 	annotations := service.Annotations
-	if v, ok := annotations["dev.inlets.manage"]; ok && v == "false" {
-		return false
+
+	value, ok := annotations["dev.inlets.manage"]
+	if ok {
+		valueBool, _ := strconv.ParseBool(value)
+		return valueBool
 	}
-	return true
+
+	return !controller.infraConfig.AnnotatedOnly
 }
 
 func getPortsString(service *corev1.Service) string {

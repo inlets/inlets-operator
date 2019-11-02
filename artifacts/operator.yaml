@@ -24,6 +24,7 @@ spec:
         imagePullPolicy: Always
         command:
           - ./inlets-operator
+          # - "-annotated-only"
           - "-provider=digitalocean"
           - "-access-key-file=/var/secrets/inlets/inlets-access-key"
           # For Packet users

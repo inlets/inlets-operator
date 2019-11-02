@@ -38,6 +38,7 @@ type InfraConfig struct {
 	SecretKeyFile     string
 	ProjectID         string
 	InletsClientImage string
+	AnnotatedOnly     bool
 	ProConfig         InletsProConfig
 }
 
@@ -68,6 +69,7 @@ func main() {
 	flag.StringVar(&infra.OrganizationID, "organization-id", "", "The organization id if using Scaleway as the provider")
 	flag.StringVar(&infra.ProjectID, "project-id", "", "The project ID if using Packet.com as the provider")
 	flag.StringVar(&infra.ProConfig.License, "license", "", "Supply a license for use with inlets-pro")
+	flag.BoolVar(&infra.AnnotatedOnly, "annotated-only", false, "Only create a tunnel for annotated services. Annotate with dev.inlets.manage=true.")
 
 	flag.Parse()
 
