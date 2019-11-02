@@ -137,7 +137,14 @@ spec:
   type: LoadBalancer
 ```
 
+## Annotations
+
+By default the operator will create a tunnel for every loadbalancer service.
+
 To ignore a service such as `traefik` type in: `kubectl annotate svc/traefik -n kube-system dev.inlets.manage=false`
+
+You can also set the operator to ignore the services by default and only manage them when the annotation is true. `dev.inlets.manage=true`
+To do this, run the operator with the flag `-annotated-only`
 
 ## Monitor/view logs
 

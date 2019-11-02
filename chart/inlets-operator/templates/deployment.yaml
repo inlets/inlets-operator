@@ -26,6 +26,9 @@ spec:
         imagePullPolicy: {{ .Values.pullPolicy }}
         command:
         - ./inlets-operator
+        {{- if .Value.annotatedOnly }}
+        - "-annotated-only"
+        {{- end }}
         - "-provider={{.Values.provider}}"
         - "-access-key-file={{.Values.accessKeyFile}}"
         - "-license={{.Values.inletsProLicense}}"
