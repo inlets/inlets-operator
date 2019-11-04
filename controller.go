@@ -474,10 +474,10 @@ func (c *Controller) syncHandler(key string) error {
 				fmt.Println(err)
 			}
 
-			if host.Status == "active" {
+			if host.Status == provision.ActiveStatus {
 				log.Printf("Device %s is now active\n", tunnel.Spec.ServiceName)
 
-				err := c.updateTunnelProvisioningStatus(tunnel, "active", host.ID, host.IP)
+				err := c.updateTunnelProvisioningStatus(tunnel, provision.ActiveStatus, host.ID, host.IP)
 				if err != nil {
 					log.Printf("Error updating tunnel status: %s, %s", tunnel.Name, err.Error())
 				}
@@ -500,10 +500,10 @@ func (c *Controller) syncHandler(key string) error {
 			if err != nil {
 				return err
 			}
-			if host.Status == "active" {
+			if host.Status == provision.ActiveStatus {
 
 				if host.IP != "" {
-					err := c.updateTunnelProvisioningStatus(tunnel, "active", host.ID, host.IP)
+					err := c.updateTunnelProvisioningStatus(tunnel, provision.ActiveStatus, host.ID, host.IP)
 					if err != nil {
 						return err
 					}
@@ -522,10 +522,10 @@ func (c *Controller) syncHandler(key string) error {
 			if err != nil {
 				return err
 			}
-			if host.Status == "running" {
+			if host.Status == provision.ActiveStatus {
 
 				if host.IP != "" {
-					err := c.updateTunnelProvisioningStatus(tunnel, "active", host.ID, host.IP)
+					err := c.updateTunnelProvisioningStatus(tunnel, provision.ActiveStatus, host.ID, host.IP)
 					if err != nil {
 						return err
 					}
@@ -540,7 +540,7 @@ func (c *Controller) syncHandler(key string) error {
 		}
 
 		break
-	case "active":
+	case provision.ActiveStatus:
 		if tunnel.Spec.ClientDeploymentRef == nil {
 			get := metav1.GetOptions{}
 			service, getServiceErr := c.kubeclientset.CoreV1().Services(tunnel.Namespace).Get(tunnel.Spec.ServiceName, get)

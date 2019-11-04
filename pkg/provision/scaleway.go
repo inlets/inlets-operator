@@ -148,10 +148,12 @@ func serverToProvisionedHost(server *instance.Server) *ProvisionedHost {
 	if server.PublicIP != nil {
 		ip = server.PublicIP.Address.String()
 	}
+
 	state := server.State.String()
 	if server.State.String() == "running" {
-		state = "active"
+		state = ActiveStatus
 	}
+
 	return &ProvisionedHost{
 		ID:     server.ID,
 		IP:     ip,

@@ -6,6 +6,8 @@ type Provisioner interface {
 	Delete(id string) error
 }
 
+const ActiveStatus = "active"
+
 type ProvisionedHost struct {
 	IP     string
 	ID     string
