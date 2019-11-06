@@ -20,7 +20,7 @@ spec:
       serviceAccountName: inlets-operator
       containers:
       - name: operator
-        image: inlets/inlets-operator:0.4.2
+        image: inlets/inlets-operator:0.4.4
         imagePullPolicy: Always
         command:
           - ./inlets-operator
