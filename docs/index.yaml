@@ -3,7 +3,22 @@ entries:
   inlets-operator:
   - apiVersion: v1
     appVersion: "1.0"
-    created: "2019-11-12T15:14:51.780228Z"
+    created: "2019-11-12T19:50:18.999241Z"
+    description: inlets-operator for Kubernetes
+    digest: 273cfd4c9693b2fd3afd996fffe28ce692d8dedee79945c41fec6c80e305b3f8
+    keywords:
+    - networking
+    - tunnels
+    maintainers:
+    - email: alex@openfaas.com
+      name: alexellis
+    name: inlets-operator
+    urls:
+    - https://inlets.github.io/inlets-operator/inlets-operator-0.4.0.tgz
+    version: 0.4.0
+  - apiVersion: v1
+    appVersion: "1.0"
+    created: "2019-11-12T19:50:18.998139Z"
     description: inlets-operator for Kubernetes
     digest: 8a310596376bc28d5a8db6266a3e81c472d38f48098bcdcbc8767148172da865
     keywords:
@@ -18,7 +33,7 @@ entries:
     version: 0.3.0
   - apiVersion: v1
     appVersion: "1.0"
-    created: "2019-11-12T15:14:51.779961Z"
+    created: "2019-11-12T19:50:18.997913Z"
     description: inlets-operator for Kubernetes
     digest: d791fb91ad798db18b0599667a3aeed12cfc447f6ea8927d9f615fb3cd0aaba7
     keywords:
@@ -33,7 +48,7 @@ entries:
     version: 0.2.2
   - apiVersion: v1
     appVersion: "1.0"
-    created: "2019-11-12T15:14:51.779637Z"
+    created: "2019-11-12T19:50:18.997653Z"
     description: inlets-operator for Kubernetes
     digest: 9efb95b737e557511d94ee2f3c51c4b5a5d814e4319c535604a71f9b0c8bbb7a
     keywords:
@@ -48,7 +63,7 @@ entries:
     version: 0.2.1
   - apiVersion: v1
     appVersion: "1.0"
-    created: "2019-11-12T15:14:51.778808Z"
+    created: "2019-11-12T19:50:18.997102Z"
     description: inlets-operator for Kubernetes
     digest: 852394fd543e0b079910cbf1ed57e950cb33ed966b974e3a218c1d702eb3e79f
     keywords:
@@ -63,7 +78,7 @@ entries:
     version: 0.2.0
   - apiVersion: v1
     appVersion: "1.0"
-    created: "2019-11-12T15:14:51.777412Z"
+    created: "2019-11-12T19:50:18.99688Z"
     description: inlets-operator for Kubernetes
     digest: 1775dffd2c699b1028eaaf6082274f8c402ca5ecece2f87eb440623ede5a5433
     keywords:
@@ -76,4 +91,4 @@ entries:
     urls:
     - https://inlets.github.io/inlets-operator/inlets-operator-0.1.0.tgz
     version: 0.1.0
-generated: "2019-11-12T15:14:51.774807Z"
+generated: "2019-11-12T19:50:18.996316Z"
