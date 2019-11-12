@@ -123,6 +123,9 @@ func NewController(
 		},
 		DeleteFunc: func(old interface{}) {
 			r, ok := checkCustomResourceType(old)
+
+			log.Println("Delete event:", r.Name, r.Namespace, r.OwnerReferences)
+
 			if ok {
 				if len(r.Status.HostID) > 0 {
 					var provisioner provision.Provisioner
@@ -153,6 +156,7 @@ func NewController(
 					}
 				}
 			}
+
 		},
 	})
 
@@ -342,9 +346,9 @@ func (c *Controller) syncHandler(key string) error {
 							Namespace: service.ObjectMeta.Namespace,
 							OwnerReferences: []metav1.OwnerReference{
 								*metav1.NewControllerRef(service, schema.GroupVersionKind{
-									Group:   inletsv1alpha1.SchemeGroupVersion.Group,
-									Version: inletsv1alpha1.SchemeGroupVersion.Version,
-									Kind:    "Tunnel",
+									Group:   "",
+									Version: "v1",
+									Kind:    "Service",
 								}),
 							},
 						},
