@@ -26,7 +26,7 @@ spec:
         imagePullPolicy: {{ .Values.pullPolicy }}
         command:
         - ./inlets-operator
-        {{- if .Value.annotatedOnly }}
+        {{- if .Values.annotatedOnly }}
         - "-annotated-only"
         {{- end }}
         - "-provider={{.Values.provider}}"
