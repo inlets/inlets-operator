@@ -1,5 +1,7 @@
 # inlets-operator
 
+[![Build Status](https://travis-ci.org/inlets/inlets-operator.svg?branch=master)](https://travis-ci.org/inlets/inlets-operator)
+
 Get a Kubernetes LoadBalancer where you never thought it was possible.
 
 In cloud-based [Kubernetes](https://kubernetes.io/) solutions, Services can be exposed as type "LoadBalancer" and your cloud provider will provision a LoadBalancer and start routing traffic, in another word: you get ingress to your service.
