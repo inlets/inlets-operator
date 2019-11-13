@@ -23,6 +23,7 @@ Backlog completed:
 - [x] Provision VMs/exit-nodes on public cloud
 - [x] Provision to [Packet.com](https://packet.com)
 - [x] Provision to DigitalOcean
+- [x] Provision to Scaleway
 - [x] Automatically update Service type LoadBalancer with a public IP
 - [x] Tunnel L7 `http` traffic
 - [x] In-cluster Role, Dockerfile and YAML files
@@ -31,16 +32,15 @@ Backlog completed:
 - [x] Ignore Services with `dev.inlets.manage: false` annotation
 - [x] Garbage collect hosts when Service or CRD is deleted
 - [x] CI with Travis (use openfaas-incubator/openfaas-operator as a sample)
-- [x] Provision to Scaleway
+- [x] Automate [`inlets-pro`](https://github.com/inlets/inlets-pro-pkg) for TCP traffic
 
 Backlog pending:
 
 - [ ] Automate `wss://` for control-port using self-signed certs or LetsEncrypt and nip.io
-- [ ] Move control-port and `/tunnel` endpoint to high port i.e. `31111`
+- [ ] Move control-port and `/tunnel` endpoint to high port i.e. `31111` and make it configurable in the helm chart
 - [ ] Provision to AWS EC2
 - [ ] Provision to GCP
-
-- [ ] Automate [`inlets-pro`](https://github.com/inlets/inlets-pro-pkg) for TCP traffic
+- [ ] Provision to Civo
 
 Inlets tunnels HTTP traffic at L7, so the inlets-operator can be used to tunnel HTTP traffic. A new project I'm working on called [inlets-pro](https://github.com/inlets/inlets-pro-pkg) tunnels any TCP traffic at L4 i.e. Mongo, Redis, NATS, SSH, TLS, whatever you like.
 
