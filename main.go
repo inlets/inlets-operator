@@ -47,7 +47,8 @@ func (i InfraConfig) UsePro() bool {
 }
 
 type InletsProConfig struct {
-	License string
+	License     string
+	ClientImage string
 }
 
 func init() {
@@ -69,6 +70,8 @@ func main() {
 	flag.StringVar(&infra.OrganizationID, "organization-id", "", "The organization id if using Scaleway as the provider")
 	flag.StringVar(&infra.ProjectID, "project-id", "", "The project ID if using Packet.com as the provider")
 	flag.StringVar(&infra.ProConfig.License, "license", "", "Supply a license for use with inlets-pro")
+	flag.StringVar(&infra.ProConfig.ClientImage, "pro-client-image", "", "Supply a Docker image for the inlets-pro client")
+
 	flag.BoolVar(&infra.AnnotatedOnly, "annotated-only", false, "Only create a tunnel for annotated services. Annotate with dev.inlets.manage=true.")
 
 	flag.Parse()
@@ -118,6 +121,10 @@ func main() {
 // GetInletsClientImage returns the image for the client-side tunnel
 func (i *InfraConfig) GetInletsClientImage() string {
 	if i.UsePro() {
+		if len(i.ProConfig.ClientImage) > 0 {
+			return i.ProConfig.ClientImage
+		}
+
 		return "alexellis2/inlets-pro:0.4"
 	}
 	if i.InletsClientImage == "" {
