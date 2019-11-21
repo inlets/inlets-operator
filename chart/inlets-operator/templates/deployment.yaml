@@ -36,6 +36,9 @@ spec:
         {{- if .Values.packetProjectId }}
         - "-region={{.Values.packetProjectId}}"
         {{- end }}
+        {{- if .Values.proClientImage }}
+        - "-pro-client-image={{.Values.proClientImage}}"
+        {{- end }}
         resources:
           {{- toYaml .Values.resources | nindent 12 }}
         env:

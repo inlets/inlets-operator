@@ -13,9 +13,10 @@ inletsProLicense: ""
 
 annotatedOnly: false
 
-image: "inlets/inlets-operator:0.5.0"
+image: "inlets/inlets-operator:0.5.2"
 pullPolicy: "IfNotPresent"
 clientImage: "inlets/inlets:2.6.1"
+proClientImage: "alexellis2/inlets-pro:0.4"
 
 nameOverride: ""
 fullnameOverride: ""
