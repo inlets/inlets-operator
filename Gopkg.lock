@@ -9,6 +9,14 @@
   revision = "782f4967f2dc4564575ca782fe2d04090b5faca8"
 
 [[projects]]
+  digest = "1:5bd74021baf638b4e3493a6832c89ee554058154d17e14d2f5a5345013f5f703"
+  name = "github.com/digitalocean/godo"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "2a154f748812b9414534b84f082cee6ec3b4c8ab"
+  version = "v1.27.0"
+
+[[projects]]
   digest = "1:36a5ff9459163d104f2af9776c8db63f3eb4339f527a00a9835c8d562eb116ba"
   name = "github.com/evanphx/json-patch"
   packages = ["."]
@@ -49,6 +57,14 @@
   version = "v1.1.0"
 
 [[projects]]
+  digest = "1:a63cff6b5d8b95638bfe300385d93b2a6d9d687734b863da8e09dc834510a690"
+  name = "github.com/google/go-querystring"
+  packages = ["query"]
+  pruneopts = "UT"
+  revision = "44c6ddd0a2342c386950e880b658017258da92fc"
+  version = "v1.0.0"
+
+[[projects]]
   digest = "1:3ee90c0d94da31b442dde97c99635aaafec68d0b8a3c12ee2075c6bdabeec6bb"
   name = "github.com/google/gofuzz"
   packages = ["."]
@@ -86,6 +102,14 @@
   version = "v0.3.5"
 
 [[projects]]
+  digest = "1:323e8b7050b74cc428c3d9fec6f6fd4b9db5a3d6f03a186b38bb42446235317c"
+  name = "github.com/inlets/inletsctl"
+  packages = ["pkg/provision"]
+  pruneopts = "UT"
+  revision = "1b1eb6ccb2190cfd17346ddf1f093e0377987ef9"
+  version = "0.3.0"
+
+[[projects]]
   digest = "1:eaefc85d32c03e5f0c2b88ea2f79fce3d993e2c78316d21319575dd4ea9153ca"
   name = "github.com/json-iterator/go"
   packages = ["."]
@@ -108,6 +132,34 @@
   pruneopts = "UT"
   revision = "94122c33edd36123c84d5368cfb2b69df93a0ec8"
   version = "v1.0.1"
+
+[[projects]]
+  digest = "1:4294e1911f1ea747ee11f6772a118c4b33efcf49e83837318c1123c18961dccf"
+  name = "github.com/packethost/packngo"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "02a3ebac54fcfe6297c72ddfb68f8144f31c47b4"
+  version = "v0.2.0"
+
+[[projects]]
+  digest = "1:de3fd970da3e0fb0d77db37112da9ecd2e96b70505ddc4e9123303a4bfd1155c"
+  name = "github.com/scaleway/scaleway-sdk-go"
+  packages = [
+    "api/instance/v1",
+    "api/marketplace/v1",
+    "internal/async",
+    "internal/auth",
+    "internal/errors",
+    "internal/marshaler",
+    "internal/parameter",
+    "internal/uuid",
+    "logger",
+    "namegenerator",
+    "scw",
+  ]
+  pruneopts = "UT"
+  revision = "0a62912ef11a57001d90cc54678b99694a8b466c"
+  version = "v1.0.0-beta.4"
 
 [[projects]]
   digest = "1:1af58d182e3b1008d25d7ba65ff7c2631a246023d3b814f9ba8c7919aded59f3"
@@ -134,10 +186,11 @@
 
 [[projects]]
   branch = "release-branch.go1.12"
-  digest = "1:55a792c4b3c86e3f3047ee88287348d1b6c4e01b1c6bd961f048a41b07a870e2"
+  digest = "1:0603797596a4354eb70375de29e843571185a049dd0cc57881a8d333f4a09a00"
   name = "golang.org/x/net"
   packages = [
     "context",
+    "context/ctxhttp",
     "http/httpguts",
     "http2",
     "http2/hpack",
@@ -147,14 +200,15 @@
   revision = "cdfb69ac37fc6fa907650654115ebebb3aae2087"
 
 [[projects]]
-  digest = "1:9359217acc6040b4be710ce34473acef28023ad39bfafecea34ffaea7f1e1890"
+  branch = "master"
+  digest = "1:8d1c112fb1679fa097e9a9255a786ee47383fa2549a3da71bcb1334a693ebcfe"
   name = "golang.org/x/oauth2"
   packages = [
     ".",
     "internal",
   ]
   pruneopts = "UT"
-  revision = "a6bd8cefa1811bd24b86f8902872e4e8225f74c4"
+  revision = "5d9234df094ce600ff541158d1491aa10d078a47"
 
 [[projects]]
   digest = "1:e1a85d3648114c446b2874647bf30f646a8594e7e4e45db87fe962aba60e51f5"
@@ -511,6 +565,7 @@
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
+    "github.com/inlets/inletsctl/pkg/provision",
     "github.com/sethvargo/go-password/password",
     "k8s.io/api/apps/v1",
     "k8s.io/api/core/v1",
