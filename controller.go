@@ -1,3 +1,6 @@
+// Copyright (c) Inlets Author(s) 2019. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 package main
 
 import (
@@ -28,7 +31,7 @@ import (
 	"k8s.io/client-go/util/workqueue"
 	"k8s.io/klog"
 
-	provision "github.com/inlets/inlets-operator/pkg/provision"
+	provision "github.com/inlets/inletsctl/pkg/provision"
 
 	inletsv1alpha1 "github.com/inlets/inlets-operator/pkg/apis/inletsoperator/v1alpha1"
 	clientset "github.com/inlets/inlets-operator/pkg/generated/clientset/versioned"

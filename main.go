@@ -121,12 +121,12 @@ func main() {
 // GetInletsClientImage returns the image for the client-side tunnel
 func (i *InfraConfig) GetInletsClientImage() string {
 	if i.UsePro() {
-		if len(i.ProConfig.ClientImage) > 0 {
-			return i.ProConfig.ClientImage
+		if i.ProConfig.ClientImage == "" {
+			return "alexellis2/inlets-pro:0.4"
 		}
-
-		return "alexellis2/inlets-pro:0.4"
+		return i.ProConfig.ClientImage
 	}
+
 	if i.InletsClientImage == "" {
 		return "inlets/inlets:2.6.1"
 	}

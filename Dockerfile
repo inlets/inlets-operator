@@ -9,6 +9,7 @@ COPY . .
 ARG OPTS
 
 RUN gofmt -l -d $(find . -type f -name '*.go' -not -path "./vendor/*") && \
+  go test -v ./ && \
   VERSION=$(git describe --all --exact-match `git rev-parse HEAD` | grep tags | sed 's/tags\///') && \
   GIT_COMMIT=$(git rev-list -1 HEAD) && \
   env ${OPTS} CGO_ENABLED=0 GOOS=linux go build -ldflags "-s -w \
