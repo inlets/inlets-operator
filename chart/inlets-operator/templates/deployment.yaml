@@ -33,6 +33,10 @@ spec:
         - "-access-key-file={{.Values.accessKeyFile}}"
         - "-license={{.Values.inletsProLicense}}"
         - "-region={{.Values.region}}"
+        {{- if .Values.gceProjectId }}
+        - "-zone={{.Values.zone}}"
+        - "-project-id={{.Values.gceProjectId}}"
+        {{- end }}
         {{- if .Values.packetProjectId }}
         - "-region={{.Values.packetProjectId}}"
         {{- end }}

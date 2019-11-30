@@ -3,6 +3,10 @@ replicaCount: 1
 provider: "digitalocean"
 region: "lon1"
 
+# provider: "gce"
+# zone: "us-central1-a"
+# gceProjectId: "<Your GCP Project ID>"
+
 #provider: "packet"
 #region: "ams1"
 # packetProjectId: "project-id"
