@@ -35,9 +35,11 @@ Parameter | Description | Default
 ---                             | ---                                                                     | ---
 `image`                 | Docker image for the Inlets Operator                                            | `inlets/inlets-operator:0.4.2`
 `clientImage`           | Docker image for the inlets client                                              | `inlets/inlets:2.6.3`
-`provider`              | Your infrastructure provider - 'packet' or 'digitalocean'                       | `""`
+`provider`              | Your infrastructure provider - 'packet' or 'digitalocean' or 'gce'                       | `""`
 `region`                | The region to provision hosts into                                              | `""`
+`zone`                  | The zone where the exit node is to be provisioned (Used when Google Compute Engine is used as provider) | `us-central1-a`
 `accessKeyFile`         | Read the access key for your infrastructure provider from a file (recommended)  | `/var/secrets/inlets/inlets-access-key`
+`gceProjectId`          | The project ID if using Google Compute Engine as the provider                   | `""`
 `packetProjectId`       | The project ID if using Packet.com as the provider                              | `""`
 `annotatedOnly`         | Only create a tunnel for annotated services.                                    | `false`
 `inletsProLicense`      | License for use with inlets-pro                                                 | `""`

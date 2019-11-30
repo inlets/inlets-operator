@@ -143,6 +143,9 @@ func NewController(
 					case "scaleway":
 						provisioner, _ = provision.NewScalewayProvisioner(controller.infraConfig.GetAccessKey(), controller.infraConfig.GetSecretKey(), controller.infraConfig.OrganizationID, controller.infraConfig.Region)
 						break
+					case "gce":
+						provisioner, _ = provision.NewGCEProvisioner(controller.infraConfig.GetAccessKey())
+						break
 					}
 
 					if provisioner != nil {
@@ -440,6 +443,7 @@ func (c *Controller) syncHandler(key string) error {
 			}
 
 			id = res.ID
+
 		} else if c.infraConfig.Provider == "scaleway" {
 			provisioner, _ := provision.NewScalewayProvisioner(c.infraConfig.GetAccessKey(), c.infraConfig.GetSecretKey(), c.infraConfig.OrganizationID, c.infraConfig.Region)
 
@@ -452,6 +456,36 @@ func (c *Controller) syncHandler(key string) error {
 				Region:     c.infraConfig.Region,
 				UserData:   userData,
 				Additional: map[string]string{},
+			})
+
+			if err != nil {
+				return err
+			}
+			id = res.ID
+
+		} else if c.infraConfig.Provider == "gce" {
+			provisioner, _ := provision.NewGCEProvisioner(c.infraConfig.GetAccessKey())
+
+			userData := makeUserdata(tunnel.Spec.AuthToken, c.infraConfig.UsePro(), tunnel.Spec.ServiceName)
+
+			firewallRuleName := "inlets"
+			inletsPort := inletsControlPort
+
+			if c.infraConfig.UsePro() {
+				inletsPort = inletsProControlPort
+			}
+
+			res, err := provisioner.Provision(provision.BasicHost{
+				Name:     tunnel.Name,
+				OS:       "projects/debian-cloud/global/images/debian-9-stretch-v20191121",
+				Plan:     "f1-micro",
+				UserData: userData,
+				Additional: map[string]string{
+					"projectid":     c.infraConfig.ProjectID,
+					"zone":          c.infraConfig.Zone,
+					"firewall-name": firewallRuleName,
+					"firewall-port": strconv.Itoa(inletsPort),
+				},
 			})
 
 			if err != nil {
@@ -529,6 +563,7 @@ func (c *Controller) syncHandler(key string) error {
 					}
 				}
 			}
+
 		} else if c.infraConfig.Provider == "scaleway" {
 			provisioner, _ := provision.NewScalewayProvisioner(c.infraConfig.GetAccessKey(), c.infraConfig.GetSecretKey(), c.infraConfig.OrganizationID, c.infraConfig.Region)
 			host, err := provisioner.Status(tunnel.Status.HostID)
@@ -538,6 +573,29 @@ func (c *Controller) syncHandler(key string) error {
 			}
 			if host.Status == provision.ActiveStatus {
 
+				if host.IP != "" {
+					err := c.updateTunnelProvisioningStatus(tunnel, provision.ActiveStatus, host.ID, host.IP)
+					if err != nil {
+						return err
+					}
+
+					err = c.updateService(tunnel, host.IP)
+					if err != nil {
+						log.Printf("Error updating service: %s, %s", tunnel.Spec.ServiceName, err.Error())
+						return fmt.Errorf("tunnel update error %s", err)
+					}
+				}
+			}
+
+		} else if c.infraConfig.Provider == "gce" {
+			provisioner, _ := provision.NewGCEProvisioner(c.infraConfig.GetAccessKey())
+			host, err := provisioner.Status(tunnel.Status.HostID)
+
+			if err != nil {
+				return err
+			}
+
+			if host.Status == provision.ActiveStatus {
 				if host.IP != "" {
 					err := c.updateTunnelProvisioningStatus(tunnel, provision.ActiveStatus, host.ID, host.IP)
 					if err != nil {

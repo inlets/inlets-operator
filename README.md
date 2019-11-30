@@ -24,6 +24,7 @@ Backlog completed:
 - [x] Provision to [Packet.com](https://packet.com)
 - [x] Provision to DigitalOcean
 - [x] Provision to Scaleway
+- [x] Provision to GCP
 - [x] Automatically update Service type LoadBalancer with a public IP
 - [x] Tunnel L7 `http` traffic
 - [x] In-cluster Role, Dockerfile and YAML files
@@ -39,7 +40,6 @@ Backlog pending:
 - [ ] Automate `wss://` for control-port using self-signed certs or LetsEncrypt and nip.io
 - [ ] Move control-port and `/tunnel` endpoint to high port i.e. `31111` and make it configurable in the helm chart
 - [ ] Provision to AWS EC2
-- [ ] Provision to GCP
 - [ ] Provision to Civo
 
 Inlets tunnels HTTP traffic at L7, so the inlets-operator can be used to tunnel HTTP traffic. A new project I'm working on called [inlets-pro](https://github.com/inlets/inlets-pro-pkg) tunnels any TCP traffic at L4 i.e. Mongo, Redis, NATS, SSH, TLS, whatever you like.
@@ -92,6 +92,49 @@ kubectl apply -f ./artifacts/operator-rbac.yaml
 kubectl apply -f ./artifacts/operator.yaml
 ```
 
+## Running in-cluster, using Google Compute Engine for the exit node using helm
+
+> Note: this example is now multi-arch, so it's valid for `x86_64`, `ARMHF`, and `ARM64`.
+
+If you do not have helm installed and configured follow the instructions [here](https://github.com/openfaas/faas-netes/blob/master/HELM.md)
+
+It is assumed that you have gcloud installed and configured on your machine.
+If not, then follow the instructions [here](https://cloud.google.com/sdk/docs/quickstarts)
+
+```sh
+
+# Get current projectID
+export PROJECTID=$(gcloud config get-value core/project 2>/dev/null)
+
+# Create a service account
+export SERVICEACCOUNT=$(gcloud iam service-accounts list | grep inlets | awk '{print $2}')
+
+# Assign appropriate roles to inlets service account
+gcloud projects add-iam-policy-binding $PROJECTID \
+--member serviceAccount:$SERVICEACCOUNT \
+--role roles/compute.admin
+
+gcloud projects add-iam-policy-binding $PROJECTID \
+--member serviceAccount:$SERVICEACCOUNT \
+--role roles/iam.serviceAccountUser
+
+# Create inlets service account key file
+gcloud iam service-accounts keys create key.json \
+--iam-account $SERVICEACCOUNT
+
+# Create a secret to store the service account key file
+kubectl create secret generic inlets-access-key --from-file=inlets-access-key=key.json
+
+# Add and update the inlets-operator helm repo
+helm repo add inlets https://inlets.github.io/inlets-operator/
+
+helm repo update
+
+# Install inlets-operator with the required fields
+helm upgrade inlets-operator --install inlets/inlets-operator \
+  --set provider=gce,zone=us-central1-a,gceProjectId=$PROJECTID
+
+```
 ## Running on a Raspberry Pi
 
 Use the same commands as described in the section above.
@@ -160,9 +203,12 @@ kubectl logs deploy/inlets-operator -n kube-system -f
 
 | Provider                                                           | Price per month | Price per hour |     OS image | CPU | Memory | Boot time |
 | ------------------------------------------------------------------ | --------------: | -------------: | -----------: | --: | -----: | --------: |
+| [Google Compute Engine]()                                          |         *  ~\$4.28 |       ~\$0.006 | Debian GNU Linux 9 (stretch) | 1 | 614MB | ~3-15s |
 | [Packet](https://www.packet.com/cloud/servers/t1-small/)           |           ~\$51 |         \$0.07 | Ubuntu 16.04 |   4 |    8GB | ~45-60s  |
 | [Digital Ocean](https://www.digitalocean.com/pricing/#Compute)     |             \$5 |      ~\$0.0068 | Ubuntu 16.04 |   1 |  512MB | ~20-30s  |
 | [Scaleway](https://www.scaleway.com/en/pricing/#virtual-instances) |           2.99€ |         0.006€ | Ubuntu 18.04 |   2 |    2GB | 3-5m      |
+
+### * The first f1-micro instance in a GCP Project (the default instance type for inlets-operator) is free for 720hrs(30 days) a month 
 
 ## Contributing
 
