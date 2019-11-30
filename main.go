@@ -122,13 +122,13 @@ func main() {
 func (i *InfraConfig) GetInletsClientImage() string {
 	if i.UsePro() {
 		if i.ProConfig.ClientImage == "" {
-			return "alexellis2/inlets-pro:0.4"
+			return "alexellis2/inlets-pro:0.4.3"
 		}
 		return i.ProConfig.ClientImage
 	}
 
 	if i.InletsClientImage == "" {
-		return "inlets/inlets:2.6.1"
+		return "inlets/inlets:2.6.3"
 	}
 
 	return i.InletsClientImage

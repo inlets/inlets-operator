@@ -33,7 +33,7 @@ spec:
           # - "-license=JWT-OBTAINED-FROM-https://github.com/alexellis/inlets-pro-pkg"
         env:
         - name: client_image
-          value: inlets/inlets:2.6.1
+          value: inlets/inlets:2.6.3
         resources:
           limits:
             memory: 128Mi

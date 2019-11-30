@@ -34,7 +34,7 @@ and can be overwritten via the helm `--set` flag.
 Parameter | Description | Default
 ---                             | ---                                                                     | ---
 `image`                 | Docker image for the Inlets Operator                                            | `inlets/inlets-operator:0.4.2`
-`clientImage`           | Docker image for the inlets client                                              | `inlets/inlets:2.6.1`
+`clientImage`           | Docker image for the inlets client                                              | `inlets/inlets:2.6.3`
 `provider`              | Your infrastructure provider - 'packet' or 'digitalocean'                       | `""`
 `region`                | The region to provision hosts into                                              | `""`
 `accessKeyFile`         | Read the access key for your infrastructure provider from a file (recommended)  | `/var/secrets/inlets/inlets-access-key`
