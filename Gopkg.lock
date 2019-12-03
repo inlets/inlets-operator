@@ -73,14 +73,6 @@
   version = "v1.0.0"
 
 [[projects]]
-  digest = "1:a63cff6b5d8b95638bfe300385d93b2a6d9d687734b863da8e09dc834510a690"
-  name = "github.com/google/go-querystring"
-  packages = ["query"]
-  pruneopts = "UT"
-  revision = "44c6ddd0a2342c386950e880b658017258da92fc"
-  version = "v1.0.0"
-
-[[projects]]
   digest = "1:3ee90c0d94da31b442dde97c99635aaafec68d0b8a3c12ee2075c6bdabeec6bb"
   name = "github.com/google/gofuzz"
   packages = ["."]
@@ -126,12 +118,12 @@
   version = "v0.3.5"
 
 [[projects]]
-  digest = "1:b3d4506610922cf958f20e8ed0a1ac27ff6e1191cdabd0438f7484291e0a7579"
+  digest = "1:bcbe16508a308cebecf0cb9dc5d9dba35cb0821ddd614dcedfe34ccd1d06073d"
   name = "github.com/inlets/inletsctl"
   packages = ["pkg/provision"]
   pruneopts = "UT"
-  revision = "3bf1b42d0e76176e5818b82ea5799474fd1a388b"
-  version = "0.3.3"
+  revision = "c0b25dd347dff9dcef9ac4c676c4aef43010182c"
+  version = "0.3.4"
 
 [[projects]]
   digest = "1:eaefc85d32c03e5f0c2b88ea2f79fce3d993e2c78316d21319575dd4ea9153ca"

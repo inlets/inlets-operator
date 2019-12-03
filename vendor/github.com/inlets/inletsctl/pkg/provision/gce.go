@@ -32,7 +32,7 @@ func (gce *GCEProvisioner) Provision(host BasicHost) (*ProvisionedHost, error) {
 		Description:  "Exit node created by inlets-operator",
 		MachineType:  fmt.Sprintf("zones/%s/machineTypes/%s", host.Additional["zone"], host.Plan),
 		CanIpForward: true,
-		Zone:         fmt.Sprintf("projects/%s/zones/us-central1-a", host.Additional["projectid"]),
+		Zone:         fmt.Sprintf("projects/%s/zones/%s", host.Additional["projectid"], host.Additional["zone"]),
 		Disks: []*compute.AttachedDisk{
 			{
 				AutoDelete: true,
