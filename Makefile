@@ -1,37 +1,55 @@
-.PHONY: build push manifest test verify-codegen charts
+.PHONY: build build-% build-armhf push push-% manifest manifest-annotate-% manifest-annotate-armhf test verify-codegen charts help
+DOCKER_REPOSITORY=inlets/inlets-operator
+ARCHS=amd64 arm64 armhf ppc64le
 TAG?=latest
 
 # docker manifest command will work with Docker CLI 18.03 or newer
 # but for now it's still experimental feature so we need to enable that
 export DOCKER_CLI_EXPERIMENTAL=enabled
 
-build:
-	docker build -t inlets/inlets-operator:$(TAG)-amd64 . -f Dockerfile
-	docker build --build-arg OPTS="GOARCH=arm64" -t inlets/inlets-operator:$(TAG)-arm64 . -f Dockerfile
-	docker build --build-arg OPTS="GOARCH=arm GOARM=6" -t inlets/inlets-operator:$(TAG)-armhf . -f Dockerfile
+.PHONY: build
+build: $(addprefix build-,$(ARCHS))  ## Build Docker images for all architectures 
 
-push:
-	docker push inlets/inlets-operator:$(TAG)-amd64
-	docker push inlets/inlets-operator:$(TAG)-arm64
-	docker push inlets/inlets-operator:$(TAG)-armhf
+.PHONY: build-%
+build-%:
+	docker build $(BUILD_ARGS) --build-arg OPTS="GOARCH=$*" -t $(DOCKER_REPOSITORY):$(TAG)-$* .
 
-manifest:
-	docker manifest create --amend inlets/inlets-operator:$(TAG) \
-		inlets/inlets-operator:$(TAG)-amd64 \
-		inlets/inlets-operator:$(TAG)-arm64 \
-		inlets/inlets-operator:$(TAG)-armhf
-	docker manifest annotate inlets/inlets-operator:$(TAG) inlets/inlets-operator:$(TAG)-arm64 --os linux --arch arm64
-	docker manifest annotate inlets/inlets-operator:$(TAG) inlets/inlets-operator:$(TAG)-armhf --os linux --arch arm --variant v6
-	docker manifest push -p inlets/inlets-operator:$(TAG)
+build-armhf:
+	docker build $(BUILD_ARGS) --build-arg OPTS="GOARCH=arm GOARM=6" -t $(DOCKER_REPOSITORY):$(TAG)-armhf .
 
-test:
+.PHONY: push
+push: $(addprefix push-,$(ARCHS)) ## Push Docker images for all architectures
+
+.PHONY: push-%
+push-%:
+	docker push $(DOCKER_REPOSITORY):$(TAG)-$* 
+
+.PHONY: manifest
+manifest: ## Create and push Docker manifest to combine all architectures in multi-arch Docker image
+	docker manifest create --amend $(DOCKER_REPOSITORY):$(TAG) $(addprefix $(DOCKER_REPOSITORY):$(TAG)-,$(ARCHS))
+	$(MAKE) $(addprefix manifest-annotate-,$(ARCHS))
+	docker manifest push -p $(DOCKER_REPOSITORY):$(TAG)
+
+.PHONY: manifest-annotate-%
+manifest-annotate-%:
+	docker manifest annotate $(DOCKER_REPOSITORY):$(TAG) $(DOCKER_REPOSITORY):$(TAG)-$* --os linux --arch $*
+
+.PHONY: manifest-annotate-armhf
+manifest-annotate-armhf:
+	docker manifest annotate $(DOCKER_REPOSITORY):$(TAG) $(DOCKER_REPOSITORY):$(TAG)-armhf --os linux --arch arm --variant v6
+
+test: ## Run tests
 	go test ./...
 
-verify-codegen:
+verify-codegen: ## Verify generated code
 	./hack/verify-codegen.sh
 
-charts:
+charts: ## Build helm charts
 	cd chart && helm package inlets-operator/
 	mv chart/*.tgz docs/
 	helm repo index docs --url https://inlets.github.io/inlets-operator/ --merge ./docs/index.yaml
 
+.DEFAULT_GOAL := help
+help: ## Show help
+	@echo "\nUsage:\n  make \033[36m<target>\033[0m\n\nTargets:"
+	@grep -E '^[a-zA-Z_/%\-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-15s\033[0m %s\n", $$1, $$2}'
