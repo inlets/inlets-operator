@@ -16,7 +16,7 @@ Whilst 5 USD is cheaper than a "Cloud Load Balancer", this tool is for users who
 
 ## Status and backlog
 
-This version of the inlets-operator is a early proof-of-concept, but it builds upon inlets, which is stable and widely used.
+The inlets-operator automates cloud host provisioning to run inlets or inlets-pro to expose internal services to the Internet.
 
 Backlog completed:
 
