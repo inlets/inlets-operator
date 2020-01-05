@@ -38,7 +38,7 @@ spec:
         - "-project-id={{.Values.gceProjectId}}"
         {{- end }}
         {{- if .Values.packetProjectId }}
-        - "-region={{.Values.packetProjectId}}"
+        - "-project-id={{.Values.packetProjectId}}"
         {{- end }}
         {{- if .Values.proClientImage }}
         - "-pro-client-image={{.Values.proClientImage}}"
