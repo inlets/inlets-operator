@@ -3,7 +3,22 @@ entries:
   inlets-operator:
   - apiVersion: v1
     appVersion: "1.0"
-    created: "2020-01-05T12:29:28.678253Z"
+    created: "2020-01-09T19:55:06.621211Z"
+    description: inlets-operator for Kubernetes
+    digest: d0b72c6cc7cdb8b640aaaec3cd9ae3fe96bf272a2b89a9cd66cd16ea765389e5
+    keywords:
+    - networking
+    - tunnels
+    maintainers:
+    - email: alex@openfaas.com
+      name: alexellis
+    name: inlets-operator
+    urls:
+    - https://inlets.github.io/inlets-operator/inlets-operator-0.5.6.tgz
+    version: 0.5.6
+  - apiVersion: v1
+    appVersion: "1.0"
+    created: "2020-01-09T19:55:06.620958Z"
     description: inlets-operator for Kubernetes
     digest: 8bd54e7392e0322609f875d4c4966bfc07b2e9b5d96453d3a8a8be59d2b5f49c
     keywords:
@@ -18,7 +33,7 @@ entries:
     version: 0.5.5
   - apiVersion: v1
     appVersion: "1.0"
-    created: "2020-01-05T12:29:28.677861Z"
+    created: "2020-01-09T19:55:06.620591Z"
     description: inlets-operator for Kubernetes
     digest: adb5826dd120b413931769357145aaec9b3347407d709619842aa8430485da2c
     keywords:
@@ -33,7 +48,7 @@ entries:
     version: 0.5.4
   - apiVersion: v1
     appVersion: "1.0"
-    created: "2020-01-05T12:29:28.677594Z"
+    created: "2020-01-09T19:55:06.619848Z"
     description: inlets-operator for Kubernetes
     digest: e8b5a800affe9e11370f406a0eb1bbed3ae61b15638462430188753d1f28ca72
     keywords:
@@ -48,7 +63,7 @@ entries:
     version: 0.4.3
   - apiVersion: v1
     appVersion: "1.0"
-    created: "2020-01-05T12:29:28.677296Z"
+    created: "2020-01-09T19:55:06.619425Z"
     description: inlets-operator for Kubernetes
     digest: 28e65ba2d79881202b5e1b0dacfb171d0a253f0eacc3b8d6ca0c3bcb67b0bc0b
     keywords:
@@ -63,7 +78,7 @@ entries:
     version: 0.4.2
   - apiVersion: v1
     appVersion: "1.0"
-    created: "2020-01-05T12:29:28.676736Z"
+    created: "2020-01-09T19:55:06.618953Z"
     description: inlets-operator for Kubernetes
     digest: 8befa5dc701b64e99c984682ba05dbfffbd63970a2d4be6037360b038f65236d
     keywords:
@@ -78,7 +93,7 @@ entries:
     version: 0.4.1
   - apiVersion: v1
     appVersion: "1.0"
-    created: "2020-01-05T12:29:28.676182Z"
+    created: "2020-01-09T19:55:06.618478Z"
     description: inlets-operator for Kubernetes
     digest: 273cfd4c9693b2fd3afd996fffe28ce692d8dedee79945c41fec6c80e305b3f8
     keywords:
@@ -93,7 +108,7 @@ entries:
     version: 0.4.0
   - apiVersion: v1
     appVersion: "1.0"
-    created: "2020-01-05T12:29:28.675638Z"
+    created: "2020-01-09T19:55:06.618004Z"
     description: inlets-operator for Kubernetes
     digest: 8a310596376bc28d5a8db6266a3e81c472d38f48098bcdcbc8767148172da865
     keywords:
@@ -108,7 +123,7 @@ entries:
     version: 0.3.0
   - apiVersion: v1
     appVersion: "1.0"
-    created: "2020-01-05T12:29:28.675092Z"
+    created: "2020-01-09T19:55:06.617671Z"
     description: inlets-operator for Kubernetes
     digest: d791fb91ad798db18b0599667a3aeed12cfc447f6ea8927d9f615fb3cd0aaba7
     keywords:
@@ -123,7 +138,7 @@ entries:
     version: 0.2.2
   - apiVersion: v1
     appVersion: "1.0"
-    created: "2020-01-05T12:29:28.67407Z"
+    created: "2020-01-09T19:55:06.617244Z"
     description: inlets-operator for Kubernetes
     digest: 9efb95b737e557511d94ee2f3c51c4b5a5d814e4319c535604a71f9b0c8bbb7a
     keywords:
@@ -138,7 +153,7 @@ entries:
     version: 0.2.1
   - apiVersion: v1
     appVersion: "1.0"
-    created: "2020-01-05T12:29:28.673516Z"
+    created: "2020-01-09T19:55:06.616793Z"
     description: inlets-operator for Kubernetes
     digest: 852394fd543e0b079910cbf1ed57e950cb33ed966b974e3a218c1d702eb3e79f
     keywords:
@@ -153,7 +168,7 @@ entries:
     version: 0.2.0
   - apiVersion: v1
     appVersion: "1.0"
-    created: "2020-01-05T12:29:28.672948Z"
+    created: "2020-01-09T19:55:06.615882Z"
     description: inlets-operator for Kubernetes
     digest: 1775dffd2c699b1028eaaf6082274f8c402ca5ecece2f87eb440623ede5a5433
     keywords:
@@ -166,4 +181,4 @@ entries:
     urls:
     - https://inlets.github.io/inlets-operator/inlets-operator-0.1.0.tgz
     version: 0.1.0
-generated: "2020-01-05T12:29:28.671796Z"
+generated: "2020-01-09T19:55:06.615003Z"
