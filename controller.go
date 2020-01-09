@@ -860,9 +860,9 @@ curl -sLO https://raw.githubusercontent.com/inlets/inlets/master/hack/inlets-ope
 export AUTHTOKEN="` + authToken + `"
 export REMOTETCP="` + remoteTCP + `"
 export IP=$(curl -sfSL https://api.ipify.org)
-curl -SLsf https://github.com/inlets/inlets-pro-pkg/releases/download/0.4.0/inlets-pro-linux > inlets-pro-linux && \
-chmod +x ./inlets-pro-linux  && \
-mv ./inlets-pro-linux /usr/local/bin/inlets-pro
+curl -SLsf https://github.com/inlets/inlets-pro-pkg/releases/download/0.4.3/inlets-pro > /tmp/inlets-pro && \
+chmod +x /tmp/inlets-pro && \
+mv /tmp/inlets-pro /usr/local/bin/inlets-pro
 curl -sLO https://raw.githubusercontent.com/inlets/inlets/master/hack/inlets-pro.service  && \
 	mv inlets-pro.service /etc/systemd/system/inlets-pro.service && \
 	echo "AUTHTOKEN=$AUTHTOKEN" >> /etc/default/inlets-pro && \
