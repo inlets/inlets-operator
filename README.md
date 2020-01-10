@@ -147,6 +147,47 @@ Use the same commands as described in the section above.
 > There used to be separate deployment files in `artifacts` folder called `operator-amd64.yaml` and `operator-armhf.yaml`.
 > Since version `0.2.7` Docker images get built for multiple architectures with the same tag which means that there is now just one deployment file called `operator.yaml` that can be used on all supported architecures.
 
+## Running in a local VM, using DigitalOcean for the exit node
+It is assumed that you have [k3sup](https://github.com/alexellis/k3sup), [Vagrant](https://www.vagrantup.com/), and [VirtualBoax](https://www.virtualbox.org/) installed and configured on your machine.
+If not, then follow the instructions [here](https://www.vagrantup.com/docs/installation/) and [here](https://www.virtualbox.org/manual/UserManual.html#installation)
+
+```ruby
+# Create a Vagrantfile
+cat >Vagrantfile <<EOF
+Vagrant.configure("2") do |config|
+  config.vm.box = "ubuntu/bionic64"
+  config.vm.network "forwarded_port", guest: 6443, host: 6443, host_ip: "127.0.0.1"
+end
+EOF
+```
+
+> Tip: if you didn't forward the k8s API port on `Vagrantfile`, you still can creating an SSH tunnel (ex. `$ vagrant ssh -- -NfL 127.0.0.1:6443:127.0.0.1:6443` )
+
+```sh
+# Create a virtual machine  
+vagrant up 
+
+# Get user, ssh port, and key from `ssh-config`
+read USER SSH_PORT SSH_KEY <<< $( vagrant ssh-config \
+ | awk '/User |Port|IdentityFile/{print $2}' | tr '\n' ' ' )
+
+# Create a cluster 
+k3sup install --user ${USER}         \
+              --ip 127.0.0.1         \
+              --ssh-key ${SSH_KEY}   \
+              --ssh-port ${SSH_PORT} 
+
+# Try the access:
+export KUBECONFIG=$( pwd )/kubeconfig
+kubectl get node -o wide 
+
+# Generate a temporary file with your DO_TOKEN
+TMP_FILE=$( mktemp ) ; echo "DO_TOKEN_REDACTED" > ${TMP_FILE}
+
+# Install intlets-operator
+k3sup app install inlets-operator -t ${TMP_FILE} 
+```
+
 ## Get a LoadBalancer provided by inlets
 
 ```sh
