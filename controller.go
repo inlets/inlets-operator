@@ -4,6 +4,7 @@
 package main
 
 import (
+	"encoding/base64"
 	"fmt"
 	"log"
 	"strconv"
@@ -145,6 +146,9 @@ func NewController(
 						break
 					case "gce":
 						provisioner, _ = provision.NewGCEProvisioner(controller.infraConfig.GetAccessKey())
+						break
+					case "ec2":
+						provisioner, _ = provision.NewEC2Provisioner(controller.infraConfig.Region, controller.infraConfig.GetAccessKey(), controller.infraConfig.GetSecretKey())
 						break
 					}
 
@@ -492,6 +496,32 @@ func (c *Controller) syncHandler(key string) error {
 				return err
 			}
 			id = res.ID
+
+		} else if c.infraConfig.Provider == "ec2" {
+			provisioner, _ := provision.NewEC2Provisioner(c.infraConfig.Region, c.infraConfig.GetAccessKey(), c.infraConfig.GetSecretKey())
+
+			inletsPort := inletsControlPort
+
+			if c.infraConfig.UsePro() {
+				inletsPort = inletsProControlPort
+			}
+
+			userData := makeUserdata(tunnel.Spec.AuthToken, c.infraConfig.UsePro(), tunnel.Spec.ServiceName)
+
+			res, err := provisioner.Provision(provision.BasicHost{
+				Name:     tunnel.Name,
+				OS:       "ubuntu/images/hvm-ssd/ubuntu-xenial-16.04-amd64-server-20191114",
+				Plan:     "t3.micro",
+				UserData: base64.StdEncoding.EncodeToString([]byte(userData)),
+				Additional: map[string]string{
+					"inlets-port": strconv.Itoa(inletsPort),
+				},
+			})
+
+			if err != nil {
+				return err
+			}
+			id = res.ID
 		}
 
 		log.Printf("Provisioning call took: %fs\n", time.Since(start).Seconds())
@@ -609,8 +639,29 @@ func (c *Controller) syncHandler(key string) error {
 					}
 				}
 			}
-		}
+		} else if c.infraConfig.Provider == "ec2" {
+			provisioner, _ := provision.NewEC2Provisioner(c.infraConfig.Region, c.infraConfig.GetAccessKey(), c.infraConfig.GetSecretKey())
+			host, err := provisioner.Status(tunnel.Status.HostID)
 
+			if err != nil {
+				return err
+			}
+			if host.Status == provision.ActiveStatus {
+
+				if host.IP != "" {
+					err := c.updateTunnelProvisioningStatus(tunnel, provision.ActiveStatus, host.ID, host.IP)
+					if err != nil {
+						return err
+					}
+
+					err = c.updateService(tunnel, host.IP)
+					if err != nil {
+						log.Printf("Error updating service: %s, %s", tunnel.Spec.ServiceName, err.Error())
+						return fmt.Errorf("tunnel update error %s", err)
+					}
+				}
+			}
+		}
 		break
 	case provision.ActiveStatus:
 		if tunnel.Spec.ClientDeploymentRef == nil {

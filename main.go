@@ -62,12 +62,12 @@ func main() {
 		ProConfig: InletsProConfig{},
 	}
 
-	flag.StringVar(&infra.Provider, "provider", "packet", "Your infrastructure provider - 'packet', 'digitalocean', 'scaleway', or 'gce'")
+	flag.StringVar(&infra.Provider, "provider", "packet", "Your infrastructure provider - 'packet', 'digitalocean', 'scaleway', 'gce' or ec2")
 	flag.StringVar(&infra.Region, "region", "", "The region to provision hosts into")
 	flag.StringVar(&infra.Zone, "zone", "us-central1-a", "The zone where the exit node is to be provisioned")
 	flag.StringVar(&infra.AccessKey, "access-key", "", "The access key for your infrastructure provider")
 	flag.StringVar(&infra.AccessKeyFile, "access-key-file", "", "Read the access key for your infrastructure provider from a file (recommended)")
-	flag.StringVar(&infra.SecretKey, "secret-key", "", "The secret key if using Scaleway as the provider")
+	flag.StringVar(&infra.SecretKey, "secret-key", "", "The secret key if using Scaleway or EC2 as the provider")
 	flag.StringVar(&infra.SecretKeyFile, "secret-key-file", "", "Read the access key for your infrastructure provider from a file (recommended)")
 	flag.StringVar(&infra.OrganizationID, "organization-id", "", "The organization id if using Scaleway as the provider")
 	flag.StringVar(&infra.ProjectID, "project-id", "", "The project ID if using Packet.com, or Google Compute Engine as the provider")
