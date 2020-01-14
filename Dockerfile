@@ -1,7 +1,9 @@
-FROM golang:1.11
+FROM golang:1.13 as builder
+
+ENV GO111MODULE=off
+ENV CGO_ENABLED=0
 
 RUN mkdir -p /go/src/github.com/inlets/inlets-operator/
-
 WORKDIR /go/src/github.com/inlets/inlets-operator
 
 COPY . .
