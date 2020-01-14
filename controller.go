@@ -150,6 +150,9 @@ func NewController(
 					case "ec2":
 						provisioner, _ = provision.NewEC2Provisioner(controller.infraConfig.Region, controller.infraConfig.GetAccessKey(), controller.infraConfig.GetSecretKey())
 						break
+					case "civo":
+						provisioner, _ = provision.NewCivoProvisioner(controller.infraConfig.GetAccessKey())
+						break
 					}
 
 					if provisioner != nil {
@@ -522,6 +525,25 @@ func (c *Controller) syncHandler(key string) error {
 				return err
 			}
 			id = res.ID
+		} else if c.infraConfig.Provider == "civo" {
+			provisioner, _ := provision.NewCivoProvisioner(c.infraConfig.GetAccessKey())
+
+			userData := makeUserdata(tunnel.Spec.AuthToken, c.infraConfig.UsePro(), tunnel.Spec.ServiceName)
+
+			res, err := provisioner.Provision(provision.BasicHost{
+				Name:       tunnel.Name,
+				OS:         "811a8dfb-8202-49ad-b1ef-1e6320b20497",
+				Plan:       "g2.small",
+				Region:     c.infraConfig.Region,
+				UserData:   userData,
+				Additional: map[string]string{},
+			})
+
+			if err != nil {
+				return err
+			}
+			id = res.ID
+
 		}
 
 		log.Printf("Provisioning call took: %fs\n", time.Since(start).Seconds())
@@ -648,6 +670,28 @@ func (c *Controller) syncHandler(key string) error {
 			}
 			if host.Status == provision.ActiveStatus {
 
+				if host.IP != "" {
+					err := c.updateTunnelProvisioningStatus(tunnel, provision.ActiveStatus, host.ID, host.IP)
+					if err != nil {
+						return err
+					}
+
+					err = c.updateService(tunnel, host.IP)
+					if err != nil {
+						log.Printf("Error updating service: %s, %s", tunnel.Spec.ServiceName, err.Error())
+						return fmt.Errorf("tunnel update error %s", err)
+					}
+				}
+			}
+		} else if c.infraConfig.Provider == "civo" {
+			provisioner, _ := provision.NewCivoProvisioner(c.infraConfig.GetAccessKey())
+			host, err := provisioner.Status(tunnel.Status.HostID)
+
+			if err != nil {
+				return err
+			}
+
+			if host.Status == provision.ActiveStatus {
 				if host.IP != "" {
 					err := c.updateTunnelProvisioningStatus(tunnel, provision.ActiveStatus, host.ID, host.IP)
 					if err != nil {

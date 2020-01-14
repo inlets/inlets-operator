@@ -62,7 +62,7 @@ func main() {
 		ProConfig: InletsProConfig{},
 	}
 
-	flag.StringVar(&infra.Provider, "provider", "packet", "Your infrastructure provider - 'packet', 'digitalocean', 'scaleway', 'gce' or ec2")
+	flag.StringVar(&infra.Provider, "provider", "packet", "Your infrastructure provider - 'packet', 'digitalocean', 'scaleway', 'civo', 'gce' or ec2")
 	flag.StringVar(&infra.Region, "region", "", "The region to provision hosts into")
 	flag.StringVar(&infra.Zone, "zone", "us-central1-a", "The zone where the exit node is to be provisioned")
 	flag.StringVar(&infra.AccessKey, "access-key", "", "The access key for your infrastructure provider")
