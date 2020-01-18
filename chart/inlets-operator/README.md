@@ -26,28 +26,6 @@
     kubectl apply -f ./artifacts/crd.yaml
     ```
 
-## Configuration
-
-The following table lists the configurable parameters of the `inlets-operator` chart and their default values,
-and can be overwritten via the helm `--set` flag.
-
-Parameter | Description | Default
----                             | ---                                                                     | ---
-`image`                 | Docker image for the Inlets Operator                                            | `inlets/inlets-operator:0.4.2`
-`clientImage`           | Docker image for the inlets client                                              | `inlets/inlets:2.6.3`
-`provider`              | Your infrastructure provider - 'packet' or 'digitalocean' or 'gce'                       | `""`
-`region`                | The region to provision hosts into                                              | `""`
-`zone`                  | The zone where the exit node is to be provisioned (Used when Google Compute Engine is used as provider) | `us-central1-a`
-`accessKeyFile`         | Read the access key for your infrastructure provider from a file (recommended)  | `/var/secrets/inlets/inlets-access-key`
-`gceProjectId`          | The project ID if using Google Compute Engine as the provider                   | `""`
-`packetProjectId`       | The project ID if using Packet.com as the provider                              | `""`
-`annotatedOnly`         | Only create a tunnel for annotated services.                                    | `false`
-`inletsProLicense`      | License for use with inlets-pro                                                 | `""`
-`resources`             | Operator resources requests & limits                                            | `{"requests":{"cpu": "100m", "memory": "128Mi"}}`
-`nodeSelector`          | Node labels for data pod assignment                                             | `{}`
-`tolerations`           | Node tolerations                                                                | `[]`
-`affinity`              | Node affinity policy                                                            | `{}`
-
 ## Deploy an example configuration
 
 ### DigitalOcean with inlets OSS (recommended)
@@ -69,3 +47,25 @@ helm upgrade inlets-operator --install inlets/inlets-operator \
 helm upgrade inlets-operator --install inlets/inlets-operator \
   --set provider=packet,region=ams1,packetProjectId=PACKETID
 ```
+
+## Chart parameters
+
+The following table lists the configurable parameters of the `inlets-operator` chart and their default values,
+and can be overwritten via the helm `--set` flag.
+
+Parameter | Description | Default
+---                             | ---                                                                     | ---
+`image`                 | Docker image for the Inlets Operator                                            | `inlets/inlets-operator:0.4.2`
+`clientImage`           | Docker image for the inlets client                                              | `inlets/inlets:2.6.3`
+`provider`              | Your infrastructure provider - 'digitalocean', 'ec2', 'scaleway', 'packet', or 'gce'                       | `""`
+`region`                | The region to provision hosts into                                              | `""`
+`zone`                  | The zone where the exit node is to be provisioned (Used when Google Compute Engine is used as provider) | `us-central1-a`
+`accessKeyFile`         | Read the access key for your infrastructure provider from a file (recommended)  | `/var/secrets/inlets/inlets-access-key`
+`gceProjectId`          | The project ID if using Google Compute Engine as the provider                   | `""`
+`packetProjectId`       | The project ID if using Packet.com as the provider                              | `""`
+`annotatedOnly`         | Only create a tunnel for annotated services.                                    | `false`
+`inletsProLicense`      | License for use with inlets-pro                                                 | `""`
+`resources`             | Operator resources requests & limits                                            | `{"requests":{"cpu": "100m", "memory": "128Mi"}}`
+`nodeSelector`          | Node labels for data pod assignment                                             | `{}`
+`tolerations`           | Node tolerations                                                                | `[]`
+`affinity`              | Node affinity policy                                                            | `{}`
