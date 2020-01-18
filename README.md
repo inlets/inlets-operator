@@ -149,12 +149,6 @@ helm upgrade inlets-operator --install inlets/inlets-operator \
   --set provider=gce,zone=us-central1-a,gceProjectId=$PROJECTID
 
 ```
-## Running on a Raspberry Pi
-
-Use the same commands as described in the section above.
-
-> There used to be separate deployment files in `artifacts` folder called `operator-amd64.yaml` and `operator-armhf.yaml`.
-> Since version `0.2.7` Docker images get built for multiple architectures with the same tag which means that there is now just one deployment file called `operator.yaml` that can be used on all supported architecures.
 
 ## Get a LoadBalancer provided by inlets
 
@@ -212,6 +206,14 @@ The operator deployment is in the `kube-system` namespace.
 ```sh
 kubectl logs deploy/inlets-operator -n kube-system -f
 ```
+
+## Running on a Raspberry Pi
+
+Use the same commands as described in the section above.
+
+> There used to be separate deployment files in `artifacts` folder called `operator-amd64.yaml` and `operator-armhf.yaml`.
+> Since version `0.2.7` Docker images get built for multiple architectures with the same tag which means that there is now just one deployment file called `operator.yaml` that can be used on all supported architecures.
+
 
 # Provider Pricing
 
