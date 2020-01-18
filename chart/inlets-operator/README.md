@@ -1,5 +1,9 @@
 # inlets-operator chart
 
+Install the inlets-operator with this chart or with [k3sup](https://k3sup.dev).
+
+You can also install the inlets-operator with [k3sup app install inlets-operator](https://k3sup.dev), to any Kubernetes cluster. k3sup provides strongly-typed flags and validation for parameters.
+
 ## Pre-reqs
 
 * Configure [helm and tiller](https://github.com/openfaas/faas-netes/blob/master/HELM.md)

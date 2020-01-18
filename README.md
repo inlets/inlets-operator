@@ -92,6 +92,15 @@ kubectl apply -f ./artifacts/operator-rbac.yaml
 kubectl apply -f ./artifacts/operator.yaml
 ```
 
+You can also install the inlets-operator using a single command using [k3sup](https://k3sup.dev/), k3sup runs against any valid Kubernetes cluster and is not limited to use with k3s.
+
+```sh
+k3sup app install inlets-operator \
+ --provider digitalocean \
+ --region lon1 \
+ --token-file $HOME/Downloads/do-access-token
+```
+
 ## Running in-cluster, using Google Compute Engine for the exit node using helm
 
 > Note: this example is now multi-arch, so it's valid for `x86_64`, `ARMHF`, and `ARM64`.
