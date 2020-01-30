@@ -30,7 +30,7 @@ spec:
           # For Packet users
           # - "-provider=packet"
           # For inlets-pro
-          # - "-license=JWT-OBTAINED-FROM-https://github.com/alexellis/inlets-pro-pkg"
+          # - "-license=JWT-OBTAINED-FROM-https://github.com/inlets/inlets-pro"
         env:
         - name: client_image
           value: inlets/inlets:2.6.3

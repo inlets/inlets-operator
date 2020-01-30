@@ -12,7 +12,7 @@ region: "lon1"
 # packetProjectId: "project-id"
 accessKeyFile: "/var/secrets/inlets/inlets-access-key"
 
-# Obtain from https://github.com/alexellis/inlets-pro-pkg
+# Obtain from https://github.com/inlets/inlets-pro
 inletsProLicense: ""
 
 annotatedOnly: false

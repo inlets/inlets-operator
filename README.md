@@ -33,7 +33,7 @@ Backlog completed:
 - [x] Ignore Services with `dev.inlets.manage: false` annotation
 - [x] Garbage collect hosts when Service or CRD is deleted
 - [x] CI with Travis (use openfaas-incubator/openfaas-operator as a sample)
-- [x] Automate [`inlets-pro`](https://github.com/inlets/inlets-pro-pkg) for TCP traffic
+- [x] Automate [`inlets-pro`](https://github.com/inlets/inlets-pro) for TCP traffic
 
 Backlog pending:
 
@@ -42,14 +42,14 @@ Backlog pending:
 - [ ] Provision to AWS EC2
 - [ ] Provision to Civo
 
-Inlets tunnels HTTP traffic at L7, so the inlets-operator can be used to tunnel HTTP traffic. A new project I'm working on called [inlets-pro](https://github.com/inlets/inlets-pro-pkg) tunnels any TCP traffic at L4 i.e. Mongo, Redis, NATS, SSH, TLS, whatever you like.
+Inlets tunnels HTTP traffic at L7, so the inlets-operator can be used to tunnel HTTP traffic. A new project I'm working on called [inlets-pro](https://github.com/inlets/inlets-pro) tunnels any TCP traffic at L4 i.e. Mongo, Redis, NATS, SSH, TLS, whatever you like.
 
 ### Related projects
 
 Inlets is [listed on the Cloud Native Landscape](https://landscape.cncf.io/category=service-proxy&format=card-mode&grouping=category&sort=stars) as a Service Proxy
 
 * [inlets](https://github.com/inlets/inlets) - open-source L7 HTTP tunnel and reverse proxy
-* [inlets-pro](https://github.com/inlets/inlets-pro-pkg) - L4 TCP load-balancer
+* [inlets-pro](https://github.com/inlets/inlets-pro) - L4 TCP load-balancer
 * [inlets-operator](https://github.com/inlets/inlets-operator) - deep integration for inlets in Kubernetes, expose Service type LoadBalancer
 * [inletsctl](https://github.com/inlets/inletsctl) - CLI tool to provision exit-nodes for use with inlets or inlets-pro
 
@@ -238,6 +238,6 @@ Contributions are welcome, see the [CONTRIBUTING.md](CONTRIBUTING.md) guide.
 
 - [metallb](https://github.com/danderson/metallb) - open source LoadBalancer for private Kubernetes clusters, no tunnelling.
 - [inlets](https://inlets.dev) - inlets provides an L7 HTTP tunnel for applications through the use of an exit node, it is used by the inlets operator
-- [inlets pro](https://github.com/inlets/inlets-pro-pkg) - L4 TCP tunnel, which can tunnel any TCP traffic and is on the roadmap for the inlets-operator
+- [inlets pro](https://github.com/inlets/inlets-pro) - L4 TCP tunnel, which can tunnel any TCP traffic and is on the roadmap for the inlets-operator
 - [Cloudflare Argo](https://www.cloudflare.com/en-gb/products/argo-tunnel/) - paid SaaS product from Cloudflare for Cloudflare customers and domains - K8s integration available through Ingress
 - [ngrok](https://ngrok.com) - a popular tunnelling tool, restarts every 7 hours, limits connections per minute, paid SaaS product with no K8s integration available

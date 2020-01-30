@@ -955,7 +955,7 @@ curl -sLO https://raw.githubusercontent.com/inlets/inlets/master/hack/inlets-ope
 export AUTHTOKEN="` + authToken + `"
 export REMOTETCP="` + remoteTCP + `"
 export IP=$(curl -sfSL https://api.ipify.org)
-curl -SLsf https://github.com/inlets/inlets-pro-pkg/releases/download/0.4.3/inlets-pro > /tmp/inlets-pro && \
+curl -SLsf https://github.com/inlets/inlets-pro/releases/download/0.4.3/inlets-pro > /tmp/inlets-pro && \
 chmod +x /tmp/inlets-pro && \
 mv /tmp/inlets-pro /usr/local/bin/inlets-pro
 curl -sLO https://raw.githubusercontent.com/inlets/inlets/master/hack/inlets-pro.service  && \
