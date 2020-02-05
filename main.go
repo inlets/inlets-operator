@@ -19,6 +19,9 @@ import (
 	clientset "github.com/inlets/inlets-operator/pkg/generated/clientset/versioned"
 	informers "github.com/inlets/inlets-operator/pkg/generated/informers/externalversions"
 	"github.com/inlets/inlets-operator/pkg/signals"
+
+	// required for generating code from CRD
+	_ "k8s.io/code-generator/cmd/client-gen/generators"
 )
 
 var (
@@ -167,3 +170,4 @@ func (i *InfraConfig) GetSecretKey() string {
 
 	return strings.TrimSpace(i.SecretKey)
 }
+

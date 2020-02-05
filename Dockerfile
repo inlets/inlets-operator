@@ -1,20 +1,24 @@
+FROM teamserverless/license-check:0.3.6 as license-check
+
 FROM golang:1.13 as builder
-
-ENV GO111MODULE=off
 ENV CGO_ENABLED=0
+ENV GO111MODULE=on
+#ENV GOFLAGS=-mod=vendor
 
-RUN mkdir -p /go/src/github.com/inlets/inlets-operator/
+COPY --from=license-check /license-check /usr/bin/
+
+RUN mkdir -p /go/src/github.com/inlets/inlets-operator
 WORKDIR /go/src/github.com/inlets/inlets-operator
 
 COPY . .
 
 ARG OPTS
 
-RUN gofmt -l -d $(find . -type f -name '*.go' -not -path "./vendor/*") && \
-  go test -v ./ && \
-  VERSION=$(git describe --all --exact-match `git rev-parse HEAD` | grep tags | sed 's/tags\///') && \
+RUN gofmt -l -d $(find . -type f -name '*.go' -not -path "./vendor/*")
+RUN go test -mod=vendor -v ./...
+RUN VERSION=$(git describe --all --exact-match `git rev-parse HEAD` | grep tags | sed 's/tags\///') && \
   GIT_COMMIT=$(git rev-list -1 HEAD) && \
-  env ${OPTS} CGO_ENABLED=0 GOOS=linux go build -ldflags "-s -w \
+  env ${OPTS} CGO_ENABLED=0 GOOS=linux go build -mod=vendor -ldflags "-s -w \
   -X github.com/inlets/inlets-operator/pkg/version.Release=${VERSION} \
   -X github.com/inlets/inlets-operator/pkg/version.SHA=${GIT_COMMIT}" \
   -a -installsuffix cgo -o inlets-operator . && \
@@ -28,12 +32,11 @@ RUN gofmt -l -d $(find . -type f -name '*.go' -not -path "./vendor/*") && \
 
 FROM scratch
 
-COPY --from=0 /etc/passwd /etc/group /etc/
-COPY --from=0 /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
-COPY --from=0 --chown=app:app /scratch-tmp /tmp/
-COPY --from=0 /go/src/github.com/inlets/inlets-operator/inlets-operator .
+COPY --from=builder /etc/passwd /etc/group /etc/
+COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
+COPY --from=builder --chown=app:app /scratch-tmp /tmp/
+COPY --from=builder /go/src/github.com/inlets/inlets-operator/inlets-operator .
 
 USER app
 
-ENTRYPOINT ["./inlets-operator"]
-CMD ["-logtostderr"]
+CMD ["./inlets-operator"]

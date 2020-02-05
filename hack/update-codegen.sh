@@ -1,41 +1,40 @@
 #!/usr/bin/env bash
 
-# Copyright 2017 The Kubernetes Authors.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+# copied from: https://github.com/weaveworks/flagger/tree/master/hack
 
 set -o errexit
 set -o nounset
 set -o pipefail
 
-SCRIPT_ROOT=$(dirname "${BASH_SOURCE[0]}")/..
-CODEGEN_PKG=${CODEGEN_PKG:-$(cd "${SCRIPT_ROOT}"; ls -d -1 ./vendor/k8s.io/code-generator 2>/dev/null || echo ../code-generator)}
+SCRIPT_ROOT=$(git rev-parse --show-toplevel)
 
-# generate the code with:
-# --output-base    because this script should also be able to run inside the vendor dir of
-#                  k8s.io/kubernetes. The output-base is needed for the generators to output into the vendor dir
-#                  instead of the $GOPATH directly. For normal projects this can be dropped.
-#"deepcopy,client,informer,lister" \
+# Grab code-generator version from go.sum.
+CODEGEN_VERSION="v0.17.2"
+CODEGEN_PKG=$(echo `go env GOPATH`"/pkg/mod/k8s.io/code-generator@${CODEGEN_VERSION}")
 
-"${CODEGEN_PKG}"/generate-groups.sh all \
-  github.com/inlets/inlets-operator/pkg/generated github.com/inlets/inlets-operator/pkg/apis \
-  inletsoperator:v1alpha1 \
-  --output-base "$(dirname "${BASH_SOURCE[0]}")/../../.." \
-  --go-header-file "${SCRIPT_ROOT}"/hack/boilerplate.go.txt
+echo ">> Using ${CODEGEN_PKG}"
 
-echo 
+# code-generator does work with go.mod but makes assumptions about
+# the project living in `$GOPATH/src`. To work around this and support
+# any location; create a temporary directory, use this as an output
+# base, and copy everything back once generated.
+TEMP_DIR=$(mktemp -d)
+cleanup() {
+    echo ">> Removing ${TEMP_DIR}"
+    rm -rf ${TEMP_DIR}
+}
+trap "cleanup" EXIT SIGINT
 
-# To use your own boilerplate text append:
-#   --go-header-file "${SCRIPT_ROOT}"/hack/custom-boilerplate.go.txt
+echo ">> Temporary output directory ${TEMP_DIR}"
 
-cp -r "$(dirname "${BASH_SOURCE[0]}")/../../../github.com/inlets/inlets-operator/." "${SCRIPT_ROOT}/"
+# Ensure we can execute.
+chmod +x ${CODEGEN_PKG}/generate-groups.sh
+
+${CODEGEN_PKG}/generate-groups.sh all \
+    github.com/inlets/inlets-operator/pkg/client github.com/inlets/inlets-operator/pkg/apis \
+    inletsoperator:v1alpha1 \
+    --output-base "${TEMP_DIR}" \
+    --go-header-file ${SCRIPT_ROOT}/hack/boilerplate.go.txt
+
+# Copy everything back.
+cp -r "${TEMP_DIR}/github.com/inlets/inlets-operator/." "${SCRIPT_ROOT}/"

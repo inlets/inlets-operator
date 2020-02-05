@@ -41,7 +41,7 @@ import (
 	listers "github.com/inlets/inlets-operator/pkg/generated/listers/inletsoperator/v1alpha1"
 )
 
-const controllerAgentName = "sample-controller"
+const controllerAgentName = "inlets-operator"
 const inletsControlPort = 8080
 const inletsProControlPort = 8123
 
@@ -95,9 +95,6 @@ func NewController(
 	infra *InfraConfig,
 ) *Controller {
 
-	// Create event broadcaster
-	// Add sample-controller types to the default Kubernetes Scheme so Events can be
-	// logged for sample-controller types.
 	utilruntime.Must(samplescheme.AddToScheme(scheme.Scheme))
 	klog.V(4).Info("Creating event broadcaster")
 	eventBroadcaster := record.NewBroadcaster()

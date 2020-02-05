@@ -32,7 +32,7 @@ Backlog completed:
 - [x] ARM64 (Graviton/Odroid/Packet.com) Dockerfile/build and K8s YAML files
 - [x] Ignore Services with `dev.inlets.manage: false` annotation
 - [x] Garbage collect hosts when Service or CRD is deleted
-- [x] CI with Travis (use openfaas-incubator/openfaas-operator as a sample)
+- [x] CI with Travis
 - [x] Automate [`inlets-pro`](https://github.com/inlets/inlets-pro) for TCP traffic
 
 Backlog pending:

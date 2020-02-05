@@ -20,7 +20,7 @@ package v1alpha1
 
 import (
 	v1alpha1 "github.com/inlets/inlets-operator/pkg/apis/inletsoperator/v1alpha1"
-	"github.com/inlets/inlets-operator/pkg/generated/clientset/versioned/scheme"
+	"github.com/inlets/inlets-operator/pkg/client/clientset/versioned/scheme"
 	rest "k8s.io/client-go/rest"
 )
 
