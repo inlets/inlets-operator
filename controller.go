@@ -36,7 +36,7 @@ import (
 
 	inletsv1alpha1 "github.com/inlets/inlets-operator/pkg/apis/inletsoperator/v1alpha1"
 	clientset "github.com/inlets/inlets-operator/pkg/generated/clientset/versioned"
-	samplescheme "github.com/inlets/inlets-operator/pkg/generated/clientset/versioned/scheme"
+	inletsscheme "github.com/inlets/inlets-operator/pkg/generated/clientset/versioned/scheme"
 	informers "github.com/inlets/inlets-operator/pkg/generated/informers/externalversions/inletsoperator/v1alpha1"
 	listers "github.com/inlets/inlets-operator/pkg/generated/listers/inletsoperator/v1alpha1"
 )
@@ -85,7 +85,7 @@ type Controller struct {
 	recorder record.EventRecorder
 }
 
-// NewController returns a new sample controller
+// NewController returns a new controller
 func NewController(
 	kubeclientset kubernetes.Interface,
 	operatorClient clientset.Interface,
@@ -95,7 +95,7 @@ func NewController(
 	infra *InfraConfig,
 ) *Controller {
 
-	utilruntime.Must(samplescheme.AddToScheme(scheme.Scheme))
+	utilruntime.Must(inletsscheme.AddToScheme(scheme.Scheme))
 	klog.V(4).Info("Creating event broadcaster")
 	eventBroadcaster := record.NewBroadcaster()
 	eventBroadcaster.StartLogging(klog.Infof)

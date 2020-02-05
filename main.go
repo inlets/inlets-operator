@@ -170,4 +170,3 @@ func (i *InfraConfig) GetSecretKey() string {
 
 	return strings.TrimSpace(i.SecretKey)
 }
-
