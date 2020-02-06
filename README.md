@@ -2,7 +2,7 @@
 
 [![Build Status](https://travis-ci.com/inlets/inlets-operator.svg?branch=master)](https://travis-ci.com/inlets/inlets-operator) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) [![Go Report Card](https://goreportcard.com/badge/github.com/inlets/inlets-operator)](https://goreportcard.com/report/github.com/inlets/inlets-operator) [![Documentation](https://godoc.org/github.com/inlets/inlets-operator?status.svg)](http://godoc.org/github.com/inlets/inlets-operator) [![Derek App](https://alexellis.o6s.io/badge?owner=inlets&repo=inlets-operator)](https://github.com/alexellis/derek/)
 
-Get a Kubernetes LoadBalancer where you never thought it was possible.
+"Get a Kubernetes LoadBalancer where you never thought it was possible."
 
 In cloud-based [Kubernetes](https://kubernetes.io/) solutions, Services can be exposed as type "LoadBalancer" and your cloud provider will provision a LoadBalancer and start routing traffic, in another word: you get ingress to your service.
 
