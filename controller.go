@@ -154,7 +154,9 @@ func NewController(
 
 					if provisioner != nil {
 						log.Printf("Deleting exit-node for %s: %s, ip: %s\n", r.Spec.ServiceName, r.Status.HostID, r.Status.HostIP)
-						err := provisioner.Delete(r.Status.HostID)
+
+						delReq := provision.HostDeleteRequest{ID: r.Status.HostID, IP: r.Status.HostIP}
+						err := provisioner.Delete(delReq)
 						if err != nil {
 							log.Println(err)
 						} else {
