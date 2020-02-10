@@ -18,13 +18,26 @@ Whilst 5 USD is cheaper than a "Cloud Load Balancer", this tool is for users who
 
 The inlets-operator automates cloud host provisioning to run inlets or inlets-pro to expose internal services to the Internet.
 
-Backlog completed:
+There are two tunnel projects available for you to use with the inlets-operator:
+
+* [inlets](https://github.com/inlets/inlets)
+
+  Tunnel L7 HTTP/HTTPS traffic.
+  Free, OSS, built for community developers. Encryption via TLS to be configured separately.
+
+* [inlets-pro](https://github.com/inlets/inlets-pro)
+
+  Tunnel any TCP traffic at L4 i.e. Mongo, Postgres, MariaDB, Redis, NATS, SSH and TLS itself.
+  Commercially licensed and supported. For cloud native operators and developers with built-in automatic end-to-end TLS.
+
+Operator backlog:
 
 - [x] Provision VMs/exit-nodes on public cloud
-- [x] Provision to [Packet.com](https://packet.com)
-- [x] Provision to DigitalOcean
-- [x] Provision to Scaleway
-- [x] Provision to GCP
+  - [x] Provision to [Packet.com](https://packet.com)
+  - [x] Provision to DigitalOcean
+  - [x] Provision to Scaleway
+  - [x] Provision to GCP
+  - [x] Provision to AWS EC2
 - [x] Automatically update Service type LoadBalancer with a public IP
 - [x] Tunnel L7 `http` traffic
 - [x] In-cluster Role, Dockerfile and YAML files
@@ -32,17 +45,17 @@ Backlog completed:
 - [x] ARM64 (Graviton/Odroid/Packet.com) Dockerfile/build and K8s YAML files
 - [x] Ignore Services with `dev.inlets.manage: false` annotation
 - [x] Garbage collect hosts when Service or CRD is deleted
-- [x] CI with Travis
-- [x] Automate [`inlets-pro`](https://github.com/inlets/inlets-pro) for TCP traffic
+- [x] CI with Travis and automated release artifacts
+- [x] One-line installer [k3sup](https://k3sup.dev/) - `k3sup app install inlets-operator --help`
+
+With [`inlets-pro`](https://github.com/inlets/inlets-pro) configured, you get the following additional benefits:
+
+- [x] Tunnel pure TCP traffic
+- [x] Automatic configuration of TLS and encryption using secured websocket `wss://` for control-port
+- [x] Separate data-plane (ports given by Kubernetes) and control-plane (port `8132`)
 
 Backlog pending:
-
-- [ ] Automate `wss://` for control-port using self-signed certs or LetsEncrypt and nip.io
-- [ ] Move control-port and `/tunnel` endpoint to high port i.e. `31111` and make it configurable in the helm chart
-- [ ] Provision to AWS EC2
 - [ ] Provision to Civo
-
-Inlets tunnels HTTP traffic at L7, so the inlets-operator can be used to tunnel HTTP traffic. A new project I'm working on called [inlets-pro](https://github.com/inlets/inlets-pro) tunnels any TCP traffic at L4 i.e. Mongo, Redis, NATS, SSH, TLS, whatever you like.
 
 ### Related projects
 
@@ -57,7 +70,7 @@ Inlets is [listed on the Cloud Native Landscape](https://landscape.cncf.io/categ
 
 inlets and inlets-operator are brought to you by [Alex Ellis](https://twitter.com/alexellisuk). Alex is a [CNCF Ambassador](https://www.cncf.io/people/ambassadors/) and the founder of [OpenFaaS](https://github.com/openfaas/faas/).
 
-> Note: `inlets` is made available free-of-charge, but you can support its ongoing development through [GitHub Sponsors](https://insiders.openfaas.io/) 💪
+`inlets` is made available free-of-charge, but you can support its ongoing development through [GitHub Sponsors](https://insiders.openfaas.io/) 💪
 
 ## Video demo
 
@@ -111,7 +124,6 @@ It is assumed that you have gcloud installed and configured on your machine.
 If not, then follow the instructions [here](https://cloud.google.com/sdk/docs/quickstarts)
 
 ```sh
-
 # Get current projectID
 export PROJECTID=$(gcloud config get-value core/project 2>/dev/null)
 
@@ -192,7 +204,7 @@ spec:
 
 ## Annotations
 
-By default the operator will create a tunnel for every loadbalancer service.
+By default the operator will create a tunnel for every LoadBalancer service.
 
 To ignore a service such as `traefik` type in: `kubectl annotate svc/traefik -n kube-system dev.inlets.manage=false`
 
