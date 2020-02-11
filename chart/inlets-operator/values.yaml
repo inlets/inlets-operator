@@ -17,7 +17,7 @@ inletsProLicense: ""
 
 annotatedOnly: false
 
-image: "inlets/inlets-operator:0.6.2"
+image: "inlets/inlets-operator:0.6.3"
 pullPolicy: "IfNotPresent"
 clientImage: "inlets/inlets:2.6.4"
 proClientImage: "inlets/inlets-pro:0.5.1"
