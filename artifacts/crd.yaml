@@ -9,3 +9,23 @@ spec:
     kind: Tunnel
     plural: tunnels
   scope: Namespaced
+  subresources:
+    status: {}
+  additionalPrinterColumns:
+  - name: Service
+    type: string
+    JSONPath: .spec.serviceName
+  - name: HostStatus
+    type: string
+    JSONPath: .status.hostStatus
+  - name: HostIP
+    type: string
+    JSONPath: .status.hostIP
+  - name: HostID
+    type: string
+    JSONPath: .status.hostId
+  - name: Tunnel
+    type: string
+    JSONPath: .spec.client_deployment.name
+
+
