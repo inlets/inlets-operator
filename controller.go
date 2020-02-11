@@ -554,10 +554,9 @@ func (c *Controller) syncHandler(key string) error {
 			}
 		} else {
 			err = c.updateTunnelProvisioningStatus(tunnel, "provisioning", id, "")
-		}
-
-		if err != nil {
-			return fmt.Errorf("tunnel update error %s", err)
+			if err != nil {
+				return fmt.Errorf("tunnel %s (%s) update error: %s", tunnel.Name, "provisioning", err)
+			}
 		}
 
 		break
