@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
@@ -65,7 +66,7 @@ func main() {
 		ProConfig: InletsProConfig{},
 	}
 
-	flag.StringVar(&infra.Provider, "provider", "packet", "Your infrastructure provider - 'packet', 'digitalocean', 'scaleway', 'civo', 'gce' or ec2")
+	flag.StringVar(&infra.Provider, "provider", "packet", "Your infrastructure provider - 'packet', 'digitalocean', 'scaleway', 'civo', 'gce' or 'ec2'")
 	flag.StringVar(&infra.Region, "region", "", "The region to provision hosts into")
 	flag.StringVar(&infra.Zone, "zone", "us-central1-a", "The zone where the exit node is to be provisioned")
 	flag.StringVar(&infra.AccessKey, "access-key", "", "The access key for your infrastructure provider")
@@ -81,6 +82,11 @@ func main() {
 
 	flag.Parse()
 
+	err := validateFlags(*infra)
+
+	if err != nil {
+		fmt.Fprintf(os.Stderr, err.Error())
+	}
 	infra.InletsClientImage = os.Getenv("client_image")
 
 	log.Printf("Inlets client: %s\n", infra.GetInletsClientImage())
@@ -105,18 +111,18 @@ func main() {
 	}
 
 	kubeInformerFactory := kubeinformers.NewSharedInformerFactory(kubeClient, time.Second*30)
-	exampleInformerFactory := informers.NewSharedInformerFactory(operatorClient, time.Second*30)
+	tunnelsInformerFactory := informers.NewSharedInformerFactory(operatorClient, time.Second*30)
 
 	controller := NewController(kubeClient, operatorClient,
 		kubeInformerFactory.Apps().V1().Deployments(),
-		exampleInformerFactory.Inletsoperator().V1alpha1().Tunnels(),
+		tunnelsInformerFactory.Inletsoperator().V1alpha1().Tunnels(),
 		kubeInformerFactory.Core().V1().Services(),
 		infra)
 
 	// notice that there is no need to run Start methods in a separate goroutine. (i.e. go kubeInformerFactory.Start(stopCh)
 	// Start method is non-blocking and runs all registered informers in a dedicated goroutine.
 	kubeInformerFactory.Start(stopCh)
-	exampleInformerFactory.Start(stopCh)
+	tunnelsInformerFactory.Start(stopCh)
 
 	if err = controller.Run(2, stopCh); err != nil {
 		klog.Fatalf("Error running controller: %s", err.Error())

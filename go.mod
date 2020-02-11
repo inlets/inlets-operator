@@ -2,9 +2,11 @@ module github.com/inlets/inlets-operator
 
 go 1.13
 
+// replace github.com/inlets/inletsctl => /home/alex/inletsctl
+
 require (
 	github.com/aws/aws-sdk-go v1.27.3 // indirect
-	github.com/inlets/inletsctl v0.0.0-20200209155055-356886f41e7c
+	github.com/inlets/inletsctl v0.0.0-20200211114314-aab68519494e
 	github.com/sethvargo/go-password v0.1.3
 
 	k8s.io/api v0.17.0
