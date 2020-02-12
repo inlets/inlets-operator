@@ -42,7 +42,7 @@ helm upgrade inlets-operator --install inlets/inlets-operator
 
 ```sh
 helm upgrade inlets-operator --install inlets/inlets-operator \
-  --set license=JWT_GOES_HERE
+  --set inletsProLicense=JWT_GOES_HERE
 ```
 
 ### Packet.com with inlets OSS
