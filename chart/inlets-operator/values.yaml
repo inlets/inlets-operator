@@ -7,9 +7,9 @@ region: "lon1"
 # zone: "us-central1-a"
 # gceProjectId: "<Your GCP Project ID>"
 
-#provider: "packet"
-#region: "ams1"
-# packetProjectId: "project-id"
+# provider: "packet"
+# region: "ams1"
+# packetProjectId: "<Your Packet Project ID>"
 accessKeyFile: "/var/secrets/inlets/inlets-access-key"
 
 # Obtain a free 14-day trial from https://github.com/inlets/inlets-pro
