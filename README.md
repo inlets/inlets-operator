@@ -57,14 +57,14 @@ With [`inlets-pro`](https://github.com/inlets/inlets-pro) configured, you get th
 Backlog pending:
 - [ ] Provision to Civo
 
-### Related projects
+### inlets projects
 
-Inlets is [listed on the Cloud Native Landscape](https://landscape.cncf.io/category=service-proxy&format=card-mode&grouping=category&sort=stars) as a Service Proxy
+Inlets is a Cloud Native Tunnel and is [listed on the Cloud Native Landscape](https://landscape.cncf.io/category=service-proxy&format=card-mode&grouping=category&sort=stars) under *Service Proxies*.
 
-* [inlets](https://github.com/inlets/inlets) - open-source L7 HTTP tunnel and reverse proxy
-* [inlets-pro](https://github.com/inlets/inlets-pro) - L4 TCP load-balancer
-* [inlets-operator](https://github.com/inlets/inlets-operator) - deep integration for inlets in Kubernetes, expose Service type LoadBalancer
-* [inletsctl](https://github.com/inlets/inletsctl) - CLI tool to provision exit-nodes for use with inlets or inlets-pro
+* [inlets](https://github.com/inlets/inlets) - Cloud Native Tunnel for L7 / HTTP traffic written in Go
+* [inlets-pro](https://github.com/inlets/inlets-pro-pkg) - Cloud Native Tunnel for L4 TCP
+* [inlets-operator](https://github.com/inlets/inlets-operator) - Public IPs for your private Kubernetes Services and CRD
+* [inletsctl](https://github.com/inlets/inletsctl) - Automate the cloud for fast HTTP (L7) and TCP (L4) tunnels
 
 ## Author
 
