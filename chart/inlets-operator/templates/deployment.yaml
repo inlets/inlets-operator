@@ -41,6 +41,9 @@ spec:
         {{- if .Values.proClientImage }}
         - "-pro-client-image={{.Values.proClientImage}}"
         {{- end }}
+        {{- if .Values.secretKeyFile }}
+        - "-secret-key-file=/var/secrets/inlets/secret/inlets-secret-key"
+        {{- end }}
         resources:
           {{- toYaml .Values.resources | nindent 12 }}
         env:
@@ -50,11 +53,22 @@ spec:
         - mountPath: /var/secrets/inlets/
           name: inlets-access-key
           readOnly: true
+        {{- if .Values.secretKeyFile }}
+        - mountPath: /var/secrets/inlets/secret/
+          name: inlets-secret-key
+          readOnly: true
+        {{- end }}
       volumes:
       - name: inlets-access-key
         secret:
           defaultMode: 420
           secretName: inlets-access-key
+      {{- if .Values.secretKeyFile }}
+      - name: inlets-secret-key
+        secret:
+          defaultMode: 420
+          secretName: inlets-secret-key
+      {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

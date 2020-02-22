@@ -134,6 +134,50 @@ k3sup app install inlets-operator \
  --token-file $HOME/Downloads/do-access-token
 ```
 
+## Using a provider which requires an Access Key and Secret Key? (AWS EC2, Scaleway)
+
+These providers require an additional secret to be provided, this can be created like this:
+
+
+ 
+To install using `k3sup` you can pass the additional --secret-key-file arg
+
+```sh
+
+k3sup app install inlets-operator \
+ --provider ec2 \
+ --region eu-west-1 \
+ --token-file $HOME/Downloads/access-key \
+ --secret-key-file $HOME/Downloads/secret-access-key \
+ --license $(cat $HOME/inlets-pro-license.txt)
+
+```
+
+If you are installing manually, using the yaml files you will need to un-comment the sections indicated in the
+ `artifacts/operator.yaml` file
+
+```sh
+
+kubectl apply -f ./artifacts/crd.yaml
+
+# Create a secret to store the access token
+
+kubectl create secret generic inlets-access-key \
+  --from-literal inlets-access-key="$(cat ~/Downloads/access-key)"
+
+# Create a secret to store the secret access token
+
+kubectl create secret generic inlets-secret-key \
+  --from-literal inlets-secret-key="$(cat ~/Downloads/secret-access-key)"
+
+kubectl apply -f ./artifacts/crd.yaml
+
+# Apply the operator deployment and RBAC role
+kubectl apply -f ./artifacts/operator-rbac.yaml
+kubectl apply -f ./artifacts/operator.yaml
+```
+ 
+
 ## Running in-cluster, using Google Compute Engine for the exit node using helm
 
 > Note: this example is now multi-arch, so it's valid for `x86_64`, `ARMHF`, and `ARM64`.
