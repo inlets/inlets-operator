@@ -14,6 +14,8 @@ This solution is for users who want to gain incoming network access (ingress) to
 
 Whilst 5 USD is cheaper than a "Cloud Load Balancer", this tool is for users who cannot get incoming connections due to their network configuration, not for saving money vs. public cloud.
 
+You can configure the operator to use either of our tunnels: inlets OSS for L7 HTTP traffic, or inlets PRO which adds L4 TCP support, automatic encryption with TLS and can enable the use of an IngressController and cert-manager directly from your laptop or private cloud.
+
 ## Status and backlog
 
 The inlets-operator automates cloud host provisioning to run inlets or inlets-pro to expose internal services to the Internet.
@@ -28,9 +30,11 @@ There are two tunnel projects available for you to use with the inlets-operator:
 * [inlets-pro](https://github.com/inlets/inlets-pro)
 
   Tunnel any TCP traffic at L4 i.e. Mongo, Postgres, MariaDB, Redis, NATS, SSH and TLS itself.
-  Commercially licensed and supported. For cloud native operators and developers with built-in automatic end-to-end TLS.
+  Automatic end-to-end encryption built-in with TLS.
+  Tunnel an IngressController including TLS termination.
+  Commercially licensed and supported. For cloud native operators and developers.
 
-Operator backlog:
+Operator cloud host provisioning:
 
 - [x] Provision VMs/exit-nodes on public cloud
   - [x] Provision to [Packet.com](https://packet.com)
@@ -38,6 +42,16 @@ Operator backlog:
   - [x] Provision to Scaleway
   - [x] Provision to GCP
   - [x] Provision to AWS EC2
+- [x] Publish stand-alone [Go provisioning library/SDK](https://github.com/inlets/inletsctl/tree/master/pkg/provision)
+
+With [`inlets-pro`](https://github.com/inlets/inlets-pro) configured, you get the following additional benefits:
+
+- [x] Automatic configuration of TLS and encryption using secured websocket `wss://` for control-port
+- [x] Tunnel pure TCP traffic
+- [x] Separate data-plane (ports given by Kubernetes) and control-plane (port `8132`)
+
+Other features:
+
 - [x] Automatically update Service type LoadBalancer with a public IP
 - [x] Tunnel L7 `http` traffic
 - [x] In-cluster Role, Dockerfile and YAML files
@@ -47,12 +61,6 @@ Operator backlog:
 - [x] Garbage collect hosts when Service or CRD is deleted
 - [x] CI with Travis and automated release artifacts
 - [x] One-line installer [k3sup](https://k3sup.dev/) - `k3sup app install inlets-operator --help`
-
-With [`inlets-pro`](https://github.com/inlets/inlets-pro) configured, you get the following additional benefits:
-
-- [x] Tunnel pure TCP traffic
-- [x] Automatic configuration of TLS and encryption using secured websocket `wss://` for control-port
-- [x] Separate data-plane (ports given by Kubernetes) and control-plane (port `8132`)
 
 Backlog pending:
 - [ ] Provision to Civo
@@ -106,6 +114,18 @@ kubectl apply -f ./artifacts/operator.yaml
 ```
 
 You can also install the inlets-operator using a single command using [k3sup](https://k3sup.dev/), k3sup runs against any valid Kubernetes cluster and is not limited to use with k3s.
+
+Install with inlets PRO:
+
+```sh
+k3sup app install inlets-operator \
+ --provider digitalocean \
+ --region lon1 \
+ --token-file $HOME/Downloads/do-access-token \
+ --license $(cat $HOME/inlets-pro-license.txt)
+```
+
+Install with inlets OSS:
 
 ```sh
 k3sup app install inlets-operator \
@@ -180,7 +200,15 @@ kubectl logs deploy/nginx-1-tunnel-client
 
 Check the IP of the LoadBalancer and then access it via the Internet.
 
-Example with OpenFaaS, make sure you give the `port` a `name` of `http`, otherwise a default of `80` will be used incorrectly.
+## Get an IngressController plus TLS termination
+
+You can bring your own IngressController if you are using inlets-pro, learn more with this tutorial:
+
+* [Expose Your IngressController and get TLS from LetsEncrypt](https://docs.inlets.dev/#/get-started/quickstart-ingresscontroller-cert-manager?id=expose-your-ingresscontroller-and-get-tls-from-letsencrypt)
+
+## Notes on OSS inlets
+
+inlets PRO can tunnel multiple ports, but inlets OSS is set to take the first port named "http" for your service. With the OSS version of inlets (see example with OpenFaaS), make sure you give the `port` a `name` of `http`, otherwise a default of `80` will be used incorrectly.
 
 ```yaml
 apiVersion: v1
@@ -202,7 +230,7 @@ spec:
   type: LoadBalancer
 ```
 
-## Annotations
+## Annotations and ignoring services
 
 By default the operator will create a tunnel for every LoadBalancer service.
 
@@ -226,7 +254,6 @@ Use the same commands as described in the section above.
 > There used to be separate deployment files in `artifacts` folder called `operator-amd64.yaml` and `operator-armhf.yaml`.
 > Since version `0.2.7` Docker images get built for multiple architectures with the same tag which means that there is now just one deployment file called `operator.yaml` that can be used on all supported architecures.
 
-
 # Provider Pricing
 
 The host [provisioning code](https://github.com/inlets/inletsctl/tree/master/pkg/provision) used by the inlets-operator is shared with [inletsctl](https://github.com/inlets/inletsctl), both tools use the configuration in the grid below.
@@ -242,14 +269,16 @@ These costs need to be treated as an estimate and will depend on your bandwidth 
 
 * The first f1-micro instance in a GCP Project (the default instance type for inlets-operator) is free for 720hrs(30 days) a month 
 
+You can [purchase inlets PRO here](https://docs.inlets.dev/#/pricing/)
+
 ## Contributing
 
 Contributions are welcome, see the [CONTRIBUTING.md](CONTRIBUTING.md) guide.
 
 ## Similar projects / products and alternatives
 
+- [inlets pro](https://github.com/inlets/inlets-pro) - L4 TCP tunnel, which can tunnel any TCP traffic with automatic, built-in encryption. Kubernetes-ready with Docker images and YAML manifests. 
+- [inlets](https://inlets.dev) - inlets provides an L7 HTTP tunnel for applications through the use of an exit node, it is used by the inlets operator. Encryption can be configured separately.
 - [metallb](https://github.com/danderson/metallb) - open source LoadBalancer for private Kubernetes clusters, no tunnelling.
-- [inlets](https://inlets.dev) - inlets provides an L7 HTTP tunnel for applications through the use of an exit node, it is used by the inlets operator
-- [inlets pro](https://github.com/inlets/inlets-pro) - L4 TCP tunnel, which can tunnel any TCP traffic and is on the roadmap for the inlets-operator
 - [Cloudflare Argo](https://www.cloudflare.com/en-gb/products/argo-tunnel/) - paid SaaS product from Cloudflare for Cloudflare customers and domains - K8s integration available through Ingress
 - [ngrok](https://ngrok.com) - a popular tunnelling tool, restarts every 7 hours, limits connections per minute, paid SaaS product with no K8s integration available
