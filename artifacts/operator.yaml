@@ -20,7 +20,7 @@ spec:
       serviceAccountName: inlets-operator
       containers:
       - name: operator
-        image: inlets/inlets-operator:0.4.4
+        image: inlets/inlets-operator:0.6.3
         imagePullPolicy: Always
         command:
           - ./inlets-operator
@@ -30,10 +30,15 @@ spec:
           # For Packet users
           # - "-provider=packet"
           # For inlets-pro
-          # - "-license=JWT-OBTAINED-FROM-https://github.com/inlets/inlets-pro"
+          # - "-license=<SET THIS TO YOUR LICENSE>"
+          #- "-pro-client-image=inlets/inlets-pro:0.5.1"
+          # For Providers that use an access key and a secret key
+          # - "-secret-key-file=/var/secrets/inlets/secret/inlets-secret-key"
+          # For providers that need a region
+          # - "-region=eu-west-1"
         env:
         - name: client_image
-          value: inlets/inlets:2.6.3
+          value: inlets/inlets:2.6.4
         resources:
           limits:
             memory: 128Mi
@@ -43,8 +48,17 @@ spec:
         - mountPath: /var/secrets/inlets/
           name: inlets-access-key
           readOnly: true
+        # For Providers that use an access key and a secret key
+        #- mountPath: /var/secrets/inlets/secret/
+        #  name: inlets-secret-key
+        #  readOnly: true
       volumes:
       - name: inlets-access-key
         secret:
           defaultMode: 420
           secretName: inlets-access-key
+      # For Providers that use an access key and a secret key
+      #- name: inlets-secret-key
+      #  secret:
+      #    defaultMode: 420
+      #    secretName: inlets-secret-key

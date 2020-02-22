@@ -102,3 +102,4 @@ Parameter | Description | Default
 `nodeSelector`          | Node labels for data pod assignment                                             | `{}`
 `tolerations`           | Node tolerations                                                                | `[]`
 `affinity`              | Node affinity policy                                                            | `{}`
+`secretKeyFile`         | If we are using a provider that requires a secret key as well as an access key, set to `/var/secrets/inlets/secret/inlets-secret-key` | `""`
