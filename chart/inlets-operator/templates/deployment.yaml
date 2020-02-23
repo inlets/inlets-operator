@@ -30,15 +30,13 @@ spec:
         - "-annotated-only"
         {{- end }}
         - "-provider={{.Values.provider}}"
+        - "-zone={{.Values.zone}}"
+        - "-region={{.Values.region}}"
         - "-access-key-file={{.Values.accessKeyFile}}"
         - "-license={{.Values.inletsProLicense}}"
-        - "-region={{.Values.region}}"
-        {{- if .Values.gceProjectId }}
-        - "-zone={{.Values.zone}}"
-        - "-project-id={{.Values.gceProjectId}}"
-        {{- end }}
-        {{- if .Values.packetProjectId }}
-        - "-project-id={{.Values.packetProjectId}}"
+        - "-project-id={{.Values.projectID}}"
+        {{- if .Values.organizationID }}
+        - "-organization-id={{.Values.organizationID}}"
         {{- end }}
         {{- if .Values.proClientImage }}
         - "-pro-client-image={{.Values.proClientImage}}"
