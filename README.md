@@ -178,7 +178,7 @@ helm repo update
 
 # Install inlets-operator with the required fields
 helm upgrade inlets-operator --install inlets/inlets-operator \
-  --set provider=gce,zone=us-central1-a,gceProjectId=$PROJECTID
+  --set provider=gce,zone=us-central1-a,projectID=$PROJECTID
 
 ```
 

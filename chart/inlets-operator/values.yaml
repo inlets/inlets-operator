@@ -5,11 +5,16 @@ region: "lon1"
 
 # provider: "gce"
 # zone: "us-central1-a"
-# gceProjectId: "<Your GCP Project ID>"
+# projectID: "<Your GCP Project ID>"
 
 # provider: "packet"
 # region: "ams1"
-# packetProjectId: "<Your Packet Project ID>"
+# projectID: "<Your Packet Project ID>"
+
+# provider: "scaleway"
+# region: "ams1"
+# organization-id: "<Your Organization ID>"
+
 accessKeyFile: "/var/secrets/inlets/inlets-access-key"
 
 # Obtain a free 14-day trial from https://github.com/inlets/inlets-pro

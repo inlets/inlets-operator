@@ -45,12 +45,41 @@ helm upgrade inlets-operator --install inlets/inlets-operator \
   --set inletsProLicense=JWT_GOES_HERE
 ```
 
+### Google Compute Engine with inlets OSS
+
+```sh
+helm upgrade inlets-operator --install inlets/inlets-operator \
+  --set provider=gce,zone=us-central1-a,projectID=PROJECTID
+```
+
+### Google Compute Engine with inlets-pro
+
+```sh
+helm upgrade inlets-operator --install inlets/inlets-operator \
+  --set provider=gce,zone=us-central1-a,projectID=PROJECTID,inletsProLicense=JWT_GOES_HERE
+```
+
 ### Packet.com with inlets OSS
 
 ```sh
 helm upgrade inlets-operator --install inlets/inlets-operator \
-  --set provider=packet,region=ams1,packetProjectId=PACKETID
+  --set provider=packet,region=ams1,projectID=PROJECTID
 ```
+
+### Packet.com with inlets-pro
+
+```sh
+helm upgrade inlets-operator --install inlets/inlets-operator \
+  --set provider=packet,region=ams1,projectID=PROJECTID,inletsProLicense=WT_GOES_HERE
+```
+
+### Scaleway with inlets OSS
+
+```sh
+helm upgrade inlets-operator --install inlets/inlets-operator \
+  --set provider=scaleway,region=ams1,organizationID=ORGANIZATIONID
+```
+
 
 ## Chart parameters
 
