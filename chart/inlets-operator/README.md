@@ -94,8 +94,7 @@ Parameter | Description | Default
 `region`                | The region to provision hosts into                                              | `""`
 `zone`                  | The zone where the exit node is to be provisioned (Used when Google Compute Engine is used as provider) | `us-central1-a`
 `accessKeyFile`         | Read the access key for your infrastructure provider from a file (recommended)  | `/var/secrets/inlets/inlets-access-key`
-`gceProjectId`          | The project ID if using Google Compute Engine as the provider                   | `""`
-`packetProjectId`       | The project ID if using Packet.com as the provider                              | `""`
+`projectId`             | The project ID if using Google Compute Engine or Packet.com  as the provider    | `""`
 `annotatedOnly`         | Only create a tunnel for annotated services.                                    | `false`
 `inletsProLicense`      | License for use with inlets-pro                                                 | `""`
 `resources`             | Operator resources requests & limits                                            | `{"requests":{"cpu": "100m", "memory": "128Mi"}}`
