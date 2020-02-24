@@ -31,7 +31,7 @@ spec:
           # - "-provider=packet"
           # For inlets-pro
           # - "-license=<SET THIS TO YOUR LICENSE>"
-          #- "-pro-client-image=inlets/inlets-pro:0.5.1"
+          # - "-pro-client-image=inlets/inlets-pro:0.5.6"
           # For Providers that use an access key and a secret key
           # - "-secret-key-file=/var/secrets/inlets/secret/inlets-secret-key"
           # For providers that need a region
