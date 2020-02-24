@@ -13,7 +13,7 @@ region: "lon1"
 
 # provider: "scaleway"
 # region: "ams1"
-# organization-id: "<Your Organization ID>"
+# organizationID: "<Your Organization ID>"
 
 accessKeyFile: "/var/secrets/inlets/inlets-access-key"
 
