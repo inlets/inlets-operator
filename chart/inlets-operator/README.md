@@ -1,8 +1,8 @@
 # inlets-operator chart
 
-Install the inlets-operator with this chart or with [k3sup](https://k3sup.dev).
+Install the inlets-operator with this chart or with [arkade](https://get-arkade.dev).
 
-You can also install the inlets-operator with [k3sup app install inlets-operator](https://k3sup.dev), to any Kubernetes cluster. k3sup provides strongly-typed flags and validation for parameters.
+You can also install the inlets-operator with [arkade install inlets-operator](https://get-arkade.dev) to any Kubernetes cluster. arkade provides strongly-typed flags and validation for parameters.
 
 ## Pre-reqs
 
