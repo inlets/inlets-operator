@@ -60,7 +60,7 @@ Other features:
 - [x] Ignore Services with `dev.inlets.manage: false` annotation
 - [x] Garbage collect hosts when Service or CRD is deleted
 - [x] CI with Travis and automated release artifacts
-- [x] One-line installer [k3sup](https://k3sup.dev/) - `k3sup app install inlets-operator --help`
+- [x] One-line installer [arkade](https://get-arkade.dev/) - `arkade install inlets-operator --help`
 
 Backlog pending:
 - [ ] Provision to Civo
@@ -113,12 +113,12 @@ kubectl apply -f ./artifacts/operator-rbac.yaml
 kubectl apply -f ./artifacts/operator.yaml
 ```
 
-You can also install the inlets-operator using a single command using [k3sup](https://k3sup.dev/), k3sup runs against any valid Kubernetes cluster and is not limited to use with k3s.
+You can also install the inlets-operator using a single command using [arkade](https://get-arkade.dev/), arkade runs against any valid Kubernetes cluster and is not limited to use with k3s.
 
 Install with inlets PRO:
 
 ```sh
-k3sup app install inlets-operator \
+arkade install inlets-operator \
  --provider digitalocean \
  --region lon1 \
  --token-file $HOME/Downloads/do-access-token \
@@ -128,7 +128,7 @@ k3sup app install inlets-operator \
 Install with inlets OSS:
 
 ```sh
-k3sup app install inlets-operator \
+arkade install inlets-operator \
  --provider digitalocean \
  --region lon1 \
  --token-file $HOME/Downloads/do-access-token
@@ -140,11 +140,11 @@ These providers require an additional secret to be provided, this can be created
 
 
  
-To install using `k3sup` you can pass the additional --secret-key-file arg
+To install using `arkade` you can pass the additional --secret-key-file arg
 
 ```sh
 
-k3sup app install inlets-operator \
+arkade install inlets-operator \
  --provider ec2 \
  --region eu-west-1 \
  --token-file $HOME/Downloads/access-key \
