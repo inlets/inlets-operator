@@ -1,6 +1,10 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+
+	"k8s.io/apimachinery/pkg/api/resource"
+)
 
 func validateFlags(c InfraConfig) error {
 	if c.Provider == "packet" {
@@ -16,5 +20,11 @@ func validateFlags(c InfraConfig) error {
 			return fmt.Errorf("zone required for provider: %s", c.Provider)
 		}
 	}
+	if len(c.MaxClientMemory) > 0 {
+		if _, err := resource.ParseQuantity(c.MaxClientMemory); err != nil {
+			return fmt.Errorf("invalid memory value: %s", err.Error())
+		}
+	}
+
 	return nil
 }
