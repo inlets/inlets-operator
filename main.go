@@ -45,6 +45,7 @@ type InfraConfig struct {
 	InletsClientImage string
 	AnnotatedOnly     bool
 	ProConfig         InletsProConfig
+	MaxClientMemory   string
 }
 
 func (i InfraConfig) UsePro() bool {
@@ -77,6 +78,7 @@ func main() {
 	flag.StringVar(&infra.ProjectID, "project-id", "", "The project ID if using Packet.com, or Google Compute Engine as the provider")
 	flag.StringVar(&infra.ProConfig.License, "license", "", "Supply a license for use with inlets-pro")
 	flag.StringVar(&infra.ProConfig.ClientImage, "pro-client-image", "", "Supply a Docker image for the inlets-pro client")
+	flag.StringVar(&infra.MaxClientMemory, "max-client-memory", "128Mi", "Maximum memory limit for the tunnel clients")
 
 	flag.BoolVar(&infra.AnnotatedOnly, "annotated-only", false, "Only create a tunnel for annotated services. Annotate with dev.inlets.manage=true.")
 

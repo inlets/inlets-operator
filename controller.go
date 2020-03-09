@@ -16,6 +16,7 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
@@ -725,7 +726,13 @@ func (c *Controller) syncHandler(key string) error {
 
 			ports := getPortsString(service)
 
-			client := makeClient(tunnel, firstPort, c.infraConfig.GetInletsClientImage(), c.infraConfig.UsePro(), ports, c.infraConfig.ProConfig.License)
+			client := makeClient(tunnel, firstPort,
+				c.infraConfig.GetInletsClientImage(),
+				c.infraConfig.UsePro(),
+				ports,
+				c.infraConfig.ProConfig.License,
+				c.infraConfig.MaxClientMemory)
+
 			deployment, createDeployErr := c.kubeclientset.AppsV1().
 				Deployments(tunnel.Namespace).
 				Create(client)
@@ -767,7 +774,7 @@ func (c *Controller) syncHandler(key string) error {
 	return nil
 }
 
-func makeClient(tunnel *inletsv1alpha1.Tunnel, targetPort int32, clientImage string, usePro bool, ports, license string) *appsv1.Deployment {
+func makeClient(tunnel *inletsv1alpha1.Tunnel, targetPort int32, clientImage string, usePro bool, ports, license string, maxMemory string) *appsv1.Deployment {
 	replicas := int32(1)
 	name := tunnel.Name + "-client"
 	var container corev1.Container
@@ -799,6 +806,16 @@ func makeClient(tunnel *inletsv1alpha1.Tunnel, targetPort int32, clientImage str
 				"--license=" + license,
 			},
 		}
+	}
+
+	container.Resources = corev1.ResourceRequirements{
+		Limits: corev1.ResourceList{
+			corev1.ResourceMemory: resource.MustParse(maxMemory),
+		},
+		Requests: corev1.ResourceList{
+			corev1.ResourceCPU:    resource.MustParse("25m"),
+			corev1.ResourceMemory: resource.MustParse("25Mi"),
+		},
 	}
 
 	deployment := appsv1.Deployment{
