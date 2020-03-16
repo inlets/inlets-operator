@@ -172,9 +172,9 @@ type SharedInformerFactory interface {
 	ForResource(resource schema.GroupVersionResource) (GenericInformer, error)
 	WaitForCacheSync(stopCh <-chan struct{}) map[reflect.Type]bool
 
-	Inletsoperator() inletsoperator.Interface
+	Inlets() inletsoperator.Interface
 }
 
-func (f *sharedInformerFactory) Inletsoperator() inletsoperator.Interface {
+func (f *sharedInformerFactory) Inlets() inletsoperator.Interface {
 	return inletsoperator.New(f, f.namespace, f.tweakListOptions)
 }

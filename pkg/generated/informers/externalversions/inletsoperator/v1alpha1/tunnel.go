@@ -21,7 +21,7 @@ package v1alpha1
 import (
 	time "time"
 
-	inletsoperatorv1alpha1 "github.com/inlets/inlets-operator/pkg/apis/inletsoperator/v1alpha1"
+	InletsV1alpha1 "github.com/inlets/inlets-operator/pkg/apis/inletsoperator/v1alpha1"
 	versioned "github.com/inlets/inlets-operator/pkg/generated/clientset/versioned"
 	internalinterfaces "github.com/inlets/inlets-operator/pkg/generated/informers/externalversions/internalinterfaces"
 	v1alpha1 "github.com/inlets/inlets-operator/pkg/generated/listers/inletsoperator/v1alpha1"
@@ -61,16 +61,16 @@ func NewFilteredTunnelInformer(client versioned.Interface, namespace string, res
 				if tweakListOptions != nil {
 					tweakListOptions(&options)
 				}
-				return client.InletsoperatorV1alpha1().Tunnels(namespace).List(options)
+				return client.InletsV1alpha1().Tunnels(namespace).List(options)
 			},
 			WatchFunc: func(options v1.ListOptions) (watch.Interface, error) {
 				if tweakListOptions != nil {
 					tweakListOptions(&options)
 				}
-				return client.InletsoperatorV1alpha1().Tunnels(namespace).Watch(options)
+				return client.InletsV1alpha1().Tunnels(namespace).Watch(options)
 			},
 		},
-		&inletsoperatorv1alpha1.Tunnel{},
+		&InletsV1alpha1.Tunnel{},
 		resyncPeriod,
 		indexers,
 	)
@@ -81,7 +81,7 @@ func (f *tunnelInformer) defaultInformer(client versioned.Interface, resyncPerio
 }
 
 func (f *tunnelInformer) Informer() cache.SharedIndexInformer {
-	return f.factory.InformerFor(&inletsoperatorv1alpha1.Tunnel{}, f.defaultInformer)
+	return f.factory.InformerFor(&InletsV1alpha1.Tunnel{}, f.defaultInformer)
 }
 
 func (f *tunnelInformer) Lister() v1alpha1.TunnelLister {

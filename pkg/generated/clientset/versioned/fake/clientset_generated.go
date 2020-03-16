@@ -20,8 +20,8 @@ package fake
 
 import (
 	clientset "github.com/inlets/inlets-operator/pkg/generated/clientset/versioned"
-	inletsoperatorv1alpha1 "github.com/inlets/inlets-operator/pkg/generated/clientset/versioned/typed/inletsoperator/v1alpha1"
-	fakeinletsoperatorv1alpha1 "github.com/inlets/inlets-operator/pkg/generated/clientset/versioned/typed/inletsoperator/v1alpha1/fake"
+	inletsv1alpha1 "github.com/inlets/inlets-operator/pkg/generated/clientset/versioned/typed/inletsoperator/v1alpha1"
+	fakeinletsv1alpha1 "github.com/inlets/inlets-operator/pkg/generated/clientset/versioned/typed/inletsoperator/v1alpha1/fake"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/watch"
 	"k8s.io/client-go/discovery"
@@ -41,7 +41,7 @@ func NewSimpleClientset(objects ...runtime.Object) *Clientset {
 		}
 	}
 
-	cs := &Clientset{}
+	cs := &Clientset{tracker: o}
 	cs.discovery = &fakediscovery.FakeDiscovery{Fake: &cs.Fake}
 	cs.AddReactor("*", "*", testing.ObjectReaction(o))
 	cs.AddWatchReactor("*", func(action testing.Action) (handled bool, ret watch.Interface, err error) {
@@ -63,15 +63,20 @@ func NewSimpleClientset(objects ...runtime.Object) *Clientset {
 type Clientset struct {
 	testing.Fake
 	discovery *fakediscovery.FakeDiscovery
+	tracker   testing.ObjectTracker
 }
 
 func (c *Clientset) Discovery() discovery.DiscoveryInterface {
 	return c.discovery
 }
 
+func (c *Clientset) Tracker() testing.ObjectTracker {
+	return c.tracker
+}
+
 var _ clientset.Interface = &Clientset{}
 
-// InletsoperatorV1alpha1 retrieves the InletsoperatorV1alpha1Client
-func (c *Clientset) InletsoperatorV1alpha1() inletsoperatorv1alpha1.InletsoperatorV1alpha1Interface {
-	return &fakeinletsoperatorv1alpha1.FakeInletsoperatorV1alpha1{Fake: &c.Fake}
+// InletsV1alpha1 retrieves the InletsV1alpha1Client
+func (c *Clientset) InletsV1alpha1() inletsv1alpha1.InletsV1alpha1Interface {
+	return &fakeinletsv1alpha1.FakeInletsV1alpha1{Fake: &c.Fake}
 }

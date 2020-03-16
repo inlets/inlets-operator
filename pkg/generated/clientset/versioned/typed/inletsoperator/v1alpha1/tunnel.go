@@ -56,7 +56,7 @@ type tunnels struct {
 }
 
 // newTunnels returns a Tunnels
-func newTunnels(c *InletsoperatorV1alpha1Client, namespace string) *tunnels {
+func newTunnels(c *InletsV1alpha1Client, namespace string) *tunnels {
 	return &tunnels{
 		client: c.RESTClient(),
 		ns:     namespace,
