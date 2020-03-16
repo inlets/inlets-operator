@@ -117,7 +117,7 @@ func main() {
 
 	controller := NewController(kubeClient, operatorClient,
 		kubeInformerFactory.Apps().V1().Deployments(),
-		tunnelsInformerFactory.Inletsoperator().V1alpha1().Tunnels(),
+		tunnelsInformerFactory.Inlets().V1alpha1().Tunnels(),
 		kubeInformerFactory.Core().V1().Services(),
 		infra)
 

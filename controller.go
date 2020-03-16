@@ -334,7 +334,7 @@ func (c *Controller) syncHandler(key string) error {
 
 	if service != nil {
 		if service.Spec.Type == "LoadBalancer" {
-			tunnels := c.operatorclientset.InletsoperatorV1alpha1().
+			tunnels := c.operatorclientset.InletsV1alpha1().
 				Tunnels(service.ObjectMeta.Namespace)
 
 			ops := metav1.GetOptions{}
@@ -746,7 +746,7 @@ func (c *Controller) syncHandler(key string) error {
 				Namespace: deployment.Namespace,
 			}
 
-			_, updateErr := c.operatorclientset.InletsoperatorV1alpha1().
+			_, updateErr := c.operatorclientset.InletsV1alpha1().
 				Tunnels(tunnel.Namespace).
 				Update(tunnel)
 
@@ -892,7 +892,7 @@ func (c *Controller) updateTunnelProvisioningStatus(tunnel *inletsv1alpha1.Tunne
 	tunnelCopy.Status.HostID = id
 	tunnelCopy.Status.HostIP = ip
 
-	_, err := c.operatorclientset.InletsoperatorV1alpha1().Tunnels(tunnel.Namespace).Update(tunnelCopy)
+	_, err := c.operatorclientset.InletsV1alpha1().Tunnels(tunnel.Namespace).Update(tunnelCopy)
 	return err
 }
 

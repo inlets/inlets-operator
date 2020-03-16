@@ -31,7 +31,7 @@ echo ">> Temporary output directory ${TEMP_DIR}"
 chmod +x ${CODEGEN_PKG}/generate-groups.sh
 
 ${CODEGEN_PKG}/generate-groups.sh all \
-    github.com/inlets/inlets-operator/pkg/client github.com/inlets/inlets-operator/pkg/apis \
+    github.com/inlets/inlets-operator/pkg/generated github.com/inlets/inlets-operator/pkg/apis \
     inletsoperator:v1alpha1 \
     --output-base "${TEMP_DIR}" \
     --go-header-file ${SCRIPT_ROOT}/hack/boilerplate.go.txt

@@ -30,13 +30,13 @@ import (
 
 // FakeTunnels implements TunnelInterface
 type FakeTunnels struct {
-	Fake *FakeInletsoperatorV1alpha1
+	Fake *FakeInletsV1alpha1
 	ns   string
 }
 
-var tunnelsResource = schema.GroupVersionResource{Group: "inletsoperator.k8s.io", Version: "v1alpha1", Resource: "tunnels"}
+var tunnelsResource = schema.GroupVersionResource{Group: "inlets.inlets.dev", Version: "v1alpha1", Resource: "tunnels"}
 
-var tunnelsKind = schema.GroupVersionKind{Group: "inletsoperator.k8s.io", Version: "v1alpha1", Kind: "Tunnel"}
+var tunnelsKind = schema.GroupVersionKind{Group: "inlets.inlets.dev", Version: "v1alpha1", Kind: "Tunnel"}
 
 // Get takes name of the tunnel, and returns the corresponding tunnel object, and an error if there is any.
 func (c *FakeTunnels) Get(name string, options v1.GetOptions) (result *v1alpha1.Tunnel, err error) {
