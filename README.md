@@ -22,17 +22,20 @@ The inlets-operator automates cloud host provisioning to run inlets or inlets-pr
 
 There are two tunnel projects available for you to use with the inlets-operator:
 
-* [inlets](https://github.com/inlets/inlets)
-
-  Tunnel L7 HTTP/HTTPS traffic.
-  Free, OSS, built for community developers. Encryption via TLS to be configured separately.
-
 * [inlets-pro](https://github.com/inlets/inlets-pro)
 
+  Tunnel an IngressController including TLS termination and LetsEncrypt certs from cert-manager
   Tunnel any TCP traffic at L4 i.e. Mongo, Postgres, MariaDB, Redis, NATS, SSH and TLS itself.
   Automatic end-to-end encryption built-in with TLS.
-  Tunnel an IngressController including TLS termination.
   Commercially licensed and supported. For cloud native operators and developers.
+  Punch out multiple ports such as 80 and 443 over the same tunnel
+
+* [inlets](https://github.com/inlets/inlets)
+
+  Tunnel L7 HTTP traffic.
+  Free, OSS, built for community developers.
+  Punch out only one port per tunnel.
+  No encryption enabled by default.
 
 Operator cloud host provisioning:
 
@@ -100,7 +103,7 @@ See an alternative video showing my cluster running with KinD on my Mac and the 
 
 You can also run the operator in-cluster, a ClusterRole is used since Services can be created in any namespace, and may need a tunnel.
 
-```sh
+```bash
 # Create a secret to store the access token
 
 kubectl create secret generic inlets-access-key \
@@ -113,11 +116,11 @@ kubectl apply -f ./artifacts/operator-rbac.yaml
 kubectl apply -f ./artifacts/operator.yaml
 ```
 
-You can also install the inlets-operator using a single command using [arkade](https://get-arkade.dev/), arkade runs against any valid Kubernetes cluster and is not limited to use with k3s.
+You can also install the inlets-operator using a single command using [arkade](https://get-arkade.dev/), arkade runs against any Kubernetes cluster.
 
 Install with inlets PRO:
 
-```sh
+```bash
 arkade install inlets-operator \
  --provider digitalocean \
  --region lon1 \
@@ -127,7 +130,7 @@ arkade install inlets-operator \
 
 Install with inlets OSS:
 
-```sh
+```bash
 arkade install inlets-operator \
  --provider digitalocean \
  --region lon1 \
@@ -137,27 +140,22 @@ arkade install inlets-operator \
 ## Using a provider which requires an Access Key and Secret Key? (AWS EC2, Scaleway)
 
 These providers require an additional secret to be provided, this can be created like this:
-
-
  
 To install using `arkade` you can pass the additional --secret-key-file arg
 
-```sh
-
+```bash
 arkade install inlets-operator \
  --provider ec2 \
  --region eu-west-1 \
  --token-file $HOME/Downloads/access-key \
  --secret-key-file $HOME/Downloads/secret-access-key \
  --license $(cat $HOME/inlets-pro-license.txt)
-
 ```
 
 If you are installing manually, using the yaml files you will need to un-comment the sections indicated in the
  `artifacts/operator.yaml` file
 
-```sh
-
+```bash
 kubectl apply -f ./artifacts/crd.yaml
 
 # Create a secret to store the access token
@@ -177,7 +175,6 @@ kubectl apply -f ./artifacts/operator-rbac.yaml
 kubectl apply -f ./artifacts/operator.yaml
 ```
  
-
 ## Running in-cluster, using Google Compute Engine for the exit node using helm
 
 > Note: this example is now multi-arch, so it's valid for `x86_64`, `ARMHF`, and `ARM64`.
@@ -223,7 +220,6 @@ helm repo update
 # Install inlets-operator with the required fields
 helm upgrade inlets-operator --install inlets/inlets-operator \
   --set provider=gce,zone=us-central1-a,projectID=$PROJECTID
-
 ```
 
 ## Get a LoadBalancer provided by inlets
