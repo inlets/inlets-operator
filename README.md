@@ -16,26 +16,30 @@ Whilst 5 USD is cheaper than a "Cloud Load Balancer", this tool is for users who
 
 You can configure the operator to use either of our tunnels: inlets OSS for L7 HTTP traffic, or inlets PRO which adds L4 TCP support, automatic encryption with TLS and can enable the use of an IngressController and cert-manager directly from your laptop or private cloud.
 
+## inlets tunnel capabilities
+
+The operator detects Services of type LoadBalancer, and then creates a `Tunnel` Custom Resource. Its next step is to provision a small VM with a public IP on the public cloud, where it will run the inlets tunnel server. Then an inlets client is deployed as a Pod within your local cluster, which connects to the server and acts like a gateway to your chosen local service.
+
+Pick your inlets edition:
+
+### [inlets PRO](https://github.com/inlets/inlets-pro)
+
+* Tunnel an IngressController including TLS termination and LetsEncrypt certs from cert-manager
+* Tunnel any TCP traffic at L4 i.e. Mongo, Postgres, MariaDB, Redis, NATS, SSH and TLS itself.
+* Automatic end-to-end encryption built-in with TLS.
+* Commercially licensed and supported. For cloud native operators and developers.
+* Punch out multiple ports such as 80 and 443 over the same tunnel
+
+Discounted [pricing available](https://docs.inlets.dev/#/pricing/?id=pricing) for personal use.
+
+### [inlets OSS](https://github.com/inlets/inlets)
+
+* Tunnel L7 HTTP traffic.
+* Free, OSS, built for community developers.
+* Punch out only one port per tunnel, port name must be: `http`
+* No encryption enabled by default.
+
 ## Status and backlog
-
-The inlets-operator automates cloud host provisioning to run inlets or inlets-pro to expose internal services to the Internet.
-
-There are two tunnel projects available for you to use with the inlets-operator:
-
-* [inlets-pro](https://github.com/inlets/inlets-pro)
-
-  Tunnel an IngressController including TLS termination and LetsEncrypt certs from cert-manager
-  Tunnel any TCP traffic at L4 i.e. Mongo, Postgres, MariaDB, Redis, NATS, SSH and TLS itself.
-  Automatic end-to-end encryption built-in with TLS.
-  Commercially licensed and supported. For cloud native operators and developers.
-  Punch out multiple ports such as 80 and 443 over the same tunnel
-
-* [inlets](https://github.com/inlets/inlets)
-
-  Tunnel L7 HTTP traffic.
-  Free, OSS, built for community developers.
-  Punch out only one port per tunnel.
-  No encryption enabled by default.
 
 Operator cloud host provisioning:
 
