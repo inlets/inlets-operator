@@ -232,8 +232,8 @@ helm upgrade inlets-operator --install inlets/inlets-operator \
 kubectl run nginx-1 --image=nginx --port=80 --restart=Always
 kubectl run nginx-2 --image=nginx --port=80 --restart=Always
 
-kubectl expose deployment nginx-1 --port=80 --type=LoadBalancer
-kubectl expose deployment nginx-2 --port=80 --type=LoadBalancer
+kubectl expose pod nginx-1 --port=80 --type=LoadBalancer
+kubectl expose pod nginx-2 --port=80 --type=LoadBalancer
 
 kubectl get svc
 
