@@ -226,15 +226,53 @@ helm upgrade inlets-operator --install inlets/inlets-operator \
   --set provider=gce,zone=us-central1-a,projectID=$PROJECTID
 ```
 
-## Get a LoadBalancer provided by inlets
+## Expose a service with a LoadBalancer
 
-```sh
+The LoadBalancer type is usually provided by a cloud controller, but when that is not available, then you can use the inlets-operator to get a public IP and ingress. The free OSS version of inlets provides a HTTP tunnel, inlets PRO can provide TCP and full functionality to an IngressController.
+
+First create a deployment for Nginx.
+
+For Kubernetes 1.17 and lower:
+
+```bash
 kubectl run nginx-1 --image=nginx --port=80 --restart=Always
-kubectl run nginx-2 --image=nginx --port=80 --restart=Always
+```
 
+For 1.18 and higher:
+
+```bash
+export DEPLOYMENT=nginx-1
+
+(cat<<EOF
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: $DEPLOYMENT
+  labels:
+    app: nginx
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:1.14.2
+        ports:
+        - containerPort: 80
+EOF
+) | kubectl apply -f -
+```
+
+Now create a service of type LoadBalancer via `kubectl expose`:
+
+```bash
 kubectl expose deployment nginx-1 --port=80 --type=LoadBalancer
-kubectl expose deployment nginx-2 --port=80 --type=LoadBalancer
-
 kubectl get svc
 
 kubectl get tunnel/nginx-1-tunnel -o yaml
@@ -244,9 +282,9 @@ kubectl logs deploy/nginx-1-tunnel-client
 
 Check the IP of the LoadBalancer and then access it via the Internet.
 
-## Get an IngressController plus TLS termination
+## Get an IngressController with TLS certificates
 
-You can bring your own IngressController if you are using inlets-pro, learn more with this tutorial:
+You can bring your own IngressController such as ingress-nginx or Traefik. And if you are using inlets PRO, you can also get TLS termination and certificates from LetsEncrypt via cert-manager.
 
 * [Expose Your IngressController and get TLS from LetsEncrypt](https://docs.inlets.dev/#/get-started/quickstart-ingresscontroller-cert-manager?id=expose-your-ingresscontroller-and-get-tls-from-letsencrypt)
 
