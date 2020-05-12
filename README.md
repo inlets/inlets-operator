@@ -241,32 +241,7 @@ kubectl run nginx-1 --image=nginx --port=80 --restart=Always
 For 1.18 and higher:
 
 ```bash
-export DEPLOYMENT=nginx-1
-
-(cat<<EOF
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: $DEPLOYMENT
-  labels:
-    app: nginx
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: nginx
-  template:
-    metadata:
-      labels:
-        app: nginx
-    spec:
-      containers:
-      - name: nginx
-        image: nginx:1.14.2
-        ports:
-        - containerPort: 80
-EOF
-) | kubectl apply -f -
+kubectl apply -f https://raw.githubusercontent.com/inlets/inlets-operator/master/contrib/nginx-sample-deployment.yaml
 ```
 
 Now create a service of type LoadBalancer via `kubectl expose`:
