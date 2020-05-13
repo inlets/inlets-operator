@@ -141,7 +141,7 @@ func (i *InfraConfig) GetInletsClientImage() string {
 	}
 
 	if i.InletsClientImage == "" {
-		return "inlets/inlets:2.7.0"
+		return "inlets/inlets:2.7.2"
 	}
 
 	return i.InletsClientImage
