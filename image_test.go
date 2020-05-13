@@ -6,7 +6,7 @@ func Test_GetInletsClientImage_DefaultOSSNoOverride(t *testing.T) {
 
 	c := InfraConfig{}
 	got := c.GetInletsClientImage()
-	want := "inlets/inlets:2.7.0"
+	want := "inlets/inlets:2.7.2"
 	if got != want {
 		t.Errorf("for OSS variant want %s, but got %s", want, got)
 		t.Fail()
