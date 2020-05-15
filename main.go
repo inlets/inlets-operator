@@ -7,7 +7,6 @@ import (
 	"log"
 	"os"
 	"strings"
-	"time"
 
 	kubeinformers "k8s.io/client-go/informers"
 	"k8s.io/client-go/kubernetes"
@@ -112,8 +111,8 @@ func main() {
 		klog.Fatalf("Error building example clientset: %s", err.Error())
 	}
 
-	kubeInformerFactory := kubeinformers.NewSharedInformerFactory(kubeClient, time.Second*30)
-	tunnelsInformerFactory := informers.NewSharedInformerFactory(operatorClient, time.Second*30)
+	kubeInformerFactory := kubeinformers.NewSharedInformerFactory(kubeClient, 0)
+	tunnelsInformerFactory := informers.NewSharedInformerFactory(operatorClient, 0)
 
 	controller := NewController(kubeClient, operatorClient,
 		kubeInformerFactory.Apps().V1().Deployments(),
