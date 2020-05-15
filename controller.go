@@ -15,6 +15,7 @@ import (
 
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
+	apiequality "k8s.io/apimachinery/pkg/api/equality"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -128,48 +129,54 @@ func NewController(
 
 			log.Println("Delete event:", r.Name, r.Namespace, r.OwnerReferences)
 
-			if ok {
-				if len(r.Status.HostID) > 0 {
-					var provisioner provision.Provisioner
-
-					switch controller.infraConfig.Provider {
-					case "digitalocean":
-						provisioner, _ = provision.NewDigitalOceanProvisioner(controller.infraConfig.GetAccessKey())
-						break
-					case "packet":
-						provisioner, _ = provision.NewPacketProvisioner(controller.infraConfig.GetAccessKey())
-						break
-					case "scaleway":
-						provisioner, _ = provision.NewScalewayProvisioner(controller.infraConfig.GetAccessKey(), controller.infraConfig.GetSecretKey(), controller.infraConfig.OrganizationID, controller.infraConfig.Region)
-						break
-					case "gce":
-						provisioner, _ = provision.NewGCEProvisioner(controller.infraConfig.GetAccessKey())
-						break
-					case "ec2":
-						provisioner, _ = provision.NewEC2Provisioner(controller.infraConfig.Region, controller.infraConfig.GetAccessKey(), controller.infraConfig.GetSecretKey())
-						break
-					case "civo":
-						provisioner, _ = provision.NewCivoProvisioner(controller.infraConfig.GetAccessKey())
-						break
-					}
-
-					if provisioner != nil {
-						log.Printf("Deleting exit-node for %s: %s, ip: %s\n", r.Spec.ServiceName, r.Status.HostID, r.Status.HostIP)
-
-						delReq := provision.HostDeleteRequest{ID: r.Status.HostID, IP: r.Status.HostIP}
-						err := provisioner.Delete(delReq)
-						if err != nil {
-							log.Println(err)
-						} else {
-							err = controller.updateService(&r, "")
-							if err != nil {
-								log.Printf("Error updating service: %s, %s", r.Spec.ServiceName, err.Error())
-							}
-						}
-					}
-				}
+			if !ok {
+				return
 			}
 
+			if len(r.Status.HostID) == 0 {
+				return
+			}
+
+			var provisioner provision.Provisioner
+
+			switch controller.infraConfig.Provider {
+			case "digitalocean":
+				provisioner, _ = provision.NewDigitalOceanProvisioner(controller.infraConfig.GetAccessKey())
+				break
+			case "packet":
+				provisioner, _ = provision.NewPacketProvisioner(controller.infraConfig.GetAccessKey())
+				break
+			case "scaleway":
+				provisioner, _ = provision.NewScalewayProvisioner(controller.infraConfig.GetAccessKey(), controller.infraConfig.GetSecretKey(), controller.infraConfig.OrganizationID, controller.infraConfig.Region)
+				break
+			case "gce":
+				provisioner, _ = provision.NewGCEProvisioner(controller.infraConfig.GetAccessKey())
+				break
+			case "ec2":
+				provisioner, _ = provision.NewEC2Provisioner(controller.infraConfig.Region, controller.infraConfig.GetAccessKey(), controller.infraConfig.GetSecretKey())
+				break
+			case "civo":
+				provisioner, _ = provision.NewCivoProvisioner(controller.infraConfig.GetAccessKey())
+				break
+			}
+
+			if provisioner == nil {
+				return
+			}
+
+			log.Printf("Deleting exit-node for %s: %s, ip: %s\n", r.Spec.ServiceName, r.Status.HostID, r.Status.HostIP)
+
+			delReq := provision.HostDeleteRequest{ID: r.Status.HostID, IP: r.Status.HostIP}
+			err := provisioner.Delete(delReq)
+			if err != nil {
+				log.Println(err)
+				return
+			}
+
+			err = controller.updateService(&r, "")
+			if err != nil {
+				log.Printf("Error updating service: %s, %s", r.Spec.ServiceName, err.Error())
+			}
 		},
 	})
 
@@ -184,12 +191,9 @@ func NewController(
 		UpdateFunc: func(old, new interface{}) {
 			newDepl := new.(*appsv1.Deployment)
 			oldDepl := old.(*appsv1.Deployment)
-			if newDepl.ResourceVersion == oldDepl.ResourceVersion {
-				// Periodic resync will send update events for all known Deployments.
-				// Two different versions of the same Deployment will always have different RVs.
-				return
+			if !apiequality.Semantic.DeepEqual(oldDepl, newDepl) {
+				controller.handleObject(new)
 			}
-			controller.handleObject(new)
 		},
 		DeleteFunc: controller.handleObject,
 	})
@@ -331,60 +335,62 @@ func (c *Controller) syncHandler(key string) error {
 	}
 
 	service, _ := c.serviceLister.Services(namespace).Get(name)
+	if service == nil {
+		return nil
+	}
 
-	if service != nil {
-		if service.Spec.Type == "LoadBalancer" {
-			tunnels := c.operatorclientset.InletsV1alpha1().
-				Tunnels(service.ObjectMeta.Namespace)
+	if service.Spec.Type != "LoadBalancer" {
+		return nil
+	}
 
-			ops := metav1.GetOptions{}
-			name := service.Name + "-tunnel"
-			found, err := tunnels.Get(name, ops)
+	tunnels := c.operatorclientset.InletsV1alpha1().Tunnels(service.ObjectMeta.Namespace)
 
-			if errors.IsNotFound(err) {
-				if manageService(*c, *service) {
-					pwdRes, pwdErr := password.Generate(64, 10, 0, false, true)
-					if pwdErr != nil {
-						log.Fatalf("Error generating password for inlets server %s", pwdErr.Error())
-					}
+	ops := metav1.GetOptions{}
+	name = service.Name + "-tunnel"
+	found, err := tunnels.Get(name, ops)
 
-					log.Printf("Creating tunnel for %s.%s\n", name, namespace)
-					tunnel := &inletsv1alpha1.Tunnel{
-						Spec: inletsv1alpha1.TunnelSpec{
-							ServiceName: service.Name,
-							AuthToken:   pwdRes,
-						},
-						ObjectMeta: metav1.ObjectMeta{
-							Name:      name,
-							Namespace: service.ObjectMeta.Namespace,
-							OwnerReferences: []metav1.OwnerReference{
-								*metav1.NewControllerRef(service, schema.GroupVersionKind{
-									Group:   "",
-									Version: "v1",
-									Kind:    "Service",
-								}),
-							},
-						},
-					}
+	if errors.IsNotFound(err) {
+		if manageService(*c, *service) {
+			pwdRes, pwdErr := password.Generate(64, 10, 0, false, true)
+			if pwdErr != nil {
+				log.Fatalf("Error generating password for inlets server %s", pwdErr.Error())
+			}
 
-					_, err := tunnels.Create(tunnel)
+			log.Printf("Creating tunnel for %s.%s\n", name, namespace)
+			tunnel := &inletsv1alpha1.Tunnel{
+				Spec: inletsv1alpha1.TunnelSpec{
+					ServiceName: service.Name,
+					AuthToken:   pwdRes,
+				},
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      name,
+					Namespace: service.ObjectMeta.Namespace,
+					OwnerReferences: []metav1.OwnerReference{
+						*metav1.NewControllerRef(service, schema.GroupVersionKind{
+							Group:   "",
+							Version: "v1",
+							Kind:    "Service",
+						}),
+					},
+				},
+			}
 
-					if err != nil {
-						log.Printf("Error creating tunnel: %s", err.Error())
-					}
-				}
-			} else {
-				log.Printf("Tunnel exists: %s\n", found.Name)
+			_, err := tunnels.Create(tunnel)
 
-				if manageService(*c, *service) == false {
-					log.Printf("Removing tunnel: %s\n", found.Name)
+			if err != nil {
+				log.Printf("Error creating tunnel: %s", err.Error())
+			}
+		}
+	} else {
+		log.Printf("Tunnel exists: %s\n", found.Name)
 
-					err := tunnels.Delete(found.Name, &metav1.DeleteOptions{})
+		if manageService(*c, *service) == false {
+			log.Printf("Removing tunnel: %s\n", found.Name)
 
-					if err != nil {
-						log.Printf("Error deleting tunnel: %s", err.Error())
-					}
-				}
+			err := tunnels.Delete(found.Name, &metav1.DeleteOptions{})
+
+			if err != nil {
+				log.Printf("Error deleting tunnel: %s", err.Error())
 			}
 		}
 	}
