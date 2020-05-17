@@ -856,18 +856,14 @@ func makeClient(tunnel *inletsv1alpha1.Tunnel, targetPort int32, clientImage str
 }
 
 func (c *Controller) updateService(tunnel *inletsv1alpha1.Tunnel, ip string) error {
-
 	get := metav1.GetOptions{}
 	res, err := c.kubeclientset.CoreV1().Services(tunnel.Namespace).Get(tunnel.Spec.ServiceName, get)
 	if err != nil {
 		return err
 	}
 
+	// Update Spec.ExternalIPs
 	copy := res.DeepCopy()
-	// copy.Status.LoadBalancer.Ingress = []corev1.LoadBalancerIngress{
-	// 	corev1.LoadBalancerIngress{IP: ip},
-	// }
-
 	if ip == "" {
 		ips := []string{}
 		for _, v := range copy.Spec.ExternalIPs {
@@ -880,7 +876,19 @@ func (c *Controller) updateService(tunnel *inletsv1alpha1.Tunnel, ip string) err
 		copy.Spec.ExternalIPs = append(copy.Spec.ExternalIPs, ip)
 	}
 
-	_, err = c.kubeclientset.CoreV1().Services(tunnel.Namespace).Update(copy)
+	res, err = c.kubeclientset.CoreV1().Services(tunnel.Namespace).Update(copy)
+	if err != nil {
+		return err
+	}
+
+	// Update Status.LoadBalancer.Ingress
+	copy = res.DeepCopy()
+	copy.Status.LoadBalancer.Ingress = make([]corev1.LoadBalancerIngress, len(copy.Spec.ExternalIPs))
+	for i, ip := range copy.Spec.ExternalIPs {
+		copy.Status.LoadBalancer.Ingress[i] = corev1.LoadBalancerIngress{IP: ip}
+	}
+
+	_, err = c.kubeclientset.CoreV1().Services(tunnel.Namespace).UpdateStatus(copy)
 	return err
 }
 
