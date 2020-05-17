@@ -15,7 +15,7 @@ rules:
   resources: ["tunnels"]
   verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
 - apiGroups: [""]
-  resources: ["services"]
+  resources: ["services", "services/status"]
   verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
 - apiGroups: [""]
   resources: ["events"]
