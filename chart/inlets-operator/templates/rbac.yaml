@@ -12,16 +12,16 @@ metadata:
   namespace: {{ .Release.Namespace }}
 rules:
 - apiGroups: ["inlets.inlets.dev"]
-  resources: ["tunnels"]
+  resources: ["tunnels", "tunnels/finalizers"]
   verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
 - apiGroups: [""]
-  resources: ["services", "services/status"]
+  resources: ["services", "services/status", "services/finalizers"]
   verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
 - apiGroups: [""]
   resources: ["events"]
   verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
 - apiGroups: ["apps"]
-  resources: ["deployments"]
+  resources: ["deployments", "deployments/finalizers"]
   verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
