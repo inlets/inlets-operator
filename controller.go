@@ -15,6 +15,7 @@ import (
 
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
+	apiequality "k8s.io/apimachinery/pkg/api/equality"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -195,13 +196,36 @@ func NewController(
 	})
 
 	serviceInformer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{
-		AddFunc: controller.enqueueService,
-		UpdateFunc: func(old, new interface{}) {
+		AddFunc: func(new interface{}) {
+			if ok := checkServiceType(new); !ok {
+				return
+			}
+
 			controller.enqueueService(new)
+		},
+		UpdateFunc: func(old, new interface{}) {
+			if ok := checkServiceType(new); !ok {
+				return
+			}
+
+			newSvc := new.(*corev1.Service)
+			oldSvc := old.(*corev1.Service)
+			if !apiequality.Semantic.DeepEqual(oldSvc.Spec, newSvc.Spec) {
+				controller.enqueueService(new)
+			}
 		},
 	})
 
 	return controller
+}
+
+func checkServiceType(obj interface{}) bool {
+	svc, ok := obj.(*corev1.Service)
+	if !ok {
+		return false
+	}
+
+	return svc.Spec.Type == corev1.ServiceTypeLoadBalancer
 }
 
 func checkCustomResourceType(obj interface{}) (inletsv1alpha1.Tunnel, bool) {
@@ -333,60 +357,59 @@ func (c *Controller) syncHandler(key string) error {
 	service, _ := c.serviceLister.Services(namespace).Get(name)
 
 	if service != nil {
-		if service.Spec.Type == "LoadBalancer" {
-			tunnels := c.operatorclientset.InletsV1alpha1().
-				Tunnels(service.ObjectMeta.Namespace)
+		tunnels := c.operatorclientset.InletsV1alpha1().
+			Tunnels(service.ObjectMeta.Namespace)
 
-			ops := metav1.GetOptions{}
-			name := service.Name + "-tunnel"
-			found, err := tunnels.Get(name, ops)
+		ops := metav1.GetOptions{}
+		name := service.Name + "-tunnel"
+		found, err := tunnels.Get(name, ops)
 
-			if errors.IsNotFound(err) {
-				if manageService(*c, *service) {
-					pwdRes, pwdErr := password.Generate(64, 10, 0, false, true)
-					if pwdErr != nil {
-						log.Fatalf("Error generating password for inlets server %s", pwdErr.Error())
-					}
-
-					log.Printf("Creating tunnel for %s.%s\n", name, namespace)
-					tunnel := &inletsv1alpha1.Tunnel{
-						Spec: inletsv1alpha1.TunnelSpec{
-							ServiceName: service.Name,
-							AuthToken:   pwdRes,
-						},
-						ObjectMeta: metav1.ObjectMeta{
-							Name:      name,
-							Namespace: service.ObjectMeta.Namespace,
-							OwnerReferences: []metav1.OwnerReference{
-								*metav1.NewControllerRef(service, schema.GroupVersionKind{
-									Group:   "",
-									Version: "v1",
-									Kind:    "Service",
-								}),
-							},
-						},
-					}
-
-					_, err := tunnels.Create(tunnel)
-
-					if err != nil {
-						log.Printf("Error creating tunnel: %s", err.Error())
-					}
+		if errors.IsNotFound(err) {
+			if manageService(*c, *service) {
+				pwdRes, pwdErr := password.Generate(64, 10, 0, false, true)
+				if pwdErr != nil {
+					log.Fatalf("Error generating password for inlets server %s", pwdErr.Error())
 				}
-			} else {
-				log.Printf("Tunnel exists: %s\n", found.Name)
 
-				if manageService(*c, *service) == false {
-					log.Printf("Removing tunnel: %s\n", found.Name)
+				log.Printf("Creating tunnel for %s.%s\n", name, namespace)
+				tunnel := &inletsv1alpha1.Tunnel{
+					Spec: inletsv1alpha1.TunnelSpec{
+						ServiceName: service.Name,
+						AuthToken:   pwdRes,
+					},
+					ObjectMeta: metav1.ObjectMeta{
+						Name:      name,
+						Namespace: service.ObjectMeta.Namespace,
+						OwnerReferences: []metav1.OwnerReference{
+							*metav1.NewControllerRef(service, schema.GroupVersionKind{
+								Group:   "",
+								Version: "v1",
+								Kind:    "Service",
+							}),
+						},
+					},
+				}
 
-					err := tunnels.Delete(found.Name, &metav1.DeleteOptions{})
+				_, err := tunnels.Create(tunnel)
 
-					if err != nil {
-						log.Printf("Error deleting tunnel: %s", err.Error())
-					}
+				if err != nil {
+					log.Printf("Error creating tunnel: %s", err.Error())
+				}
+			}
+		} else {
+			log.Printf("Tunnel exists: %s\n", found.Name)
+
+			if manageService(*c, *service) == false {
+				log.Printf("Removing tunnel: %s\n", found.Name)
+
+				err := tunnels.Delete(found.Name, &metav1.DeleteOptions{})
+
+				if err != nil {
+					log.Printf("Error deleting tunnel: %s", err.Error())
 				}
 			}
 		}
+
 	}
 
 	// Get the Tunnel resource with this namespace/name
