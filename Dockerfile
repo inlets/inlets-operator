@@ -9,22 +9,28 @@ COPY --from=license-check /license-check /usr/bin/
 RUN mkdir -p /go/src/github.com/inlets/inlets-operator
 WORKDIR /go/src/github.com/inlets/inlets-operator
 
+RUN addgroup --system app && \
+  adduser --system --ingroup app app && \
+  mkdir /scratch-tmp
+
+# Cache the download before continuing
+COPY go.mod go.mod
+COPY go.sum go.sum
+RUN go mod download
+
 COPY . .
 
 ARG OPTS
-RUN go mod download
 
 RUN gofmt -l -d $(find . -type f -name '*.go' -not -path "./vendor/*")
 RUN go test -v ./...
+RUN license-check -path ./ --verbose=false "Alex Ellis" "inlets Authors" "inlets Author(s)" \
 RUN VERSION=$(git describe --all --exact-match `git rev-parse HEAD` | grep tags | sed 's/tags\///') && \
   GIT_COMMIT=$(git rev-list -1 HEAD) && \
   env ${OPTS} CGO_ENABLED=0 GOOS=linux go build -ldflags "-s -w \
   -X github.com/inlets/inlets-operator/pkg/version.Release=${VERSION} \
   -X github.com/inlets/inlets-operator/pkg/version.SHA=${GIT_COMMIT}" \
-  -a -installsuffix cgo -o inlets-operator . && \
-  addgroup --system app && \
-  adduser --system --ingroup app app && \
-  mkdir /scratch-tmp
+  -a -installsuffix cgo -o inlets-operator .
 
 # we can't add user in next stage because it's from scratch
 # ca-certificates and tmp folder are also missing in scratch
