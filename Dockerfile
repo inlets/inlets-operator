@@ -24,7 +24,7 @@ ARG OPTS
 
 RUN gofmt -l -d $(find . -type f -name '*.go' -not -path "./vendor/*")
 RUN go test -v ./...
-RUN license-check -path ./ --verbose=false "Alex Ellis" "inlets Authors" "inlets Author(s)" \
+RUN license-check -path ./ --verbose=false "Alex Ellis" "inlets Authors" "inlets Author(s)"
 RUN VERSION=$(git describe --all --exact-match `git rev-parse HEAD` | grep tags | sed 's/tags\///') && \
   GIT_COMMIT=$(git rev-list -1 HEAD) && \
   env ${OPTS} CGO_ENABLED=0 GOOS=linux go build -ldflags "-s -w \
