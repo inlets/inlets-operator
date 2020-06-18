@@ -6,7 +6,7 @@ You can also install the inlets-operator with [arkade install inlets-operator](h
 
 ## Pre-reqs
 
-* Configure [helm and tiller](https://github.com/openfaas/faas-netes/blob/master/HELM.md)
+* Configure [helm 3](https://github.com/openfaas/faas-netes/blob/master/HELM.md) (Tiller is not required)
 
 * Add the chart repo
 
