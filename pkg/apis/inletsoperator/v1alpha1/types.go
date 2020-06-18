@@ -23,6 +23,11 @@ import (
 // +genclient
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
+// +kubebuilder:printcolumn:name="Service",type=string,JSONPath=`.spec.serviceName`
+// +kubebuilder:printcolumn:name="Tunnel",type=string,JSONPath=`.spec.client_deployment.name`
+// +kubebuilder:printcolumn:name="HostStatus",type=string,JSONPath=`.status.hostStatus`
+// +kubebuilder:printcolumn:name="HostIP",type=string,JSONPath=`.status.hostIP`
+// +kubebuilder:printcolumn:name="HostID",type=string,JSONPath=`.status.hostId`
 // Tunnel is a specification for a Tunnel resource
 type Tunnel struct {
 	metav1.TypeMeta   `json:",inline"`

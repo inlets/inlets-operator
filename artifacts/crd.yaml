@@ -25,5 +25,3 @@ spec:
   - name: Tunnel
     type: string
     JSONPath: .spec.client_deployment.name
-
-
