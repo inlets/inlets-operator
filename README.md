@@ -113,7 +113,7 @@ You can also run the operator in-cluster, a ClusterRole is used since Services c
 kubectl create secret generic inlets-access-key \
   --from-literal inlets-access-key="$(cat ~/Downloads/do-access-token)"
 
-kubectl apply -f ./artifacts/crd.yaml
+kubectl apply -f ./artifacts/crds/
 
 # Apply the operator deployment and RBAC role
 kubectl apply -f ./artifacts/operator-rbac.yaml
@@ -160,7 +160,7 @@ If you are installing manually, using the yaml files you will need to un-comment
  `artifacts/operator.yaml` file
 
 ```bash
-kubectl apply -f ./artifacts/crd.yaml
+kubectl apply -f ./artifacts/crds/
 
 # Create a secret to store the access token
 
@@ -172,7 +172,7 @@ kubectl create secret generic inlets-access-key \
 kubectl create secret generic inlets-secret-key \
   --from-literal inlets-secret-key="$(cat ~/Downloads/secret-access-key)"
 
-kubectl apply -f ./artifacts/crd.yaml
+kubectl apply -f ./artifacts/crds/
 
 # Apply the operator deployment and RBAC role
 kubectl apply -f ./artifacts/operator-rbac.yaml
