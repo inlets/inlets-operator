@@ -33,16 +33,19 @@ type Tunnel struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
-	Spec   TunnelSpec   `json:"spec"`
+	Spec TunnelSpec `json:"spec"`
+
+	// +kubebuilder:validation:Optional
 	Status TunnelStatus `json:"status"`
 }
 
 // TunnelSpec is the spec for a Tunnel resource
 type TunnelSpec struct {
-	ServiceName string `json:"serviceName"`
+	ServiceName string `json:"serviceName,omitempty"`
 
-	ClientDeploymentRef *metav1.ObjectMeta `json:"client_deployment"`
-	AuthToken           string             `json:"auth_token"`
+	// +kubebuilder:validation:Optional
+	ClientDeploymentRef *metav1.ObjectMeta `json:"client_deployment,omitempty"`
+	AuthToken           string             `json:"auth_token,omitempty"`
 }
 
 // TunnelStatus is the status for a Tunnel resource

@@ -1,3 +1,5 @@
+
+---
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
@@ -7,21 +9,21 @@ metadata:
   name: tunnels.inlets.inlets.dev
 spec:
   additionalPrinterColumns:
-    - JSONPath: .spec.serviceName
-      name: Service
-      type: string
-    - JSONPath: .spec.client_deployment.name
-      name: Tunnel
-      type: string
-    - JSONPath: .status.hostStatus
-      name: HostStatus
-      type: string
-    - JSONPath: .status.hostIP
-      name: HostIP
-      type: string
-    - JSONPath: .status.HostID
-      name: HostID
-      type: string
+  - JSONPath: .spec.serviceName
+    name: Service
+    type: string
+  - JSONPath: .spec.client_deployment.name
+    name: Tunnel
+    type: string
+  - JSONPath: .status.hostStatus
+    name: HostStatus
+    type: string
+  - JSONPath: .status.hostIP
+    name: HostIP
+    type: string
+  - JSONPath: .status.hostId
+    name: HostID
+    type: string
   group: inlets.inlets.dev
   names:
     kind: Tunnel
@@ -33,26 +35,21 @@ spec:
   validation:
     openAPIV3Schema:
       description: Tunnel is a specification for a Tunnel resource
-      type: object
-      required:
-        - spec
-        - status
       properties:
         apiVersion:
-          description: 'APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+          description: 'APIVersion defines the versioned schema of this representation
+            of an object. Servers should convert recognized schemas to the latest
+            internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
           type: string
         kind:
-          description: 'Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+          description: 'Kind is a string value representing the REST resource this
+            object represents. Servers may infer this from the endpoint the client
+            submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
           type: string
         metadata:
           type: object
         spec:
           description: TunnelSpec is the spec for a Tunnel resource
-          type: object
-          required:
-            - auth_token
-            - client_deployment
-            - serviceName
           properties:
             auth_token:
               type: string
@@ -60,13 +57,9 @@ spec:
               type: object
             serviceName:
               type: string
+          type: object
         status:
           description: TunnelStatus is the status for a Tunnel resource
-          type: object
-          required:
-            - hostIP
-            - hostId
-            - hostStatus
           properties:
             hostIP:
               type: string
@@ -74,11 +67,19 @@ spec:
               type: string
             hostStatus:
               type: string
+          required:
+          - hostIP
+          - hostId
+          - hostStatus
+          type: object
+      required:
+      - spec
+      type: object
   version: v1alpha1
   versions:
-    - name: v1alpha1
-      served: true
-      storage: true
+  - name: v1alpha1
+    served: true
+    storage: true
 status:
   acceptedNames:
     kind: ""
