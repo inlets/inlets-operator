@@ -54,6 +54,7 @@ spec:
             auth_token:
               type: string
             client_deployment:
+              nullable: true
               type: object
             serviceName:
               type: string

@@ -43,6 +43,7 @@ type Tunnel struct {
 type TunnelSpec struct {
 	ServiceName string `json:"serviceName,omitempty"`
 
+	// +nullable
 	// +kubebuilder:validation:Optional
 	ClientDeploymentRef *metav1.ObjectMeta `json:"client_deployment,omitempty"`
 	AuthToken           string             `json:"auth_token,omitempty"`
