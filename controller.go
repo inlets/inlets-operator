@@ -4,6 +4,7 @@
 package main
 
 import (
+	"context"
 	"encoding/base64"
 	"fmt"
 	"log"
@@ -151,6 +152,9 @@ func NewController(
 						break
 					case "civo":
 						provisioner, _ = provision.NewCivoProvisioner(controller.infraConfig.GetAccessKey())
+						break
+					case "linode":
+						provisioner, _ = provision.NewLinodeProvisioner(controller.infraConfig.GetAccessKey())
 						break
 					}
 
@@ -362,7 +366,7 @@ func (c *Controller) syncHandler(key string) error {
 
 		ops := metav1.GetOptions{}
 		name := service.Name + "-tunnel"
-		found, err := tunnels.Get(name, ops)
+		found, err := tunnels.Get(context.Background(), name, ops)
 
 		if errors.IsNotFound(err) {
 			if manageService(*c, *service) {
@@ -390,7 +394,8 @@ func (c *Controller) syncHandler(key string) error {
 					},
 				}
 
-				_, err := tunnels.Create(tunnel)
+				ops := metav1.CreateOptions{}
+				_, err := tunnels.Create(context.Background(), tunnel, ops)
 
 				if err != nil {
 					log.Printf("Error creating tunnel: %s", err.Error())
@@ -402,7 +407,7 @@ func (c *Controller) syncHandler(key string) error {
 			if manageService(*c, *service) == false {
 				log.Printf("Removing tunnel: %s\n", found.Name)
 
-				err := tunnels.Delete(found.Name, &metav1.DeleteOptions{})
+				err := tunnels.Delete(context.Background(), found.Name, metav1.DeleteOptions{})
 
 				if err != nil {
 					log.Printf("Error deleting tunnel: %s", err.Error())
@@ -430,6 +435,7 @@ func (c *Controller) syncHandler(key string) error {
 
 		var id string
 
+		log.Printf("Provisioning started with provider:%s host:%s\n", c.infraConfig.Provider, tunnel.Name)
 		start := time.Now()
 		if c.infraConfig.Provider == "packet" {
 
@@ -566,7 +572,27 @@ func (c *Controller) syncHandler(key string) error {
 				return err
 			}
 			id = res.ID
+		} else if c.infraConfig.Provider == "linode" {
+			provisioner, _ := provision.NewLinodeProvisioner(c.infraConfig.GetAccessKey())
 
+			userData := makeUserdata(tunnel.Spec.AuthToken, c.infraConfig.UsePro(), tunnel.Spec.ServiceName)
+
+			res, err := provisioner.Provision(provision.BasicHost{
+				Name:       tunnel.Name,
+				OS:         "linode/ubuntu16.04lts", // https://api.linode.com/v4/images
+				Plan:       "g6-nanode-1",           // https://api.linode.com/v4/linode/types
+				Region:     c.infraConfig.Region,
+				UserData:   userData,
+				Additional: map[string]string{},
+			})
+
+			if err != nil {
+				return err
+			}
+			id = res.ID
+
+		} else {
+			return fmt.Errorf("unsupported provider: %s", c.infraConfig.Provider)
 		}
 
 		log.Printf("Provisioning call took: %fs\n", time.Since(start).Seconds())
@@ -727,12 +753,37 @@ func (c *Controller) syncHandler(key string) error {
 					}
 				}
 			}
+		} else if c.infraConfig.Provider == "linode" {
+			provisioner, _ := provision.NewLinodeProvisioner(c.infraConfig.GetAccessKey())
+
+			host, err := provisioner.Status(tunnel.Status.HostID)
+
+			if err != nil {
+				return err
+			}
+
+			if host.Status == provision.ActiveStatus {
+				if host.IP != "" {
+					err := c.updateTunnelProvisioningStatus(tunnel, provision.ActiveStatus, host.ID, host.IP)
+					if err != nil {
+						return err
+					}
+
+					err = c.updateService(tunnel, host.IP)
+					if err != nil {
+						log.Printf("Error updating service: %s, %s", tunnel.Spec.ServiceName, err.Error())
+						return fmt.Errorf("tunnel update error %s", err)
+					}
+				}
+			}
+		} else {
+			return fmt.Errorf("unsupported provider: %s", c.infraConfig.Provider)
 		}
 		break
 	case provision.ActiveStatus:
 		if tunnel.Spec.ClientDeploymentRef == nil {
 			get := metav1.GetOptions{}
-			service, getServiceErr := c.kubeclientset.CoreV1().Services(tunnel.Namespace).Get(tunnel.Spec.ServiceName, get)
+			service, getServiceErr := c.kubeclientset.CoreV1().Services(tunnel.Namespace).Get(context.Background(), tunnel.Spec.ServiceName, get)
 
 			if getServiceErr != nil {
 				return getServiceErr
@@ -758,7 +809,7 @@ func (c *Controller) syncHandler(key string) error {
 
 			deployment, createDeployErr := c.kubeclientset.AppsV1().
 				Deployments(tunnel.Namespace).
-				Create(client)
+				Create(context.Background(), client, metav1.CreateOptions{})
 
 			if createDeployErr != nil {
 				log.Println(createDeployErr)
@@ -771,7 +822,7 @@ func (c *Controller) syncHandler(key string) error {
 
 			_, updateErr := c.operatorclientset.InletsV1alpha1().
 				Tunnels(tunnel.Namespace).
-				Update(tunnel)
+				Update(context.Background(), tunnel, metav1.UpdateOptions{})
 
 			if updateErr != nil {
 				log.Println(updateErr)
@@ -880,7 +931,7 @@ func makeClient(tunnel *inletsv1alpha1.Tunnel, targetPort int32, clientImage str
 
 func (c *Controller) updateService(tunnel *inletsv1alpha1.Tunnel, ip string) error {
 	get := metav1.GetOptions{}
-	res, err := c.kubeclientset.CoreV1().Services(tunnel.Namespace).Get(tunnel.Spec.ServiceName, get)
+	res, err := c.kubeclientset.CoreV1().Services(tunnel.Namespace).Get(context.Background(), tunnel.Spec.ServiceName, get)
 	if err != nil {
 		return err
 	}
@@ -899,7 +950,7 @@ func (c *Controller) updateService(tunnel *inletsv1alpha1.Tunnel, ip string) err
 		copy.Spec.ExternalIPs = append(copy.Spec.ExternalIPs, ip)
 	}
 
-	res, err = c.kubeclientset.CoreV1().Services(tunnel.Namespace).Update(copy)
+	res, err = c.kubeclientset.CoreV1().Services(tunnel.Namespace).Update(context.Background(), copy, metav1.UpdateOptions{})
 	if err != nil {
 		return err
 	}
@@ -911,7 +962,7 @@ func (c *Controller) updateService(tunnel *inletsv1alpha1.Tunnel, ip string) err
 		copy.Status.LoadBalancer.Ingress[i] = corev1.LoadBalancerIngress{IP: ip}
 	}
 
-	_, err = c.kubeclientset.CoreV1().Services(tunnel.Namespace).UpdateStatus(copy)
+	_, err = c.kubeclientset.CoreV1().Services(tunnel.Namespace).UpdateStatus(context.Background(), copy, metav1.UpdateOptions{})
 	return err
 }
 
@@ -923,7 +974,7 @@ func (c *Controller) updateTunnelProvisioningStatus(tunnel *inletsv1alpha1.Tunne
 	tunnelCopy.Status.HostID = id
 	tunnelCopy.Status.HostIP = ip
 
-	_, err := c.operatorclientset.InletsV1alpha1().Tunnels(tunnel.Namespace).UpdateStatus(tunnelCopy)
+	_, err := c.operatorclientset.InletsV1alpha1().Tunnels(tunnel.Namespace).UpdateStatus(context.Background(), tunnelCopy, metav1.UpdateOptions{})
 	return err
 }
 

@@ -19,6 +19,8 @@ limitations under the License.
 package fake
 
 import (
+	"context"
+
 	v1alpha1 "github.com/inlets/inlets-operator/pkg/apis/inletsoperator/v1alpha1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	labels "k8s.io/apimachinery/pkg/labels"
@@ -39,7 +41,7 @@ var tunnelsResource = schema.GroupVersionResource{Group: "inlets.inlets.dev", Ve
 var tunnelsKind = schema.GroupVersionKind{Group: "inlets.inlets.dev", Version: "v1alpha1", Kind: "Tunnel"}
 
 // Get takes name of the tunnel, and returns the corresponding tunnel object, and an error if there is any.
-func (c *FakeTunnels) Get(name string, options v1.GetOptions) (result *v1alpha1.Tunnel, err error) {
+func (c *FakeTunnels) Get(ctx context.Context, name string, options v1.GetOptions) (result *v1alpha1.Tunnel, err error) {
 	obj, err := c.Fake.
 		Invokes(testing.NewGetAction(tunnelsResource, c.ns, name), &v1alpha1.Tunnel{})
 
@@ -50,7 +52,7 @@ func (c *FakeTunnels) Get(name string, options v1.GetOptions) (result *v1alpha1.
 }
 
 // List takes label and field selectors, and returns the list of Tunnels that match those selectors.
-func (c *FakeTunnels) List(opts v1.ListOptions) (result *v1alpha1.TunnelList, err error) {
+func (c *FakeTunnels) List(ctx context.Context, opts v1.ListOptions) (result *v1alpha1.TunnelList, err error) {
 	obj, err := c.Fake.
 		Invokes(testing.NewListAction(tunnelsResource, tunnelsKind, c.ns, opts), &v1alpha1.TunnelList{})
 
@@ -72,14 +74,14 @@ func (c *FakeTunnels) List(opts v1.ListOptions) (result *v1alpha1.TunnelList, er
 }
 
 // Watch returns a watch.Interface that watches the requested tunnels.
-func (c *FakeTunnels) Watch(opts v1.ListOptions) (watch.Interface, error) {
+func (c *FakeTunnels) Watch(ctx context.Context, opts v1.ListOptions) (watch.Interface, error) {
 	return c.Fake.
 		InvokesWatch(testing.NewWatchAction(tunnelsResource, c.ns, opts))
 
 }
 
 // Create takes the representation of a tunnel and creates it.  Returns the server's representation of the tunnel, and an error, if there is any.
-func (c *FakeTunnels) Create(tunnel *v1alpha1.Tunnel) (result *v1alpha1.Tunnel, err error) {
+func (c *FakeTunnels) Create(ctx context.Context, tunnel *v1alpha1.Tunnel, opts v1.CreateOptions) (result *v1alpha1.Tunnel, err error) {
 	obj, err := c.Fake.
 		Invokes(testing.NewCreateAction(tunnelsResource, c.ns, tunnel), &v1alpha1.Tunnel{})
 
@@ -90,7 +92,7 @@ func (c *FakeTunnels) Create(tunnel *v1alpha1.Tunnel) (result *v1alpha1.Tunnel, 
 }
 
 // Update takes the representation of a tunnel and updates it. Returns the server's representation of the tunnel, and an error, if there is any.
-func (c *FakeTunnels) Update(tunnel *v1alpha1.Tunnel) (result *v1alpha1.Tunnel, err error) {
+func (c *FakeTunnels) Update(ctx context.Context, tunnel *v1alpha1.Tunnel, opts v1.UpdateOptions) (result *v1alpha1.Tunnel, err error) {
 	obj, err := c.Fake.
 		Invokes(testing.NewUpdateAction(tunnelsResource, c.ns, tunnel), &v1alpha1.Tunnel{})
 
@@ -102,7 +104,7 @@ func (c *FakeTunnels) Update(tunnel *v1alpha1.Tunnel) (result *v1alpha1.Tunnel, 
 
 // UpdateStatus was generated because the type contains a Status member.
 // Add a +genclient:noStatus comment above the type to avoid generating UpdateStatus().
-func (c *FakeTunnels) UpdateStatus(tunnel *v1alpha1.Tunnel) (*v1alpha1.Tunnel, error) {
+func (c *FakeTunnels) UpdateStatus(ctx context.Context, tunnel *v1alpha1.Tunnel, opts v1.UpdateOptions) (*v1alpha1.Tunnel, error) {
 	obj, err := c.Fake.
 		Invokes(testing.NewUpdateSubresourceAction(tunnelsResource, "status", c.ns, tunnel), &v1alpha1.Tunnel{})
 
@@ -113,7 +115,7 @@ func (c *FakeTunnels) UpdateStatus(tunnel *v1alpha1.Tunnel) (*v1alpha1.Tunnel, e
 }
 
 // Delete takes name of the tunnel and deletes it. Returns an error if one occurs.
-func (c *FakeTunnels) Delete(name string, options *v1.DeleteOptions) error {
+func (c *FakeTunnels) Delete(ctx context.Context, name string, opts v1.DeleteOptions) error {
 	_, err := c.Fake.
 		Invokes(testing.NewDeleteAction(tunnelsResource, c.ns, name), &v1alpha1.Tunnel{})
 
@@ -121,15 +123,15 @@ func (c *FakeTunnels) Delete(name string, options *v1.DeleteOptions) error {
 }
 
 // DeleteCollection deletes a collection of objects.
-func (c *FakeTunnels) DeleteCollection(options *v1.DeleteOptions, listOptions v1.ListOptions) error {
-	action := testing.NewDeleteCollectionAction(tunnelsResource, c.ns, listOptions)
+func (c *FakeTunnels) DeleteCollection(ctx context.Context, opts v1.DeleteOptions, listOpts v1.ListOptions) error {
+	action := testing.NewDeleteCollectionAction(tunnelsResource, c.ns, listOpts)
 
 	_, err := c.Fake.Invokes(action, &v1alpha1.TunnelList{})
 	return err
 }
 
 // Patch applies the patch and returns the patched tunnel.
-func (c *FakeTunnels) Patch(name string, pt types.PatchType, data []byte, subresources ...string) (result *v1alpha1.Tunnel, err error) {
+func (c *FakeTunnels) Patch(ctx context.Context, name string, pt types.PatchType, data []byte, opts v1.PatchOptions, subresources ...string) (result *v1alpha1.Tunnel, err error) {
 	obj, err := c.Fake.
 		Invokes(testing.NewPatchSubresourceAction(tunnelsResource, c.ns, name, pt, data, subresources...), &v1alpha1.Tunnel{})
 
