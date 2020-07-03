@@ -49,6 +49,7 @@ Operator cloud host provisioning:
   - [x] Provision to Scaleway
   - [x] Provision to GCP
   - [x] Provision to AWS EC2
+  - [x] Provision to Linode
 - [x] Publish stand-alone [Go provisioning library/SDK](https://github.com/inlets/inletsctl/tree/master/pkg/provision)
 
 With [`inlets-pro`](https://github.com/inlets/inlets-pro) configured, you get the following additional benefits:
@@ -224,6 +225,61 @@ helm repo update
 # Install inlets-operator with the required fields
 helm upgrade inlets-operator --install inlets/inlets-operator \
   --set provider=gce,zone=us-central1-a,projectID=$PROJECTID
+```
+
+## Running in-cluster, using Linode for the exit node
+
+Install using helm:
+```bash
+kubectl apply -f ./artifacts/crds/
+
+# Create a secret to store the service account key file
+kubectl create secret generic inlets-access-key --from-literal inlets-access-key=<Linode API Access Key>
+
+# Add and update the inlets-operator helm repo
+helm repo add inlets https://inlets.github.io/inlets-operator/
+
+helm repo update
+
+# Install inlets-operator with the required fields
+helm upgrade inlets-operator --install inlets/inlets-operator \
+  --set provider=linode,region=us-east
+```
+
+You can also install the inlets-operator using a single command using [arkade](https://get-arkade.dev/), arkade runs against any Kubernetes cluster.
+
+Install with inlets PRO:
+
+```bash
+arkade install inlets-operator \
+ --provider linode \
+ --region us-east \
+ --access-key <Linode API Access Key> \
+ --license $(cat $HOME/inlets-pro-license.txt)
+```
+
+Install with inlets OSS:
+
+```bash
+arkade install inlets-operator \
+ --provider linode \
+ --region us-east \
+ --access-key <Linode API Access Key>
+```
+
+You can also install using kubectl without helm: (Change `-provider` and `-region` in `./artifacts/operator.yaml`)
+
+```bash
+# Create a secret to store the access token
+
+kubectl create secret generic inlets-access-key \
+  --from-literal inlets-access-key=<Linode API Access Key>
+
+kubectl apply -f ./artifacts/crds/
+
+# Apply the operator deployment and RBAC role
+kubectl apply -f ./artifacts/operator-rbac.yaml
+kubectl apply -f ./artifacts/operator.yaml
 ```
 
 ## Expose a service with a LoadBalancer

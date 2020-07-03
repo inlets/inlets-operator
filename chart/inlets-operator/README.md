@@ -70,7 +70,7 @@ helm upgrade inlets-operator --install inlets/inlets-operator \
 
 ```sh
 helm upgrade inlets-operator --install inlets/inlets-operator \
-  --set provider=packet,region=ams1,projectID=PROJECTID,inletsProLicense=WT_GOES_HERE
+  --set provider=packet,region=ams1,projectID=PROJECTID,inletsProLicense=JWT_GOES_HERE
 ```
 
 ### Scaleway with inlets OSS
@@ -78,6 +78,20 @@ helm upgrade inlets-operator --install inlets/inlets-operator \
 ```sh
 helm upgrade inlets-operator --install inlets/inlets-operator \
   --set provider=scaleway,region=ams1,organizationID=ORGANIZATIONID
+```
+
+### Linode with inlets OSS
+
+```sh
+helm upgrade inlets-operator --install inlets/inlets-operator \
+  --set provider=linode,region=us-east
+```
+
+### Linode with inlets-pro
+
+```sh
+helm upgrade inlets-operator --install inlets/inlets-operator \
+  --set provider=linode,region=us-east,inletsProLicense=JWT_GOES_HERE
 ```
 
 
