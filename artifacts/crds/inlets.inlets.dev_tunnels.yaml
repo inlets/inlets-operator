@@ -31,7 +31,8 @@ spec:
     plural: tunnels
     singular: tunnel
   scope: Namespaced
-  subresources: {}
+  subresources:
+    status: {}
   validation:
     openAPIV3Schema:
       description: Tunnel is a specification for a Tunnel resource
@@ -73,8 +74,6 @@ spec:
           - hostId
           - hostStatus
           type: object
-      required:
-      - spec
       type: object
   version: v1alpha1
   versions:
@@ -85,5 +84,8 @@ status:
   acceptedNames:
     kind: ""
     plural: ""
-  conditions: null
-  storedVersions: null
+# This is not generated
+#  conditions: null
+#  storedVersions: null
+  conditions: []
+  storedVersions: []

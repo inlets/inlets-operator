@@ -29,14 +29,15 @@ import (
 // +kubebuilder:printcolumn:name="HostStatus",type=string,JSONPath=`.status.hostStatus`
 // +kubebuilder:printcolumn:name="HostIP",type=string,JSONPath=`.status.hostIP`
 // +kubebuilder:printcolumn:name="HostID",type=string,JSONPath=`.status.hostId`
+// +kubebuilder:subresource:status
 type Tunnel struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
-	Spec TunnelSpec `json:"spec"`
+	Spec TunnelSpec `json:"spec,omitempty"`
 
 	// +kubebuilder:validation:Optional
-	Status TunnelStatus `json:"status"`
+	Status TunnelStatus `json:"status,omitempty"`
 }
 
 // TunnelSpec is the spec for a Tunnel resource
@@ -51,9 +52,9 @@ type TunnelSpec struct {
 
 // TunnelStatus is the status for a Tunnel resource
 type TunnelStatus struct {
-	HostStatus string `json:"hostStatus"`
-	HostIP     string `json:"hostIP"`
-	HostID     string `json:"hostId"`
+	HostStatus string `json:"hostStatus,omitempty"`
+	HostIP     string `json:"hostIP,omitempty"`
+	HostID     string `json:"hostId,omitempty"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
