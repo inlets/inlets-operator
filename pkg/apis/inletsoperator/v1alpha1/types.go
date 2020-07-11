@@ -52,9 +52,12 @@ type TunnelSpec struct {
 
 // TunnelStatus is the status for a Tunnel resource
 type TunnelStatus struct {
+	// + optional
 	HostStatus string `json:"hostStatus,omitempty"`
-	HostIP     string `json:"hostIP,omitempty"`
-	HostID     string `json:"hostId,omitempty"`
+	// + optional
+	HostIP string `json:"hostIP,omitempty"`
+	// + optional
+	HostID string `json:"hostId,omitempty"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
