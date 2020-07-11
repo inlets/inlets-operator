@@ -923,7 +923,7 @@ func (c *Controller) updateTunnelProvisioningStatus(tunnel *inletsv1alpha1.Tunne
 	tunnelCopy.Status.HostID = id
 	tunnelCopy.Status.HostIP = ip
 
-	_, err := c.operatorclientset.InletsV1alpha1().Tunnels(tunnel.Namespace).Update(tunnelCopy)
+	_, err := c.operatorclientset.InletsV1alpha1().Tunnels(tunnel.Namespace).UpdateStatus(tunnelCopy)
 	return err
 }
 
