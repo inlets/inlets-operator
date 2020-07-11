@@ -12,7 +12,7 @@ metadata:
   namespace: default
 rules:
 - apiGroups: ["inlets.inlets.dev"]
-  resources: ["tunnels"]
+  resources: ["tunnels", "tunnels/status"]
   verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
 - apiGroups: [""]
   resources: ["services", "services/status"]
