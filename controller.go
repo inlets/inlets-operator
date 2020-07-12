@@ -129,52 +129,29 @@ func NewController(
 			r, ok := checkCustomResourceType(old)
 
 			log.Println("Delete event:", r.Name, r.Namespace, r.OwnerReferences)
+			if !ok {
+				log.Println("Failed to retrieve resource status")
+				return
+			}
+			if len(r.Status.HostID) == 0 {
+				log.Println("Status.HostID is empty")
+				return
+			}
+			provisioner, _ := getProvisioner(controller)
+			if provisioner != nil {
+				log.Printf("Deleting exit-node for %s: %s, ip: %s\n", r.Spec.ServiceName, r.Status.HostID, r.Status.HostIP)
 
-			if ok {
-				if len(r.Status.HostID) > 0 {
-					var provisioner provision.Provisioner
-
-					switch controller.infraConfig.Provider {
-					case "digitalocean":
-						provisioner, _ = provision.NewDigitalOceanProvisioner(controller.infraConfig.GetAccessKey())
-						break
-					case "packet":
-						provisioner, _ = provision.NewPacketProvisioner(controller.infraConfig.GetAccessKey())
-						break
-					case "scaleway":
-						provisioner, _ = provision.NewScalewayProvisioner(controller.infraConfig.GetAccessKey(), controller.infraConfig.GetSecretKey(), controller.infraConfig.OrganizationID, controller.infraConfig.Region)
-						break
-					case "gce":
-						provisioner, _ = provision.NewGCEProvisioner(controller.infraConfig.GetAccessKey())
-						break
-					case "ec2":
-						provisioner, _ = provision.NewEC2Provisioner(controller.infraConfig.Region, controller.infraConfig.GetAccessKey(), controller.infraConfig.GetSecretKey())
-						break
-					case "civo":
-						provisioner, _ = provision.NewCivoProvisioner(controller.infraConfig.GetAccessKey())
-						break
-					case "linode":
-						provisioner, _ = provision.NewLinodeProvisioner(controller.infraConfig.GetAccessKey())
-						break
-					}
-
-					if provisioner != nil {
-						log.Printf("Deleting exit-node for %s: %s, ip: %s\n", r.Spec.ServiceName, r.Status.HostID, r.Status.HostIP)
-
-						delReq := provision.HostDeleteRequest{ID: r.Status.HostID, IP: r.Status.HostIP}
-						err := provisioner.Delete(delReq)
-						if err != nil {
-							log.Println(err)
-						} else {
-							err = controller.updateService(&r, "")
-							if err != nil {
-								log.Printf("Error updating service: %s, %s", r.Spec.ServiceName, err.Error())
-							}
-						}
+				delReq := provision.HostDeleteRequest{ID: r.Status.HostID, IP: r.Status.HostIP}
+				err := provisioner.Delete(delReq)
+				if err != nil {
+					log.Println(err)
+				} else {
+					err = controller.updateService(&r, "")
+					if err != nil {
+						log.Printf("Error updating service: %s, %s", r.Spec.ServiceName, err.Error())
 					}
 				}
 			}
-
 		},
 	})
 
@@ -432,419 +409,248 @@ func (c *Controller) syncHandler(key string) error {
 
 	switch tunnel.Status.HostStatus {
 	case "":
+		provisioner, err := getProvisioner(c)
+		if err != nil {
+			return err
+		}
 
-		var id string
-
+		// Start Provisioning Host
 		log.Printf("Provisioning started with provider:%s host:%s\n", c.infraConfig.Provider, tunnel.Name)
 		start := time.Now()
-		if c.infraConfig.Provider == "packet" {
-
-			userData := makeUserdata(tunnel.Spec.AuthToken, c.infraConfig.UsePro(), tunnel.Spec.ServiceName)
-
-			provisioner, _ := provision.NewPacketProvisioner(c.infraConfig.GetAccessKey())
-
-			res, err := provisioner.Provision(provision.BasicHost{
-				Name:     tunnel.Name,
-				OS:       "ubuntu_16_04",
-				Plan:     "t1.small.x86",
-				Region:   c.infraConfig.Region,
-				UserData: userData,
-				Additional: map[string]string{
-					"project_id": c.infraConfig.ProjectID,
-				},
-			})
-
-			if err != nil {
-				return err
-			}
-			id = res.ID
-
-		} else if c.infraConfig.Provider == "digitalocean" {
-
-			provisioner, _ := provision.NewDigitalOceanProvisioner(c.infraConfig.GetAccessKey())
-
-			userData := makeUserdata(tunnel.Spec.AuthToken, c.infraConfig.UsePro(), tunnel.Spec.ServiceName)
-
-			res, err := provisioner.Provision(provision.BasicHost{
-				Name:       tunnel.Name,
-				OS:         "ubuntu-16-04-x64",
-				Plan:       "512mb",
-				Region:     c.infraConfig.Region,
-				UserData:   userData,
-				Additional: map[string]string{},
-			})
-
-			if err != nil {
-				return err
-			}
-
-			id = res.ID
-
-		} else if c.infraConfig.Provider == "scaleway" {
-			provisioner, _ := provision.NewScalewayProvisioner(c.infraConfig.GetAccessKey(), c.infraConfig.GetSecretKey(), c.infraConfig.OrganizationID, c.infraConfig.Region)
-
-			userData := makeUserdata(tunnel.Spec.AuthToken, c.infraConfig.UsePro(), tunnel.Spec.ServiceName)
-
-			res, err := provisioner.Provision(provision.BasicHost{
-				Name:       tunnel.Name,
-				OS:         "ubuntu-bionic",
-				Plan:       "DEV1-S",
-				Region:     c.infraConfig.Region,
-				UserData:   userData,
-				Additional: map[string]string{},
-			})
-
-			if err != nil {
-				return err
-			}
-			id = res.ID
-
-		} else if c.infraConfig.Provider == "gce" {
-			provisioner, _ := provision.NewGCEProvisioner(c.infraConfig.GetAccessKey())
-
-			userData := makeUserdata(tunnel.Spec.AuthToken, c.infraConfig.UsePro(), tunnel.Spec.ServiceName)
-
-			firewallRuleName := "inlets"
-			inletsPort := inletsControlPort
-
-			if c.infraConfig.UsePro() {
-				inletsPort = inletsProControlPort
-			}
-
-			res, err := provisioner.Provision(provision.BasicHost{
-				Name:     tunnel.Name,
-				OS:       "projects/debian-cloud/global/images/debian-9-stretch-v20191121",
-				Plan:     "f1-micro",
-				UserData: userData,
-				Additional: map[string]string{
-					"projectid":     c.infraConfig.ProjectID,
-					"zone":          c.infraConfig.Zone,
-					"firewall-name": firewallRuleName,
-					"firewall-port": strconv.Itoa(inletsPort),
-				},
-			})
-
-			if err != nil {
-				return err
-			}
-			id = res.ID
-
-		} else if c.infraConfig.Provider == "ec2" {
-			provisioner, _ := provision.NewEC2Provisioner(c.infraConfig.Region, c.infraConfig.GetAccessKey(), c.infraConfig.GetSecretKey())
-
-			inletsPort := inletsControlPort
-
-			if c.infraConfig.UsePro() {
-				inletsPort = inletsProControlPort
-			}
-
-			userData := makeUserdata(tunnel.Spec.AuthToken, c.infraConfig.UsePro(), tunnel.Spec.ServiceName)
-
-			res, err := provisioner.Provision(provision.BasicHost{
-				Name:     tunnel.Name,
-				OS:       "ubuntu/images/hvm-ssd/ubuntu-xenial-16.04-amd64-server-20191114",
-				Plan:     "t3.micro",
-				UserData: base64.StdEncoding.EncodeToString([]byte(userData)),
-				Additional: map[string]string{
-					"inlets-port": strconv.Itoa(inletsPort),
-				},
-			})
-
-			if err != nil {
-				return err
-			}
-			id = res.ID
-		} else if c.infraConfig.Provider == "civo" {
-			provisioner, _ := provision.NewCivoProvisioner(c.infraConfig.GetAccessKey())
-
-			userData := makeUserdata(tunnel.Spec.AuthToken, c.infraConfig.UsePro(), tunnel.Spec.ServiceName)
-
-			res, err := provisioner.Provision(provision.BasicHost{
-				Name:       tunnel.Name,
-				OS:         "811a8dfb-8202-49ad-b1ef-1e6320b20497",
-				Plan:       "g2.small",
-				Region:     c.infraConfig.Region,
-				UserData:   userData,
-				Additional: map[string]string{},
-			})
-
-			if err != nil {
-				return err
-			}
-			id = res.ID
-		} else if c.infraConfig.Provider == "linode" {
-			provisioner, _ := provision.NewLinodeProvisioner(c.infraConfig.GetAccessKey())
-
-			userData := makeUserdata(tunnel.Spec.AuthToken, c.infraConfig.UsePro(), tunnel.Spec.ServiceName)
-
-			res, err := provisioner.Provision(provision.BasicHost{
-				Name:       tunnel.Name,
-				OS:         "linode/ubuntu16.04lts", // https://api.linode.com/v4/images
-				Plan:       "g6-nanode-1",           // https://api.linode.com/v4/linode/types
-				Region:     c.infraConfig.Region,
-				UserData:   userData,
-				Additional: map[string]string{},
-			})
-
-			if err != nil {
-				return err
-			}
-			id = res.ID
-
-		} else {
-			return fmt.Errorf("unsupported provider: %s", c.infraConfig.Provider)
-		}
-
-		log.Printf("Provisioning call took: %fs\n", time.Since(start).Seconds())
-
+		host := getHostConfig(c, tunnel)
+		res, err := provisioner.Provision(host)
 		if err != nil {
-			err = c.updateTunnelProvisioningStatus(tunnel, "error", "", "")
-			if err != nil {
-				return err
-			}
-		} else {
-			err = c.updateTunnelProvisioningStatus(tunnel, "provisioning", id, "")
-			if err != nil {
-				return fmt.Errorf("tunnel %s (%s) update error: %s", tunnel.Name, "provisioning", err)
-			}
+			return err
 		}
+		log.Printf("Provisioning call took: %fs\n", time.Since(start).Seconds())
+		// End of Provisioning Host
 
+		// Updating Status
+		err = c.updateTunnelProvisioningStatus(tunnel, "provisioning", res.ID, "")
+		if err != nil {
+			return fmt.Errorf("tunnel %s (%s) update error: %s", tunnel.Name, "provisioning", err)
+		}
 		break
 
 	case "provisioning":
-
-		if c.infraConfig.Provider == "packet" {
-
-			provisioner, _ := provision.NewPacketProvisioner(c.infraConfig.GetAccessKey())
-			host, err := provisioner.Status(tunnel.Status.HostID)
-
-			if err != nil {
-				fmt.Println(err)
-			}
-
-			if host.Status == provision.ActiveStatus {
-				log.Printf("Device %s is now active\n", tunnel.Spec.ServiceName)
-
-				err := c.updateTunnelProvisioningStatus(tunnel, provision.ActiveStatus, host.ID, host.IP)
-				if err != nil {
-					log.Printf("Error updating tunnel status: %s, %s", tunnel.Name, err.Error())
-				}
-
-				err = c.updateService(tunnel, host.IP)
-				if err != nil {
-					log.Printf("Error updating service: %s, %s", tunnel.Spec.ServiceName, err.Error())
-					return fmt.Errorf("tunnel update error %s", err)
-				}
-
-			} else {
-				log.Printf("Still provisioning: %s\n", tunnel.Name)
-			}
-
-		} else if c.infraConfig.Provider == "digitalocean" {
-
-			provisioner, _ := provision.NewDigitalOceanProvisioner(c.infraConfig.GetAccessKey())
-			host, err := provisioner.Status(tunnel.Status.HostID)
-
-			if err != nil {
-				return err
-			}
-			if host.Status == provision.ActiveStatus {
-
-				if host.IP != "" {
-					err := c.updateTunnelProvisioningStatus(tunnel, provision.ActiveStatus, host.ID, host.IP)
-					if err != nil {
-						return err
-					}
-
-					err = c.updateService(tunnel, host.IP)
-					if err != nil {
-						log.Printf("Error updating service: %s, %s", tunnel.Spec.ServiceName, err.Error())
-						return fmt.Errorf("tunnel update error %s", err)
-					}
-				}
-			}
-
-		} else if c.infraConfig.Provider == "scaleway" {
-			provisioner, _ := provision.NewScalewayProvisioner(c.infraConfig.GetAccessKey(), c.infraConfig.GetSecretKey(), c.infraConfig.OrganizationID, c.infraConfig.Region)
-			host, err := provisioner.Status(tunnel.Status.HostID)
-
-			if err != nil {
-				return err
-			}
-			if host.Status == provision.ActiveStatus {
-
-				if host.IP != "" {
-					err := c.updateTunnelProvisioningStatus(tunnel, provision.ActiveStatus, host.ID, host.IP)
-					if err != nil {
-						return err
-					}
-
-					err = c.updateService(tunnel, host.IP)
-					if err != nil {
-						log.Printf("Error updating service: %s, %s", tunnel.Spec.ServiceName, err.Error())
-						return fmt.Errorf("tunnel update error %s", err)
-					}
-				}
-			}
-
-		} else if c.infraConfig.Provider == "gce" {
-			provisioner, _ := provision.NewGCEProvisioner(c.infraConfig.GetAccessKey())
-			host, err := provisioner.Status(tunnel.Status.HostID)
-
-			if err != nil {
-				return err
-			}
-
-			if host.Status == provision.ActiveStatus {
-				if host.IP != "" {
-					err := c.updateTunnelProvisioningStatus(tunnel, provision.ActiveStatus, host.ID, host.IP)
-					if err != nil {
-						return err
-					}
-
-					err = c.updateService(tunnel, host.IP)
-					if err != nil {
-						log.Printf("Error updating service: %s, %s", tunnel.Spec.ServiceName, err.Error())
-						return fmt.Errorf("tunnel update error %s", err)
-					}
-				}
-			}
-		} else if c.infraConfig.Provider == "ec2" {
-			provisioner, _ := provision.NewEC2Provisioner(c.infraConfig.Region, c.infraConfig.GetAccessKey(), c.infraConfig.GetSecretKey())
-			host, err := provisioner.Status(tunnel.Status.HostID)
-
-			if err != nil {
-				return err
-			}
-			if host.Status == provision.ActiveStatus {
-
-				if host.IP != "" {
-					err := c.updateTunnelProvisioningStatus(tunnel, provision.ActiveStatus, host.ID, host.IP)
-					if err != nil {
-						return err
-					}
-
-					err = c.updateService(tunnel, host.IP)
-					if err != nil {
-						log.Printf("Error updating service: %s, %s", tunnel.Spec.ServiceName, err.Error())
-						return fmt.Errorf("tunnel update error %s", err)
-					}
-				}
-			}
-		} else if c.infraConfig.Provider == "civo" {
-			provisioner, _ := provision.NewCivoProvisioner(c.infraConfig.GetAccessKey())
-			host, err := provisioner.Status(tunnel.Status.HostID)
-
-			if err != nil {
-				return err
-			}
-
-			if host.Status == provision.ActiveStatus {
-				if host.IP != "" {
-					err := c.updateTunnelProvisioningStatus(tunnel, provision.ActiveStatus, host.ID, host.IP)
-					if err != nil {
-						return err
-					}
-
-					err = c.updateService(tunnel, host.IP)
-					if err != nil {
-						log.Printf("Error updating service: %s, %s", tunnel.Spec.ServiceName, err.Error())
-						return fmt.Errorf("tunnel update error %s", err)
-					}
-				}
-			}
-		} else if c.infraConfig.Provider == "linode" {
-			provisioner, _ := provision.NewLinodeProvisioner(c.infraConfig.GetAccessKey())
-
-			host, err := provisioner.Status(tunnel.Status.HostID)
-
-			if err != nil {
-				return err
-			}
-
-			if host.Status == provision.ActiveStatus {
-				if host.IP != "" {
-					err := c.updateTunnelProvisioningStatus(tunnel, provision.ActiveStatus, host.ID, host.IP)
-					if err != nil {
-						return err
-					}
-
-					err = c.updateService(tunnel, host.IP)
-					if err != nil {
-						log.Printf("Error updating service: %s, %s", tunnel.Spec.ServiceName, err.Error())
-						return fmt.Errorf("tunnel update error %s", err)
-					}
-				}
-			}
-		} else {
-			return fmt.Errorf("unsupported provider: %s", c.infraConfig.Provider)
+		err = syncProvisioningHostStatus(tunnel, c)
+		// If an error occurs during Update, we'll requeue the item so we can
+		// attempt processing again later. THis could have been caused by a
+		// temporary network failure, or any other transient reason.
+		if err != nil {
+			return err
 		}
 		break
+
 	case provision.ActiveStatus:
-		if tunnel.Spec.ClientDeploymentRef == nil {
-			get := metav1.GetOptions{}
-			service, getServiceErr := c.kubeclientset.CoreV1().Services(tunnel.Namespace).Get(context.Background(), tunnel.Spec.ServiceName, get)
-
-			if getServiceErr != nil {
-				return getServiceErr
-			}
-
-			firstPort := int32(80)
-
-			for _, port := range service.Spec.Ports {
-				if port.Name == "http" {
-					firstPort = port.Port
-					break
-				}
-			}
-
-			ports := getPortsString(service)
-
-			client := makeClient(tunnel, firstPort,
-				c.infraConfig.GetInletsClientImage(),
-				c.infraConfig.UsePro(),
-				ports,
-				c.infraConfig.ProConfig.License,
-				c.infraConfig.MaxClientMemory)
-
-			deployment, createDeployErr := c.kubeclientset.AppsV1().
-				Deployments(tunnel.Namespace).
-				Create(context.Background(), client, metav1.CreateOptions{})
-
-			if createDeployErr != nil {
-				log.Println(createDeployErr)
-			}
-
-			tunnel.Spec.ClientDeploymentRef = &metav1.ObjectMeta{
-				Name:      deployment.Name,
-				Namespace: deployment.Namespace,
-			}
-
-			_, updateErr := c.operatorclientset.InletsV1alpha1().
-				Tunnels(tunnel.Namespace).
-				Update(context.Background(), tunnel, metav1.UpdateOptions{})
-
-			if updateErr != nil {
-				log.Println(updateErr)
-			}
-
-			if updateErr != nil {
-				return fmt.Errorf("tunnel update error %s", updateErr)
-			}
-
+		err := createClientDeployment(tunnel, c)
+		if err != nil {
+			return err
 		}
-
 		break
 	}
 
-	// If an error occurs during Update, we'll requeue the item so we can
-	// attempt processing again later. THis could have been caused by a
-	// temporary network failure, or any other transient reason.
+	c.recorder.Event(tunnel, corev1.EventTypeNormal, SuccessSynced, MessageResourceSynced)
+	return nil
+}
+
+func createClientDeployment(tunnel *inletsv1alpha1.Tunnel, c *Controller) error {
+	if tunnel.Spec.ClientDeploymentRef != nil {
+		// already existing
+		return nil
+	}
+
+	get := metav1.GetOptions{}
+	service, getServiceErr := c.kubeclientset.CoreV1().Services(tunnel.Namespace).Get(context.Background(), tunnel.Spec.ServiceName, get)
+
+	if getServiceErr != nil {
+		return getServiceErr
+	}
+
+	firstPort := int32(80)
+
+	for _, port := range service.Spec.Ports {
+		if port.Name == "http" {
+			firstPort = port.Port
+			break
+		}
+	}
+
+	ports := getPortsString(service)
+
+	client := makeClient(tunnel, firstPort,
+		c.infraConfig.GetInletsClientImage(),
+		c.infraConfig.UsePro(),
+		ports,
+		c.infraConfig.ProConfig.License,
+		c.infraConfig.MaxClientMemory)
+
+	deployment, createDeployErr := c.kubeclientset.AppsV1().
+		Deployments(tunnel.Namespace).
+		Create(context.Background(), client, metav1.CreateOptions{})
+
+	if createDeployErr != nil {
+		log.Println(createDeployErr)
+	}
+
+	tunnel.Spec.ClientDeploymentRef = &metav1.ObjectMeta{
+		Name:      deployment.Name,
+		Namespace: deployment.Namespace,
+	}
+
+	_, updateErr := c.operatorclientset.InletsV1alpha1().
+		Tunnels(tunnel.Namespace).
+		Update(context.Background(), tunnel, metav1.UpdateOptions{})
+
+	if updateErr != nil {
+		log.Println(updateErr)
+		return fmt.Errorf("tunnel update error %s", updateErr)
+	}
+
+	return nil
+}
+
+func getHostConfig(c *Controller, tunnel *inletsv1alpha1.Tunnel) provision.BasicHost {
+	userData := makeUserdata(tunnel.Spec.AuthToken, c.infraConfig.UsePro(), tunnel.Spec.ServiceName)
+	var host provision.BasicHost
+
+	switch c.infraConfig.Provider {
+	case "packet":
+		host = provision.BasicHost{
+			Name:     tunnel.Name,
+			OS:       "ubuntu_16_04",
+			Plan:     "t1.small.x86",
+			Region:   c.infraConfig.Region,
+			UserData: userData,
+			Additional: map[string]string{
+				"project_id": c.infraConfig.ProjectID,
+			},
+		}
+	case "digitalocean":
+		host = provision.BasicHost{
+			Name:       tunnel.Name,
+			OS:         "ubuntu-16-04-x64",
+			Plan:       "512mb",
+			Region:     c.infraConfig.Region,
+			UserData:   userData,
+			Additional: map[string]string{},
+		}
+	case "scaleway":
+		host = provision.BasicHost{
+			Name:       tunnel.Name,
+			OS:         "ubuntu-bionic",
+			Plan:       "DEV1-S",
+			Region:     c.infraConfig.Region,
+			UserData:   userData,
+			Additional: map[string]string{},
+		}
+	case "gce":
+		firewallRuleName := "inlets"
+		inletsPort := inletsControlPort
+
+		if c.infraConfig.UsePro() {
+			inletsPort = inletsProControlPort
+		}
+
+		host = provision.BasicHost{
+			Name:     tunnel.Name,
+			OS:       "projects/debian-cloud/global/images/debian-9-stretch-v20191121",
+			Plan:     "f1-micro",
+			UserData: userData,
+			Additional: map[string]string{
+				"projectid":     c.infraConfig.ProjectID,
+				"zone":          c.infraConfig.Zone,
+				"firewall-name": firewallRuleName,
+				"firewall-port": strconv.Itoa(inletsPort),
+			},
+		}
+	case "ec2":
+		inletsPort := inletsControlPort
+
+		if c.infraConfig.UsePro() {
+			inletsPort = inletsProControlPort
+		}
+
+		host = provision.BasicHost{
+			Name:     tunnel.Name,
+			OS:       "ubuntu/images/hvm-ssd/ubuntu-xenial-16.04-amd64-server-20191114",
+			Plan:     "t3.micro",
+			UserData: base64.StdEncoding.EncodeToString([]byte(userData)),
+			Additional: map[string]string{
+				"inlets-port": strconv.Itoa(inletsPort),
+			},
+		}
+	case "civo":
+		host = provision.BasicHost{
+			Name:       tunnel.Name,
+			OS:         "811a8dfb-8202-49ad-b1ef-1e6320b20497",
+			Plan:       "g2.small",
+			Region:     c.infraConfig.Region,
+			UserData:   userData,
+			Additional: map[string]string{},
+		}
+	case "linode":
+		host = provision.BasicHost{
+			Name:       tunnel.Name,
+			OS:         "linode/ubuntu16.04lts", // https://api.linode.com/v4/images
+			Plan:       "g6-nanode-1",           // https://api.linode.com/v4/linode/types
+			Region:     c.infraConfig.Region,
+			UserData:   userData,
+			Additional: map[string]string{},
+		}
+	}
+	return host
+}
+
+func getProvisioner(c *Controller) (provision.Provisioner, error) {
+	var err error
+	var provisioner provision.Provisioner
+
+	switch c.infraConfig.Provider {
+	case "packet":
+		provisioner, _ = provision.NewPacketProvisioner(c.infraConfig.GetAccessKey())
+	case "digitalocean":
+		provisioner, _ = provision.NewDigitalOceanProvisioner(c.infraConfig.GetAccessKey())
+	case "scaleway":
+		provisioner, _ = provision.NewScalewayProvisioner(c.infraConfig.GetAccessKey(), c.infraConfig.GetSecretKey(), c.infraConfig.OrganizationID, c.infraConfig.Region)
+	case "gce":
+		provisioner, _ = provision.NewGCEProvisioner(c.infraConfig.GetAccessKey())
+	case "ec2":
+		provisioner, _ = provision.NewEC2Provisioner(c.infraConfig.Region, c.infraConfig.GetAccessKey(), c.infraConfig.GetSecretKey())
+	case "civo":
+		provisioner, _ = provision.NewCivoProvisioner(c.infraConfig.GetAccessKey())
+	case "linode":
+		provisioner, _ = provision.NewLinodeProvisioner(c.infraConfig.GetAccessKey())
+	default:
+		return nil, fmt.Errorf("unsupported provider: %s", c.infraConfig.Provider)
+	}
+	return provisioner, err
+}
+
+func syncProvisioningHostStatus(tunnel *inletsv1alpha1.Tunnel, c *Controller) error {
+	provisioner, err := getProvisioner(c)
+	if err != nil {
+		return err
+	}
+	host, err := provisioner.Status(tunnel.Status.HostID)
+
 	if err != nil {
 		return err
 	}
 
-	c.recorder.Event(tunnel, corev1.EventTypeNormal, SuccessSynced, MessageResourceSynced)
+	if host.Status != provision.ActiveStatus || host.IP == "" {
+		return nil
+	}
+	err = c.updateTunnelProvisioningStatus(tunnel, provision.ActiveStatus, host.ID, host.IP)
+	if err != nil {
+		return err
+	}
+
+	err = c.updateService(tunnel, host.IP)
+	if err != nil {
+		log.Printf("Error updating service: %s, %s", tunnel.Spec.ServiceName, err.Error())
+		return fmt.Errorf("tunnel update error %s", err)
+	}
 	return nil
 }
 
