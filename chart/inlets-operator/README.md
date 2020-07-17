@@ -27,7 +27,7 @@ You can also install the inlets-operator with [arkade install inlets-operator](h
 * Install the CRD:
 
     ```sh
-    kubectl apply -f ./artifacts/crd.yaml
+    kubectl apply -f ./artifacts/crds
     ```
 
 ## Deploy an example configuration
@@ -43,6 +43,34 @@ helm upgrade inlets-operator --install inlets/inlets-operator
 ```sh
 helm upgrade inlets-operator --install inlets/inlets-operator \
   --set inletsProLicense=JWT_GOES_HERE
+```
+
+### AWS EC2 with inlets OSS
+
+```bash
+kubectl create secret generic inlets-secret-key \
+--from-literal inlets-secret-key="$(cat ~/Downloads/aws-secret-access-key)"
+
+kubectl create secret generic inlets-access-key \
+--from-literal inlets-access-key="$(cat ~/Downloads/aws-access-key)"
+
+helm upgrade inlets-operator --install inlets/inlets-operator \
+  --set provider=ec2,region=us-east-1,accessKeyFile=/var/secrets/inlets/inlets-access-key,\
+  secretKeyFile=/var/secrets/inlets/secret/inlets-secret-key
+```
+
+### AWS EC2 with inlets-pro
+
+```bash
+kubectl create secret generic inlets-secret-key \
+--from-literal inlets-secret-key="$(cat ~/Downloads/aws-secret-access-key)"
+
+kubectl create secret generic inlets-access-key \
+--from-literal inlets-access-key="$(cat ~/Downloads/aws-access-key)"
+
+helm upgrade inlets-operator --install inlets/inlets-operator \
+  --set provider=ec2,region=us-east-1,accessKeyFile=/var/secrets/inlets/inlets-access-key,\
+  secretKeyFile=/var/secrets/inlets/secret/inlets-secret-key,inletsProLicense=JWT_GOES_HERE
 ```
 
 ### Google Compute Engine with inlets OSS
