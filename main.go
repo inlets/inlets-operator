@@ -39,6 +39,7 @@ type InfraConfig struct {
 	AccessKey         string
 	SecretKey         string
 	OrganizationID    string
+	SubscriptionID    string
 	VpcID             string
 	SubnetID          string
 	AccessKeyFile     string
@@ -83,13 +84,14 @@ func main() {
 		ProConfig: InletsProConfig{},
 	}
 
-	flag.StringVar(&infra.Provider, "provider", "packet", "Your infrastructure provider - 'packet', 'digitalocean', 'scaleway', 'civo', 'gce', 'linode' or 'ec2'")
+	flag.StringVar(&infra.Provider, "provider", "packet", "Your infrastructure provider - 'packet', 'digitalocean', 'scaleway', 'civo', 'gce', 'linode', 'azure' or 'ec2'")
 	flag.StringVar(&infra.Region, "region", "", "The region to provision hosts into")
 	flag.StringVar(&infra.Zone, "zone", "us-central1-a", "The zone where the exit node is to be provisioned")
 	flag.StringVar(&infra.AccessKey, "access-key", "", "The access key for your infrastructure provider")
 	flag.StringVar(&infra.AccessKeyFile, "access-key-file", "", "Read the access key for your infrastructure provider from a file (recommended)")
 	flag.StringVar(&infra.SecretKey, "secret-key", "", "The secret key if using Scaleway or EC2 as the provider")
 	flag.StringVar(&infra.SecretKeyFile, "secret-key-file", "", "Read the access key for your infrastructure provider from a file (recommended)")
+	flag.StringVar(&infra.SubscriptionID, "subscription-id", "", "The Azure Subscription ID")
 	flag.StringVar(&infra.OrganizationID, "organization-id", "", "The organization id if using Scaleway as the provider")
 	flag.StringVar(&infra.VpcID, "vpc-id", "", "The VPC ID to create the exit-server in (EC2)")
 	flag.StringVar(&infra.SubnetID, "subnet-id", "", "The Subnet ID where the exit-server should be placed (EC2)")

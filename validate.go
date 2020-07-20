@@ -20,6 +20,11 @@ func validateFlags(c InfraConfig) error {
 			return fmt.Errorf("zone required for provider: %s", c.Provider)
 		}
 	}
+	if c.Provider == "azure" {
+		if len(c.SubscriptionID) == 0 {
+			return fmt.Errorf("subscription-id required for provider: %s", c.Provider)
+		}
+	}
 	if len(c.MaxClientMemory) > 0 {
 		if _, err := resource.ParseQuantity(c.MaxClientMemory); err != nil {
 			return fmt.Errorf("invalid memory value: %s", err.Error())

@@ -41,6 +41,9 @@ spec:
         {{- if .Values.subnetId }}
         - "-subnet-id={{.Values.subnetId}}"
         {{- end }}
+        {{- if .Values.subscriptionID }}
+        - "-subscription-id={{.Values.subscriptionID}}"
+        {{- end }}
         {{- if .Values.organizationID }}
         - "-organization-id={{.Values.organizationID}}"
         {{- end }}

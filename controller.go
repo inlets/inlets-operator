@@ -617,6 +617,32 @@ func getHostConfig(c *Controller, tunnel *inletsv1alpha1.Tunnel) provision.Basic
 			UserData:   userData,
 			Additional: map[string]string{},
 		}
+
+	case "azure":
+		// Ubuntu images can be found here https://docs.microsoft.com/en-us/azure/virtual-machines/linux/cli-ps-findimage#list-popular-images
+		// An image includes more than one property, it has publisher, offer, sku and version.
+		// So they have to be in "Additional" instead of just "OS".
+
+		inletsPort := inletsOSSControlPort
+
+		if c.infraConfig.UsePro() {
+			inletsPort = inletsPROControlPort
+		}
+		host = provision.BasicHost{
+			Name:     tunnel.Name,
+			OS:       "Additional.imageOffer",
+			Plan:     "Standard_B1ls",
+			Region:   c.infraConfig.Region,
+			UserData: userData,
+			Additional: map[string]string{
+				"inlets-port":    strconv.Itoa(inletsPort),
+				"pro":            fmt.Sprint(c.infraConfig.UsePro()),
+				"imagePublisher": "Canonical",
+				"imageOffer":     "UbuntuServer",
+				"imageSku":       "16.04-LTS",
+				"imageVersion":   "latest",
+			},
+		}
 	}
 	return host
 }
@@ -640,6 +666,8 @@ func getProvisioner(c *Controller) (provision.Provisioner, error) {
 		provisioner, _ = provision.NewCivoProvisioner(c.infraConfig.GetAccessKey())
 	case "linode":
 		provisioner, _ = provision.NewLinodeProvisioner(c.infraConfig.GetAccessKey())
+	case "azure":
+		provisioner, _ = provision.NewAzureProvisioner(c.infraConfig.SubscriptionID, c.infraConfig.GetAccessKey())
 	default:
 		return nil, fmt.Errorf("unsupported provider: %s", c.infraConfig.Provider)
 	}
