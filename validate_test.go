@@ -55,6 +55,31 @@ func Test_validateFlags_GCE_ProjectID(t *testing.T) {
 	}
 }
 
+func Test_validateFlags_Azure_SubscriptionID_EmptyValue(t *testing.T) {
+	c := InfraConfig{
+		Provider:       "azure",
+		Region:         "eastus",
+		SubscriptionID: "",
+	}
+	err := validateFlags(c)
+	want := "subscription-id required for provider: azure"
+	if err.Error() != want {
+		t.Errorf("expected error: %s, got: %s", want, err)
+	}
+}
+
+func Test_validateFlags_Azure_SubscriptionID_GoodValue(t *testing.T) {
+	c := InfraConfig{
+		Provider:       "azure",
+		Region:         "eastus",
+		SubscriptionID: "7136bb17-a334-41e1-9543-284f4af96420",
+	}
+	err := validateFlags(c)
+	if err != nil {
+		t.Errorf("expected: nil, got: %s", err)
+	}
+}
+
 func Test_validateFlags_BadMemoryValue(t *testing.T) {
 	c := InfraConfig{
 		Provider:        "digitalocean",

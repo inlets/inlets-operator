@@ -50,6 +50,7 @@ Operator cloud host provisioning:
   - [x] Provision to GCP
   - [x] Provision to AWS EC2
   - [x] Provision to Linode
+  - [x] Provision to Azure
 - [x] Publish stand-alone [Go provisioning library/SDK](https://github.com/inlets/inletsctl/tree/master/pkg/provision)
 
 With [`inlets-pro`](https://github.com/inlets/inlets-pro) configured, you get the following additional benefits:
@@ -228,6 +229,26 @@ arkade install inlets-operator \
  --provider linode \
  --region us-east \
  --access-key <Linode API Access Key>
+```
+
+## Running in-cluster, using Azure for the exit node
+Prerequisites:
+
+* You will need `az`. See [Install the Azure CLI](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli)
+
+Generate Azure auth file 
+```sh
+az ad sp create-for-rbac --sdk-auth > ~/Downloads/client_credentials.json
+```
+
+Install using helm:
+```bash
+kubectl apply -f ./artifacts/crds/
+kubectl create secret generic inlets-access-key --from-file=inlets-access-key=~/Downloads/client_credentials.json
+helm repo add inlets https://inlets.github.io/inlets-operator/
+helm repo update
+helm upgrade inlets-operator --install inlets/inlets-operator \
+  --set provider=azure,region=eastus,subscriptionID=<Azure Subscription ID> 
 ```
 
 ## Expose a service with a LoadBalancer
