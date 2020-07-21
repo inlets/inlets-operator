@@ -1,5 +1,10 @@
 replicaCount: 1
 
+# inlets PRO enables L4 TCP LoadBalancers in Kubernetes
+## To enable, obtain a free 14-day trial from https://github.com/inlets/inlets-pro
+## Or purchase at https://store.openfaas.com/
+inletsProLicense: ""
+
 provider: "digitalocean"
 region: "lon1"
 
@@ -17,15 +22,13 @@ region: "lon1"
 
 accessKeyFile: "/var/secrets/inlets/inlets-access-key"
 
-# Set to /var/secrets/inlets/secret/inlets-secret-key for a provider that requires an access key and secret key, such as EC2
+# Set to /var/secrets/inlets/secret/inlets-secret-key for a provider
+# that requires an access key and secret key, such as EC2.
 secretKeyFile: ""
-
-# Obtain a free 14-day trial from https://github.com/inlets/inlets-pro
-inletsProLicense: ""
 
 annotatedOnly: false
 
-image: "inlets/inlets-operator:0.8.5"
+image: "inlets/inlets-operator:0.8.6"
 pullPolicy: "IfNotPresent"
 clientImage: "inlets/inlets:2.7.3"
 proClientImage: "inlets/inlets-pro:0.6.0"
