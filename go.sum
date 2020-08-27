@@ -157,10 +157,8 @@ github.com/hpcloud/tail v1.0.0/go.mod h1:ab1qPbhIpdTxEkNHXyeSf5vhxWSCs/tWer42PpO
 github.com/imdario/mergo v0.3.5 h1:JboBksRwiiAJWvIYJVo46AfV+IAIKZpfrSzVKj42R4Q=
 github.com/imdario/mergo v0.3.5/go.mod h1:2EnlNZ0deacrJVfApfmtdGgDfMuh/nq6Ok1EcJh5FfA=
 github.com/inconshreveable/mousetrap v1.0.0/go.mod h1:PxqpIevigyE2G7u3NXJIT2ANytuPF1OarO4DADm73n8=
-github.com/inlets/inletsctl v0.0.0-20200630123138-2af07d807845 h1:kXLRUtZf8bxoFJwmiBvBWFgu06nkLXu3YbNpPHnIyUc=
-github.com/inlets/inletsctl v0.0.0-20200630123138-2af07d807845/go.mod h1:TYXLQgu6kEQAH+X2TgZclvJ1h+QK7cJaoPGfkfIr9KI=
-github.com/inlets/inletsctl v0.0.0-20200827135227-594b78220d6e h1:CoeGECUzZGIy++iHIhAiymPzJ7iEVBw6OIKR+liHlH0=
-github.com/inlets/inletsctl v0.0.0-20200827135227-594b78220d6e/go.mod h1:QJ7kj0pyEPAsdYWAdhfWfN5mErQ0Qp+7M3s4u//CMN4=
+github.com/inlets/inletsctl v0.0.0-20200827152430-ac28a1e46c51 h1:5dAO9CtLwMtwjVpqQXNMiE5F8GVuxJ7uK9Fqsop/Dkc=
+github.com/inlets/inletsctl v0.0.0-20200827152430-ac28a1e46c51/go.mod h1:QJ7kj0pyEPAsdYWAdhfWfN5mErQ0Qp+7M3s4u//CMN4=
 github.com/jmespath/go-jmespath v0.0.0-20180206201540-c2b33e8439af h1:pmfjZENx5imkbgOkpRUYLnmbU7UEFbjtDA2hxJ1ichM=
 github.com/jmespath/go-jmespath v0.0.0-20180206201540-c2b33e8439af/go.mod h1:Nht3zPeWKUH0NzdCt2Blrr5ys8VGpn0CEB0cQHVjt7k=
 github.com/json-iterator/go v1.1.6/go.mod h1:+SdeFBvtyEkXs7REEP0seUULqWtbJapLOCVDaaPEHmU=
@@ -310,6 +308,7 @@ golang.org/x/sys v0.0.0-20190507160741-ecd444e8653b/go.mod h1:h1NjWce9XRLGQEsW7w
 golang.org/x/sys v0.0.0-20190606165138-5da285871e9c/go.mod h1:h1NjWce9XRLGQEsW7wpKNCjG9DtNlClVuFLEZdDNbEs=
 golang.org/x/sys v0.0.0-20190616124812-15dcb6c0061f/go.mod h1:h1NjWce9XRLGQEsW7wpKNCjG9DtNlClVuFLEZdDNbEs=
 golang.org/x/sys v0.0.0-20190624142023-c5567b49c5d0/go.mod h1:h1NjWce9XRLGQEsW7wpKNCjG9DtNlClVuFLEZdDNbEs=
+golang.org/x/sys v0.0.0-20191022100944-742c48ecaeb7 h1:HmbHVPwrPEKPGLAcHSrMe6+hqSUlvZU0rab6x5EXfGU=
 golang.org/x/sys v0.0.0-20191022100944-742c48ecaeb7/go.mod h1:h1NjWce9XRLGQEsW7wpKNCjG9DtNlClVuFLEZdDNbEs=
 golang.org/x/sys v0.0.0-20191128015809-6d18c012aee9 h1:ZBzSG/7F4eNKz2L3GE9o300RX0Az1Bw5HF7PDraD+qU=
 golang.org/x/sys v0.0.0-20191128015809-6d18c012aee9/go.mod h1:h1NjWce9XRLGQEsW7wpKNCjG9DtNlClVuFLEZdDNbEs=
