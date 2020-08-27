@@ -45,8 +45,10 @@ import (
 )
 
 const controllerAgentName = "inlets-operator"
-const inletsControlPort = 8080
-const inletsProControlPort = 8123
+const inletsOSSControlPort = 8080
+const inletsPROControlPort = 8123
+const inletsOSSVersion = "2.7.4"
+const inletsPROVersion = "0.7.0"
 
 const (
 	// SuccessSynced is used as part of the Event 'reason' when a Tunnel is synced
@@ -511,7 +513,14 @@ func createClientDeployment(tunnel *inletsv1alpha1.Tunnel, c *Controller) error 
 }
 
 func getHostConfig(c *Controller, tunnel *inletsv1alpha1.Tunnel) provision.BasicHost {
-	userData := makeUserdata(tunnel.Spec.AuthToken, c.infraConfig.UsePro(), tunnel.Spec.ServiceName)
+
+	userData := provision.MakeExitServerUserdata(
+		inletsOSSControlPort,
+		tunnel.Spec.AuthToken,
+		inletsOSSVersion,
+		inletsPROVersion,
+		c.infraConfig.UsePro())
+
 	var host provision.BasicHost
 
 	switch c.infraConfig.Provider {
@@ -546,10 +555,10 @@ func getHostConfig(c *Controller, tunnel *inletsv1alpha1.Tunnel) provision.Basic
 		}
 	case "gce":
 		firewallRuleName := "inlets"
-		inletsPort := inletsControlPort
+		inletsPort := inletsOSSControlPort
 
 		if c.infraConfig.UsePro() {
-			inletsPort = inletsProControlPort
+			inletsPort = inletsPROControlPort
 		}
 
 		host = provision.BasicHost{
@@ -565,10 +574,10 @@ func getHostConfig(c *Controller, tunnel *inletsv1alpha1.Tunnel) provision.Basic
 			},
 		}
 	case "ec2":
-		inletsPort := inletsControlPort
+		inletsPort := inletsOSSControlPort
 
 		if c.infraConfig.UsePro() {
-			inletsPort = inletsProControlPort
+			inletsPort = inletsPROControlPort
 		}
 
 		host = provision.BasicHost{
@@ -668,7 +677,7 @@ func makeClient(tunnel *inletsv1alpha1.Tunnel, targetPort int32, clientImage str
 			Args: []string{
 				"client",
 				"--upstream=" + fmt.Sprintf("http://%s:%d", tunnel.Spec.ServiceName, targetPort),
-				"--remote=" + fmt.Sprintf("ws://%s:%d", tunnel.Status.HostIP, inletsControlPort),
+				"--remote=" + fmt.Sprintf("ws://%s:%d", tunnel.Status.HostIP, inletsOSSControlPort),
 				"--token=" + tunnel.Spec.AuthToken,
 			},
 		}
@@ -680,7 +689,7 @@ func makeClient(tunnel *inletsv1alpha1.Tunnel, targetPort int32, clientImage str
 			ImagePullPolicy: corev1.PullIfNotPresent,
 			Args: []string{
 				"client",
-				"--connect=" + fmt.Sprintf("wss://%s:%d/connect", tunnel.Status.HostIP, inletsProControlPort),
+				"--connect=" + fmt.Sprintf("wss://%s:%d/connect", tunnel.Status.HostIP, inletsPROControlPort),
 				"--token=" + tunnel.Spec.AuthToken,
 				"--tcp-ports=" + ports,
 				"--license=" + license,
@@ -836,39 +845,6 @@ func (c *Controller) handleObject(obj interface{}) {
 		c.enqueueTunnel(tunnel)
 		return
 	}
-}
-
-func makeUserdata(authToken string, usePro bool, remoteTCP string) string {
-	if !usePro {
-		controlPort := fmt.Sprintf("%d", inletsControlPort)
-
-		return `#!/bin/bash
-export AUTHTOKEN="` + authToken + `"
-export CONTROLPORT="` + controlPort + `"
-curl -sLS https://get.inlets.dev | sh
-curl -sLO https://raw.githubusercontent.com/inlets/inlets/master/hack/inlets-operator.service  && \
-	mv inlets-operator.service /etc/systemd/system/inlets.service && \
-	echo "AUTHTOKEN=$AUTHTOKEN" > /etc/default/inlets && \
-	echo "CONTROLPORT=$CONTROLPORT" >> /etc/default/inlets && \
-	systemctl start inlets && \
-	systemctl enable inlets`
-	}
-
-	return `#!/bin/bash
-export AUTHTOKEN="` + authToken + `"
-export REMOTETCP="` + remoteTCP + `"
-export IP=$(curl -sfSL https://checkip.amazonaws.com)
-
-curl -SLsf https://github.com/inlets/inlets-pro/releases/download/0.4.3/inlets-pro > /tmp/inlets-pro && \
-chmod +x /tmp/inlets-pro && \
-mv /tmp/inlets-pro /usr/local/bin/inlets-pro
-curl -sLO https://raw.githubusercontent.com/inlets/inlets/master/hack/inlets-pro.service  && \
-	mv inlets-pro.service /etc/systemd/system/inlets-pro.service && \
-	echo "AUTHTOKEN=$AUTHTOKEN" >> /etc/default/inlets-pro && \
-	echo "REMOTETCP=$REMOTETCP" >> /etc/default/inlets-pro && \
-	echo "IP=$IP" >> /etc/default/inlets-pro && \
-	systemctl start inlets-pro && \
-	systemctl enable inlets-pro`
 }
 
 func manageService(controller Controller, service corev1.Service) bool {
