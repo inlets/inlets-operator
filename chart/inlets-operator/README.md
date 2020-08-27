@@ -135,6 +135,8 @@ Parameter | Description | Default
 `provider`              | Your infrastructure provider - 'digitalocean', 'ec2', 'scaleway', 'packet', or 'gce'                       | `""`
 `region`                | The region to provision hosts into                                              | `""`
 `zone`                  | The zone where the exit node is to be provisioned (Used when Google Compute Engine is used as provider) | `us-central1-a`
+`vpcId`                 | The VPC ID to create the exit-server in (EC2) | `""`
+`subnetId`              | The Subnet ID where the exit-server should be placed (EC2) | `""`
 `accessKeyFile`         | Read the access key for your infrastructure provider from a file (recommended)  | `/var/secrets/inlets/inlets-access-key`
 `projectId`             | The project ID if using Google Compute Engine or Packet.com  as the provider    | `""`
 `annotatedOnly`         | Only create a tunnel for annotated services.                                    | `false`

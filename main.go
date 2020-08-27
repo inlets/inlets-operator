@@ -39,6 +39,8 @@ type InfraConfig struct {
 	AccessKey         string
 	SecretKey         string
 	OrganizationID    string
+	VpcID			  string
+	SubnetID          string
 	AccessKeyFile     string
 	SecretKeyFile     string
 	ProjectID         string
@@ -75,6 +77,8 @@ func main() {
 	flag.StringVar(&infra.SecretKey, "secret-key", "", "The secret key if using Scaleway or EC2 as the provider")
 	flag.StringVar(&infra.SecretKeyFile, "secret-key-file", "", "Read the access key for your infrastructure provider from a file (recommended)")
 	flag.StringVar(&infra.OrganizationID, "organization-id", "", "The organization id if using Scaleway as the provider")
+	flag.StringVar(&infra.VpcID, "vpc-id", "", "The VPC ID to create the exit-server in (EC2)")
+	flag.StringVar(&infra.SubnetID, "subnet-id", "", "The Subnet ID where the exit-server should be placed (EC2)")
 	flag.StringVar(&infra.ProjectID, "project-id", "", "The project ID if using Packet.com, or Google Compute Engine as the provider")
 	flag.StringVar(&infra.ProConfig.License, "license", "", "Supply a license for use with inlets-pro")
 	flag.StringVar(&infra.ProConfig.ClientImage, "pro-client-image", "", "Supply a Docker image for the inlets-pro client")
