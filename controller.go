@@ -668,7 +668,23 @@ func makeClient(tunnel *inletsv1alpha1.Tunnel, targetPort int32, clientImage str
 	name := tunnel.Name + "-client"
 	var container corev1.Container
 
-	if !usePro {
+	if usePro {
+		container = corev1.Container{
+			Name:            "client",
+			Image:           clientImage,
+			Command:         []string{"inlets-pro"},
+			ImagePullPolicy: corev1.PullIfNotPresent,
+			Args: []string{
+				"client",
+				"--url=" + fmt.Sprintf("wss://%s:%d/connect", tunnel.Status.HostIP, inletsPROControlPort),
+				"--token=" + tunnel.Spec.AuthToken,
+				"--upstream=" + tunnel.Spec.ServiceName,
+				"--ports=" + ports,
+				"--license=" + license,
+			},
+		}
+
+	} else {
 		container = corev1.Container{
 			Name:            "client",
 			Image:           clientImage,
@@ -679,20 +695,6 @@ func makeClient(tunnel *inletsv1alpha1.Tunnel, targetPort int32, clientImage str
 				"--upstream=" + fmt.Sprintf("http://%s:%d", tunnel.Spec.ServiceName, targetPort),
 				"--remote=" + fmt.Sprintf("ws://%s:%d", tunnel.Status.HostIP, inletsOSSControlPort),
 				"--token=" + tunnel.Spec.AuthToken,
-			},
-		}
-	} else {
-		container = corev1.Container{
-			Name:            "client",
-			Image:           clientImage,
-			Command:         []string{"inlets-pro"},
-			ImagePullPolicy: corev1.PullIfNotPresent,
-			Args: []string{
-				"client",
-				"--connect=" + fmt.Sprintf("wss://%s:%d/connect", tunnel.Status.HostIP, inletsPROControlPort),
-				"--token=" + tunnel.Spec.AuthToken,
-				"--tcp-ports=" + ports,
-				"--license=" + license,
 			},
 		}
 	}

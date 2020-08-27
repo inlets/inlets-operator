@@ -30,8 +30,8 @@ annotatedOnly: false
 
 image: "inlets/inlets-operator:0.8.6"
 pullPolicy: "IfNotPresent"
-clientImage: "inlets/inlets:2.7.3"
-proClientImage: "inlets/inlets-pro:0.6.0"
+clientImage: "inlets/inlets:2.7.4"
+proClientImage: "inlets/inlets-pro:0.7.0"
 
 nameOverride: ""
 fullnameOverride: ""

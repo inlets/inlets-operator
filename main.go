@@ -54,7 +54,21 @@ func (i InfraConfig) UsePro() bool {
 
 type InletsProConfig struct {
 	License     string
+	LicenseFile string
 	ClientImage string
+}
+
+func (c InletsProConfig) GetLicenseKey() (string, error) {
+	if len(c.License) > 0 {
+		return c.License, nil
+	}
+
+	body, err := ioutil.ReadFile(c.LicenseFile)
+	if err != nil {
+		return "", fmt.Errorf("error with GetLicenseKey: %s", err.Error())
+	}
+
+	return string(body), nil
 }
 
 func init() {
@@ -77,6 +91,7 @@ func main() {
 	flag.StringVar(&infra.OrganizationID, "organization-id", "", "The organization id if using Scaleway as the provider")
 	flag.StringVar(&infra.ProjectID, "project-id", "", "The project ID if using Packet.com, or Google Compute Engine as the provider")
 	flag.StringVar(&infra.ProConfig.License, "license", "", "Supply a license for use with inlets-pro")
+	flag.StringVar(&infra.ProConfig.LicenseFile, "license-file", "", "Supply a file to read for the inlets-pro license")
 	flag.StringVar(&infra.ProConfig.ClientImage, "pro-client-image", "", "Supply a Docker image for the inlets-pro client")
 	flag.StringVar(&infra.MaxClientMemory, "max-client-memory", "128Mi", "Maximum memory limit for the tunnel clients")
 
@@ -89,10 +104,20 @@ func main() {
 	if err != nil {
 		fmt.Fprintf(os.Stderr, err.Error())
 	}
+
 	infra.InletsClientImage = os.Getenv("client_image")
 
 	log.Printf("Inlets client: %s\n", infra.GetInletsClientImage())
-	log.Printf("Inlets pro: %v\n", infra.UsePro())
+
+	pro := infra.UsePro()
+
+	if pro {
+		log.Printf("Using inlets PRO.\n")
+		_, err := infra.ProConfig.GetLicenseKey()
+		if err != nil {
+			panic(err)
+		}
+	}
 
 	// set up signals so we handle the first shutdown signal gracefully
 	stopCh := signals.SetupSignalHandler()
@@ -135,13 +160,13 @@ func main() {
 func (i *InfraConfig) GetInletsClientImage() string {
 	if i.UsePro() {
 		if i.ProConfig.ClientImage == "" {
-			return "inlets/inlets-pro:0.6.0"
+			return "inlets/inlets-pro:0.7.0"
 		}
 		return i.ProConfig.ClientImage
 	}
 
 	if i.InletsClientImage == "" {
-		return "inlets/inlets:2.7.2"
+		return "inlets/inlets:2.7.4"
 	}
 
 	return i.InletsClientImage
