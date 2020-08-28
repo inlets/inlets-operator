@@ -578,6 +578,19 @@ func getHostConfig(c *Controller, tunnel *inletsv1alpha1.Tunnel) provision.Basic
 
 		if c.infraConfig.UsePro() {
 			inletsPort = inletsPROControlPort
+			inletsPort = inletsPROControlPort
+		}
+
+		var additional = map[string]string{
+			"inlets-port": strconv.Itoa(inletsPort),
+		}
+
+		if len(c.infraConfig.VpcID) > 0 {
+			additional["vpc-id"] = c.infraConfig.VpcID
+		}
+
+		if len(c.infraConfig.SubnetID) > 0 {
+			additional["subnet-id"] = c.infraConfig.SubnetID
 		}
 
 		var additional = map[string]string{
