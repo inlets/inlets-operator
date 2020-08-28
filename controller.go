@@ -578,6 +578,7 @@ func getHostConfig(c *Controller, tunnel *inletsv1alpha1.Tunnel) provision.Basic
 
 		if c.infraConfig.UsePro() {
 			inletsPort = inletsPROControlPort
+			inletsPort = inletsPROControlPort
 		}
 
 		var additional = map[string]string{
