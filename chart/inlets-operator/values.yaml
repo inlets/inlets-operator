@@ -26,12 +26,18 @@ accessKeyFile: "/var/secrets/inlets/inlets-access-key"
 # that requires an access key and secret key, such as EC2.
 secretKeyFile: ""
 
+# The VPC ID to create the exit-server in (EC2)
+vpcId: ""
+
+# The Subnet ID where the exit-server should be placed (EC2)
+subnetId: ""
+
 annotatedOnly: false
 
-image: "inlets/inlets-operator:0.8.6"
+image: "inlets/inlets-operator:0.9.0"
 pullPolicy: "IfNotPresent"
-clientImage: "inlets/inlets:2.7.3"
-proClientImage: "inlets/inlets-pro:0.6.0"
+clientImage: "inlets/inlets:2.7.4"
+proClientImage: "inlets/inlets-pro:0.7.0"
 
 nameOverride: ""
 fullnameOverride: ""
