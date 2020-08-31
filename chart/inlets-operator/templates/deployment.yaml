@@ -35,6 +35,12 @@ spec:
         - "-access-key-file={{.Values.accessKeyFile}}"
         - "-license={{.Values.inletsProLicense}}"
         - "-project-id={{.Values.projectID}}"
+        {{- if .Values.vpcId }}
+        - "-vpc-id={{.Values.vpcId}}"
+        {{- end }}
+        {{- if .Values.subnetId }}
+        - "-subnet-id={{.Values.subnetId}}"
+        {{- end }}
         {{- if .Values.organizationID }}
         - "-organization-id={{.Values.organizationID}}"
         {{- end }}
