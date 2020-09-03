@@ -34,7 +34,7 @@ subnetId: ""
 
 annotatedOnly: false
 
-image: "inlets/inlets-operator:0.9.0"
+image: "inlets/inlets-operator:0.9.1"
 pullPolicy: "IfNotPresent"
 clientImage: "inlets/inlets:2.7.4"
 proClientImage: "inlets/inlets-pro:0.7.0"
