@@ -106,22 +106,7 @@ See an alternative video showing my cluster running with KinD on my Mac and the 
 
 > Note: this example is now multi-arch, so it's valid for `x86_64`, `ARMHF`, and `ARM64`.
 
-You can also run the operator in-cluster, a ClusterRole is used since Services can be created in any namespace, and may need a tunnel.
-
-```bash
-# Create a secret to store the access token
-
-kubectl create secret generic inlets-access-key \
-  --from-literal inlets-access-key="$(cat ~/Downloads/do-access-token)"
-
-kubectl apply -f ./artifacts/crds/
-
-# Apply the operator deployment and RBAC role
-kubectl apply -f ./artifacts/operator-rbac.yaml
-kubectl apply -f ./artifacts/operator.yaml
-```
-
-You can also install the inlets-operator using a single command using [arkade](https://get-arkade.dev/), arkade runs against any Kubernetes cluster.
+You can also run the operator in-cluster, a ClusterRole is used since Services can be created in any namespace, and may need a tunnel. Install the inlets-operator using a single command with [arkade](https://get-arkade.dev/). arkade runs against any Kubernetes cluster and wraps the helm command-line.
 
 Install with inlets PRO:
 
@@ -156,29 +141,6 @@ arkade install inlets-operator \
  --secret-key-file $HOME/Downloads/secret-access-key \
  --license $(cat $HOME/inlets-pro-license.txt)
 ```
-
-If you are installing manually, using the yaml files you will need to un-comment the sections indicated in the
- `artifacts/operator.yaml` file
-
-```bash
-kubectl apply -f ./artifacts/crds/
-
-# Create a secret to store the access token
-
-kubectl create secret generic inlets-access-key \
-  --from-literal inlets-access-key="$(cat ~/Downloads/access-key)"
-
-# Create a secret to store the secret access token
-
-kubectl create secret generic inlets-secret-key \
-  --from-literal inlets-secret-key="$(cat ~/Downloads/secret-access-key)"
-
-kubectl apply -f ./artifacts/crds/
-
-# Apply the operator deployment and RBAC role
-kubectl apply -f ./artifacts/operator-rbac.yaml
-kubectl apply -f ./artifacts/operator.yaml
-```
  
 ## Running in-cluster, using Google Compute Engine for the exit node using helm
 
@@ -189,7 +151,7 @@ If you do not have helm installed and configured follow the instructions [here](
 It is assumed that you have gcloud installed and configured on your machine.
 If not, then follow the instructions [here](https://cloud.google.com/sdk/docs/quickstarts)
 
-```sh
+```bash
 # Get current projectID
 export PROJECTID=$(gcloud config get-value core/project 2>/dev/null)
 
@@ -230,6 +192,7 @@ helm upgrade inlets-operator --install inlets/inlets-operator \
 ## Running in-cluster, using Linode for the exit node
 
 Install using helm:
+
 ```bash
 kubectl apply -f ./artifacts/crds/
 
@@ -265,21 +228,6 @@ arkade install inlets-operator \
  --provider linode \
  --region us-east \
  --access-key <Linode API Access Key>
-```
-
-You can also install using kubectl without helm: (Change `-provider` and `-region` in `./artifacts/operator.yaml`)
-
-```bash
-# Create a secret to store the access token
-
-kubectl create secret generic inlets-access-key \
-  --from-literal inlets-access-key=<Linode API Access Key>
-
-kubectl apply -f ./artifacts/crds/
-
-# Apply the operator deployment and RBAC role
-kubectl apply -f ./artifacts/operator-rbac.yaml
-kubectl apply -f ./artifacts/operator.yaml
 ```
 
 ## Expose a service with a LoadBalancer
