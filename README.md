@@ -4,17 +4,13 @@
 
 "Get a Kubernetes LoadBalancer where you never thought it was possible."
 
-In cloud-based [Kubernetes](https://kubernetes.io/) solutions, Services can be exposed as type "LoadBalancer" and your cloud provider will provision a LoadBalancer and start routing traffic, in another word: you get ingress to your service.
+In cloud-based [Kubernetes](https://kubernetes.io/) solutions, Services can be exposed as type "LoadBalancer" and your cloud provider will provision a LoadBalancer and start routing traffic, in another words: you get "Ingress" to your services from the outside world.
 
-inlets-operator brings that same experience to your local Kubernetes or k3s cluster (k3s/k3d/minikube/microk8s/Docker Desktop/KinD). The operator automates the creation of an [inlets](https://inlets.dev) exit-node on public cloud, and runs the client as a Pod inside your cluster. Your Kubernetes `Service` will be updated with the public IP of the exit-node and you can start receiving incoming traffic immediately.
+inlets-operator brings that same experience to your local Kubernetes cluster. The operator automates the creation of an [inlets](https://inlets.dev) exit-server on public cloud, and runs the client as a Pod inside your cluster. Your Kubernetes `Service` will be updated with the public IP of the exit-node and you can start receiving incoming traffic immediately.
 
 ## Who is this for?
 
-This solution is for users who want to gain incoming network access (ingress) to their private Kubernetes clusters running on their laptops, VMs, within a Docker container, on-premises, or behind NAT. The cost of the LoadBalancer with a IaaS like DigitalOcean is around 5 USD / mo, which is 10 USD cheaper than an AWS ELB or GCP LoadBalancer.
-
-Whilst 5 USD is cheaper than a "Cloud Load Balancer", this tool is for users who cannot get incoming connections due to their network configuration, not for saving money vs. public cloud.
-
-You can configure the operator to use either of our tunnels: inlets OSS for L7 HTTP traffic, or inlets PRO which adds L4 TCP support, automatic encryption with TLS and can enable the use of an IngressController and cert-manager directly from your laptop or private cloud.
+This solution is for users who want to gain incoming network access (ingress) to private Kubernetes clusters. These may be running on-premises, on your laptop, within a VM or a Docker container. It even works behind NAT, and through HTTP proxies, without the need to open firewall ports. The cost of the LoadBalancer with a IaaS like DigitalOcean is around 5 USD / mo, which is several times cheaper than AWS or GCP.
 
 ## Video demo
 
@@ -28,7 +24,7 @@ Watch a video walk-through where we deploy an IngressController (ingress-nginx) 
 
 The operator detects Services of type LoadBalancer, and then creates a `Tunnel` Custom Resource. Its next step is to provision a small VM with a public IP on the public cloud, where it will run the inlets tunnel server. Then an inlets client is deployed as a Pod within your local cluster, which connects to the server and acts like a gateway to your chosen local service.
 
-Pick your inlets edition:
+Pick inlets PRO or OSS.
 
 ### [inlets PRO](https://github.com/inlets/inlets-pro)
 
@@ -57,12 +53,6 @@ Inlets is a Cloud Native Tunnel and is [listed on the Cloud Native Landscape](ht
 * [inlets-pro](https://github.com/inlets/inlets-pro-pkg) - Cloud Native Tunnel for L4 TCP
 * [inlets-operator](https://github.com/inlets/inlets-operator) - Public IPs for your private Kubernetes Services and CRD
 * [inletsctl](https://github.com/inlets/inletsctl) - Automate the cloud for fast HTTP (L7) and TCP (L4) tunnels
-
-## Author
-
-inlets and inlets-operator are brought to you by [Alex Ellis](https://twitter.com/alexellisuk). Alex is a [CNCF Ambassador](https://www.cncf.io/people/ambassadors/) and the founder of [OpenFaaS](https://github.com/openfaas/faas/).
-
-`inlets` is made available free-of-charge, but you can support its ongoing development through [GitHub Sponsors](https://insiders.openfaas.io/) 💪
 
 ## Status and backlog
 
@@ -350,8 +340,6 @@ These costs need to be treated as an estimate and will depend on your bandwidth 
 
 * The first f1-micro instance in a GCP Project (the default instance type for inlets-operator) is free for 720hrs(30 days) a month 
 
-You can [purchase inlets PRO here](https://docs.inlets.dev/#/pricing/)
-
 ## Contributing
 
 Contributions are welcome, see the [CONTRIBUTING.md](CONTRIBUTING.md) guide.
@@ -363,3 +351,7 @@ Contributions are welcome, see the [CONTRIBUTING.md](CONTRIBUTING.md) guide.
 - [metallb](https://github.com/danderson/metallb) - open source LoadBalancer for private Kubernetes clusters, no tunnelling.
 - [Cloudflare Argo](https://www.cloudflare.com/en-gb/products/argo-tunnel/) - paid SaaS product from Cloudflare for Cloudflare customers and domains - K8s integration available through Ingress
 - [ngrok](https://ngrok.com) - a popular tunnelling tool, restarts every 7 hours, limits connections per minute, paid SaaS product with no K8s integration available
+
+## Author / vendor
+
+inlets and the inlets-operator are brought to you by [OpenFaaS Ltd](https://www.openfaas.com) and [Alex Ellis](https://www.alexellis.io/).
