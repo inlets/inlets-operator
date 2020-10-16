@@ -66,13 +66,15 @@ Other features:
 - [x] In-cluster Role, Dockerfile and YAML files
 - [x] Raspberry Pi / armhf build and YAML file
 - [x] ARM64 (Graviton/Odroid/Packet.com) Dockerfile/build and K8s YAML files
-- [x] Ignore Services with `dev.inlets.manage: false` annotation
+- [x] Control which services get a LoadBalancer using annotations
 - [x] Garbage collect hosts when Service or CRD is deleted
 - [x] CI with Travis and automated release artifacts
 - [x] One-line installer [arkade](https://get-arkade.dev/) - `arkade install inlets-operator --help`
+- [x] Provision to Civo
 
 Backlog pending:
-- [ ] Provision to Civo
+
+Feel free to suggest features.
 
 ### inlets projects
 
@@ -316,10 +318,15 @@ spec:
 
 By default the operator will create a tunnel for every LoadBalancer service.
 
-To ignore a service such as `traefik` type in: `kubectl annotate svc/traefik -n kube-system dev.inlets.manage=false`
+There are two ways to override the behaviour:
 
-You can also set the operator to ignore the services by default and only manage them when the annotation is true. `dev.inlets.manage=true`
-To do this, run the operator with the flag `-annotated-only`
+1) Create LoadBalancers for every service, unless annotated
+
+  To ignore a service such as `traefik` type in: `kubectl annotate svc/traefik -n kube-system dev.inlets.manage=false`
+
+2) Create LoadBalancers only annotated services
+
+  You can also set the operator to ignore the services by default and only manage them when the annotation is true. `dev.inlets.manage=true` with the flag `-annotated-only`
 
 ## Monitor/view logs
 
