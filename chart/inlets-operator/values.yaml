@@ -32,9 +32,10 @@ vpcId: ""
 # The Subnet ID where the exit-server should be placed (EC2)
 subnetId: ""
 
+# Only provide LoadBalancers for Services annotated with "dev.inlets.manage=true"
 annotatedOnly: false
 
-image: "inlets/inlets-operator:0.9.1"
+image: "inlets/inlets-operator:0.9.2"
 pullPolicy: "IfNotPresent"
 clientImage: "inlets/inlets:2.7.4"
 proClientImage: "inlets/inlets-pro:0.7.0"
