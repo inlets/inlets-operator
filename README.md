@@ -16,6 +16,14 @@ Whilst 5 USD is cheaper than a "Cloud Load Balancer", this tool is for users who
 
 You can configure the operator to use either of our tunnels: inlets OSS for L7 HTTP traffic, or inlets PRO which adds L4 TCP support, automatic encryption with TLS and can enable the use of an IngressController and cert-manager directly from your laptop or private cloud.
 
+## Video demo
+
+Watch a video walk-through where we deploy an IngressController (ingress-nginx) to KinD, and then obtain LetsEncrypt certificates using cert-manager.
+
+![Video demo](https://img.youtube.com/vi/4wFSdNW-p4Q/hqdefault.jpg)
+
+[Try the step-by-step tutorial](https://docs.inlets.dev/#/get-started/quickstart-ingresscontroller-cert-manager?id=quick-start-expose-your-ingresscontroller-and-get-tls-from-letsencrypt-and-cert-manager)
+
 ## inlets tunnel capabilities
 
 The operator detects Services of type LoadBalancer, and then creates a `Tunnel` Custom Resource. Its next step is to provision a small VM with a public IP on the public cloud, where it will run the inlets tunnel server. Then an inlets client is deployed as a Pod within your local cluster, which connects to the server and acts like a gateway to your chosen local service.
@@ -24,20 +32,37 @@ Pick your inlets edition:
 
 ### [inlets PRO](https://github.com/inlets/inlets-pro)
 
-* Tunnel an IngressController including TLS termination and LetsEncrypt certs from cert-manager
+* Automatic end-to-end encryption of the control-plane using PKI and TLS
 * Tunnel any TCP traffic at L4 i.e. Mongo, Postgres, MariaDB, Redis, NATS, SSH and TLS itself.
-* Automatic end-to-end encryption built-in with TLS.
-* Commercially licensed and supported. For cloud native operators and developers.
+* Tunnel an IngressController including TLS termination and LetsEncrypt certs from cert-manager
 * Punch out multiple ports such as 80 and 443 over the same tunnel
+* Commercially licensed and supported. For cloud native operators and developers.
 
-Discounted [pricing available](https://docs.inlets.dev/#/pricing/?id=pricing) for personal use.
+Heavily discounted [pricing available](https://inlets.dev/) for personal use.
 
 ### [inlets OSS](https://github.com/inlets/inlets)
 
+* No encryption enabled for the control-plane.
 * Tunnel L7 HTTP traffic.
-* Free, OSS, built for community developers.
 * Punch out only one port per tunnel, port name must be: `http`
-* No encryption enabled by default.
+* Free, OSS, built for community developers.
+
+If you transfer any secrets, login info, business data, or confidential information then you should use inlets PRO for its built-in encryption using TLS and PKI.
+
+### inlets projects
+
+Inlets is a Cloud Native Tunnel and is [listed on the Cloud Native Landscape](https://landscape.cncf.io/category=service-proxy&format=card-mode&grouping=category&sort=stars) under *Service Proxies*.
+
+* [inlets](https://github.com/inlets/inlets) - Cloud Native Tunnel for L7 / HTTP traffic written in Go
+* [inlets-pro](https://github.com/inlets/inlets-pro-pkg) - Cloud Native Tunnel for L4 TCP
+* [inlets-operator](https://github.com/inlets/inlets-operator) - Public IPs for your private Kubernetes Services and CRD
+* [inletsctl](https://github.com/inlets/inletsctl) - Automate the cloud for fast HTTP (L7) and TCP (L4) tunnels
+
+## Author
+
+inlets and inlets-operator are brought to you by [Alex Ellis](https://twitter.com/alexellisuk). Alex is a [CNCF Ambassador](https://www.cncf.io/people/ambassadors/) and the founder of [OpenFaaS](https://github.com/openfaas/faas/).
+
+`inlets` is made available free-of-charge, but you can support its ongoing development through [GitHub Sponsors](https://insiders.openfaas.io/) 💪
 
 ## Status and backlog
 
@@ -51,6 +76,7 @@ Operator cloud host provisioning:
   - [x] Provision to AWS EC2
   - [x] Provision to Linode
   - [x] Provision to Azure
+- [x] Provision to Civo
 - [x] Publish stand-alone [Go provisioning library/SDK](https://github.com/inlets/inletsctl/tree/master/pkg/provision)
 
 With [`inlets-pro`](https://github.com/inlets/inlets-pro) configured, you get the following additional benefits:
@@ -70,40 +96,10 @@ Other features:
 - [x] Garbage collect hosts when Service or CRD is deleted
 - [x] CI with Travis and automated release artifacts
 - [x] One-line installer [arkade](https://get-arkade.dev/) - `arkade install inlets-operator --help`
-- [x] Provision to Civo
 
 Backlog pending:
 
-Feel free to suggest features.
-
-### inlets projects
-
-Inlets is a Cloud Native Tunnel and is [listed on the Cloud Native Landscape](https://landscape.cncf.io/category=service-proxy&format=card-mode&grouping=category&sort=stars) under *Service Proxies*.
-
-* [inlets](https://github.com/inlets/inlets) - Cloud Native Tunnel for L7 / HTTP traffic written in Go
-* [inlets-pro](https://github.com/inlets/inlets-pro-pkg) - Cloud Native Tunnel for L4 TCP
-* [inlets-operator](https://github.com/inlets/inlets-operator) - Public IPs for your private Kubernetes Services and CRD
-* [inletsctl](https://github.com/inlets/inletsctl) - Automate the cloud for fast HTTP (L7) and TCP (L4) tunnels
-
-## Author
-
-inlets and inlets-operator are brought to you by [Alex Ellis](https://twitter.com/alexellisuk). Alex is a [CNCF Ambassador](https://www.cncf.io/people/ambassadors/) and the founder of [OpenFaaS](https://github.com/openfaas/faas/).
-
-`inlets` is made available free-of-charge, but you can support its ongoing development through [GitHub Sponsors](https://insiders.openfaas.io/) 💪
-
-## Video demo
-
-This video demo shows a single-node VM running on k3s on Packet.com, and the inlets exit node also being provisioned on Packet's infrastructure.
-
-[![https://img.youtube.com/vi/LeKMSG7QFSk/0.jpg](https://img.youtube.com/vi/LeKMSG7QFSk/0.jpg)](https://www.youtube.com/watch?v=LeKMSG7QFSk&amp=&feature=youtu.be)
-
-See an alternative video showing my cluster running with KinD on my Mac and the exit node being provisioned on DigitalOcean:
-
-- [KinD & DigitalOcean](https://youtu.be/c6DTrNk9zRk).
-
-## Step-by-step tutorial
-
-[Try the step-by-step tutorial](https://blog.alexellis.io/ingress-for-your-local-kubernetes-cluster/)
+- [x] Feel free to request features.
 
 ## Running in-cluster, using DigitalOcean for the exit node
 
@@ -255,7 +251,9 @@ helm upgrade inlets-operator --install inlets/inlets-operator \
 
 ## Expose a service with a LoadBalancer
 
-The LoadBalancer type is usually provided by a cloud controller, but when that is not available, then you can use the inlets-operator to get a public IP and ingress. The free OSS version of inlets provides a HTTP tunnel, inlets PRO can provide TCP and full functionality to an IngressController.
+The LoadBalancer type is usually provided by a cloud controller, but when that is not available, then you can use the inlets-operator to get a public IP and ingress.
+
+> The free OSS version of inlets provides a HTTP tunnel, inlets PRO can provide TCP and full functionality to an IngressController.
 
 First create a deployment for Nginx.
 
@@ -283,12 +281,6 @@ kubectl logs deploy/nginx-1-tunnel-client
 ```
 
 Check the IP of the LoadBalancer and then access it via the Internet.
-
-## Get an IngressController with TLS certificates
-
-You can bring your own IngressController such as ingress-nginx or Traefik. And if you are using inlets PRO, you can also get TLS termination and certificates from LetsEncrypt via cert-manager.
-
-* [Expose Your IngressController and get TLS from LetsEncrypt](https://docs.inlets.dev/#/get-started/quickstart-ingresscontroller-cert-manager?id=expose-your-ingresscontroller-and-get-tls-from-letsencrypt)
 
 ## Notes on OSS inlets
 
