@@ -11,6 +11,16 @@ export DOCKER_CLI_EXPERIMENTAL=enabled
 .PHONY: all
 all: build
 
+.PHONY: build-local
+build-local:
+	@docker buildx create --use --name=multiarch --node multiarch && \
+	docker buildx build \
+		--progress=plain \
+		--build-arg VERSION=$(Version) --build-arg GIT_COMMIT=$(GitCommit) \
+		--platform linux/amd64 \
+		--output "type=docker,push=false" \
+		--tag inlets/inlets-operator:$(TAG) .
+
 .PHONY: build
 build:
 	@docker buildx create --use --name=multiarch --node multiarch && \
@@ -35,7 +45,7 @@ push:
 	docker buildx build \
 		--progress=plain \
 		--build-arg VERSION=$(Version) --build-arg GIT_COMMIT=$(GitCommit) \
-		--platform linux/amd64,true/arm/v6,linux/arm64 \
+		--platform linux/amd64,linux/arm/v6,linux/arm64 \
 		--output "type=image,push=true" \
 		--tag inlets/inlets-operator:$(TAG) .
 
