@@ -1,5 +1,7 @@
 .PHONY: build push manifest test verify-codegen charts
 TAG?=latest
+LDFLAGS := "-s -w -X github.com/inlets/inlets-operator/pkg/version.Release=$(Version) -X github.com/inlets/inlets-operator/pkg/version.SHA=$(GitCommit)"
+PLATFORM := "linux/amd64,linux/arm/v7,linux/arm64"
 
 Version := $(shell git describe --tags --dirty)
 GitCommit := $(shell git rev-parse HEAD)
@@ -19,7 +21,7 @@ build-local:
 		--build-arg VERSION=$(Version) --build-arg GIT_COMMIT=$(GitCommit) \
 		--platform linux/amd64 \
 		--output "type=docker,push=false" \
-		--tag inlets/inlets-operator:$(TAG) .
+		--tag inlets/inlets-operator:$(Version) .
 
 .PHONY: build
 build:
@@ -27,9 +29,9 @@ build:
 	docker buildx build \
 		--progress=plain \
 		--build-arg VERSION=$(Version) --build-arg GIT_COMMIT=$(GitCommit) \
-		--platform linux/amd64,linux/arm/v6,linux/arm64 \
+		--platform $(PLATFORM) \
 		--output "type=image,push=false" \
-		--tag inlets/inlets-operator:$(TAG) .
+		--tag inlets/inlets-operator:$(Version) .
 
 .PHONY: docker-login
 docker-login:
@@ -45,9 +47,9 @@ push:
 	docker buildx build \
 		--progress=plain \
 		--build-arg VERSION=$(Version) --build-arg GIT_COMMIT=$(GitCommit) \
-		--platform linux/amd64,linux/arm/v6,linux/arm64 \
+		--platform $(PLATFORM) \
 		--output "type=image,push=true" \
-		--tag inlets/inlets-operator:$(TAG) .
+		--tag inlets/inlets-operator:$(Version) .
 
 .PHONY: push-ghcr
 push-ghcr:
@@ -55,9 +57,9 @@ push-ghcr:
 	docker buildx build \
 		--progress=plain \
 		--build-arg VERSION=$(Version) --build-arg GIT_COMMIT=$(GitCommit) \
-		--platform linux/amd64,linux/arm/v6,linux/arm64 \
+		--platform $(PLATFORM) \
 		--output "type=image,push=true" \
-		--tag ghcr.io/inlets/inlets-operator:$(TAG) .
+		--tag ghcr.io/inlets/inlets-operator:$(Version) .
 
 test:
 	go test ./...

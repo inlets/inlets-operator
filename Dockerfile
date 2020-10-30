@@ -1,6 +1,11 @@
-FROM teamserverless/license-check:0.3.9 as license-check
+FROM --platform=${BUILDPLATFORM:-linux/amd64} teamserverless/license-check:0.3.9 as license-check
+FROM --platform=${BUILDPLATFORM:-linux/amd64} golang:1.13 as builder
 
-FROM golang:1.13 as builder
+ARG TARGETPLATFORM
+ARG BUILDPLATFORM
+ARG TARGETOS
+ARG TARGETARCH
+
 ENV CGO_ENABLED=0
 ENV GO111MODULE=on
 
@@ -9,40 +14,32 @@ COPY --from=license-check /license-check /usr/bin/
 RUN mkdir -p /go/src/github.com/inlets/inlets-operator
 WORKDIR /go/src/github.com/inlets/inlets-operator
 
-RUN addgroup --system app && \
-  adduser --system --ingroup app app && \
-  mkdir /scratch-tmp
-
 # Cache the download before continuing
 COPY go.mod go.mod
 COPY go.sum go.sum
 RUN go mod download
 
-COPY . .
-
-ARG OPTS
+COPY pkg  pkg
+COPY main.go  main.go
+COPY image_test.go  image_test.go
+COPY controller.go  controller.go
+COPY validate.go validate.go
+COPY validate_test.go validate_test.go
 
 RUN gofmt -l -d $(find . -type f -name '*.go' -not -path "./vendor/*")
-RUN go test -v ./...
+
+RUN CGO_ENABLED=${CGO_ENABLED} GOOS=${TARGETOS} GOARCH=${TARGETARCH} \
+  go test -v ./...
+
 RUN license-check -path ./ --verbose=false "Alex Ellis" "inlets Authors" "inlets Author(s)"
-RUN VERSION=$(git describe --all --exact-match `git rev-parse HEAD` | grep tags | sed 's/tags\///') && \
-  GIT_COMMIT=$(git rev-list -1 HEAD) && \
-  env ${OPTS} CGO_ENABLED=0 GOOS=linux go build -ldflags "-s -w \
-  -X github.com/inlets/inlets-operator/pkg/version.Release=${VERSION} \
-  -X github.com/inlets/inlets-operator/pkg/version.SHA=${GIT_COMMIT}" \
-  -a -installsuffix cgo -o inlets-operator .
 
-# we can't add user in next stage because it's from scratch
-# ca-certificates and tmp folder are also missing in scratch
-# so we add all of it here and copy files in next stage
+RUN CGO_ENABLED=${CGO_ENABLED} GOOS=${TARGETOS} GOARCH=${TARGETARCH} \
+  go build -ldflags "${LDFLAGS}" \
+  -a -installsuffix cgo -o /usr/bin/inlets-operator .
 
-FROM scratch
+FROM --platform=${BUILDPLATFORM:-linux/amd64} gcr.io/distroless/static:nonroot
+WORKDIR /
+COPY --from=builder /usr/bin/inlets-operator /
+USER nonroot:nonroot
 
-COPY --from=builder /etc/passwd /etc/group /etc/
-COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
-COPY --from=builder --chown=app:app /scratch-tmp /tmp/
-COPY --from=builder /go/src/github.com/inlets/inlets-operator/inlets-operator .
-
-USER app
-
-CMD ["./inlets-operator"]
+CMD ["/inlets-operator"]
