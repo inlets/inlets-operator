@@ -156,28 +156,28 @@ spec:
 
 By default the operator will create a tunnel for every LoadBalancer service.
 
-There are two ways to override the behaviour:
+There are three ways to override the behaviour:
 
-1) Create LoadBalancers for every service, unless annotated
+### 1) Create LoadBalancers for every service, unless annotated
 
-  To ignore a service such as `traefik` type in: `kubectl annotate svc/traefik -n kube-system dev.inlets.manage=false`
+To ignore a service such as `traefik` type in: `kubectl annotate svc/traefik -n kube-system dev.inlets.manage=false`
 
-2) Create LoadBalancers for only annotated services
+### 2) Create LoadBalancers for only annotated services
 
-  You can also set the operator to ignore the services by default and only manage them when the annotation is true with the flag `-annotated-only`
-  To create a service such as `traefik` type in: `kubectl annotate svc/traefik -n kube-system dev.inlets.manage=true`
+You can also set the operator to ignore the services by default and only manage them when the annotation is true with the flag `-annotated-only`
+To create a service such as `traefik` type in: `kubectl annotate svc/traefik -n kube-system dev.inlets.manage=true`
 
-3) Create a Tunnel resource for ClusterIP services
-  
-  Running multiple LoadBalancers controllers together, e.g. inlets-operator and MetalLB, can have some issue as both will compete against each other when processing the service.
-  
-  Although the inlets-operator has the flag `-annotated-only` to filter the services, not all other LoadBalancer controller have a similar feature.
-  
-  In this case, the inlets-operator is still able to expose services by using a ClusterIP service with a Tunnel resource instead of a LoadBalancer service.
-  
+### 3) Create a Tunnel resource for ClusterIP services
+
+Running multiple LoadBalancers controllers together, e.g. inlets-operator and MetalLB, can have some issue as both will compete against each other when processing the service.
+
+Although the inlets-operator has the flag `-annotated-only` to filter the services, not all other LoadBalancer controller have a similar feature.
+
+In this case, the inlets-operator is still able to expose services by using a ClusterIP service with a Tunnel resource instead of a LoadBalancer service.
+
 Example:
 
-```
+```yaml
 ---
 apiVersion: v1
 kind: Service
@@ -203,7 +203,7 @@ spec:
 
 The public IP address of the tunnel is available in the service resource:
 
-```
+```bash
 $ kubectl get services,tunnel
 NAME            TYPE        CLUSTER-IP        EXTERNAL-IP       PORT(S)   AGE
 service/nginx   ClusterIP   192.168.226.216   104.248.163.242   80/TCP    78s
@@ -214,7 +214,7 @@ tunnel.inlets.inlets.dev/nginx   nginx     nginx-client   active       104.248.1
 
 or use a jsonpath to get the value:
 
-```
+```bash
 kubectl get service nginx --output jsonpath='{.status.loadBalancer.ingress[0].ip}'
 ```
 
