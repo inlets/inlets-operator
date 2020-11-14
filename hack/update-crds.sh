@@ -1,17 +1,17 @@
 #!/bin/bash
 
 export controllergen="$GOPATH/bin/controller-gen"
-export PKG=sigs.k8s.io/controller-tools/cmd/controller-gen
+export PKG=sigs.k8s.io/controller-tools/cmd/controller-gen@v0.4.0
 
-if [ ! -e "$gen" ]
+if [ ! -e "$controllergen" ]
 then
 echo "Getting $PKG"
-    GO111MODULE=off go get $PKG
+    go install $PKG
 fi
 
 echo $controllergen
 
-echo "$controllergen" \
+"$controllergen" \
   crd \
   schemapatch:manifests=./artifacts/crds \
   paths=./pkg/apis/... \
@@ -19,8 +19,8 @@ echo "$controllergen" \
 
 # Some versions of controller-tools generate storedVersions and conditions as null,
 # We need to change them to []
-echo sed -i.bak \
+sed -i.bak \
   -e 's/conditions: null/conditions: \[\]/' \
   -e 's/storedVersions: null/storedVersions: \[\]/' \
   ./artifacts/crds/*.yaml
-echo rm -f ./artifacts/crds/*.bak
+rm -f ./artifacts/crds/*.bak

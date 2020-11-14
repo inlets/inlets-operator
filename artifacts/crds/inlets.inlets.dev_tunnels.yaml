@@ -1,27 +1,11 @@
-apiVersion: apiextensions.k8s.io/v1beta1
+apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.3.0
+    controller-gen.kubebuilder.io/version: v0.4.0
   creationTimestamp: null
   name: tunnels.inlets.inlets.dev
 spec:
-  additionalPrinterColumns:
-  - JSONPath: .spec.serviceName
-    name: Service
-    type: string
-  - JSONPath: .spec.client_deployment.name
-    name: Tunnel
-    type: string
-  - JSONPath: .status.hostStatus
-    name: HostStatus
-    type: string
-  - JSONPath: .status.hostIP
-    name: HostIP
-    type: string
-  - JSONPath: .status.hostId
-    name: HostID
-    type: string
   group: inlets.inlets.dev
   names:
     kind: Tunnel
@@ -29,51 +13,66 @@ spec:
     plural: tunnels
     singular: tunnel
   scope: Namespaced
-  subresources:
-    status: {}
-  validation:
-    openAPIV3Schema:
-      description: Tunnel is a specification for a Tunnel resource
-      type: object
-      properties:
-        apiVersion:
-          description: 'APIVersion defines the versioned schema of this representation
-            of an object. Servers should convert recognized schemas to the latest
-            internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
-          type: string
-        kind:
-          description: 'Kind is a string value representing the REST resource this
-            object represents. Servers may infer this from the endpoint the client
-            submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
-          type: string
-        metadata:
-          type: object
-        spec:
-          description: TunnelSpec is the spec for a Tunnel resource
-          type: object
-          properties:
-            auth_token:
-              type: string
-            client_deployment:
-              type: object
-              nullable: true
-            serviceName:
-              type: string
-        status:
-          description: TunnelStatus is the status for a Tunnel resource
-          type: object
-          properties:
-            hostIP:
-              type: string
-            hostId:
-              type: string
-            hostStatus:
-              type: string
-  version: v1alpha1
   versions:
-  - name: v1alpha1
+  - additionalPrinterColumns:
+    - jsonPath: .spec.serviceName
+      name: Service
+      type: string
+    - jsonPath: .spec.client_deployment.name
+      name: Tunnel
+      type: string
+    - jsonPath: .status.hostStatus
+      name: HostStatus
+      type: string
+    - jsonPath: .status.hostIP
+      name: HostIP
+      type: string
+    - jsonPath: .status.hostId
+      name: HostID
+      type: string
+    name: v1alpha1
+    schema:
+      openAPIV3Schema:
+        description: Tunnel is a specification for a Tunnel resource
+        type: object
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation
+              of an object. Servers should convert recognized schemas to the latest
+              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this
+              object represents. Servers may infer this from the endpoint the client
+              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: TunnelSpec is the spec for a Tunnel resource
+            type: object
+            properties:
+              auth_token:
+                type: string
+              client_deployment:
+                type: object
+                nullable: true
+              serviceName:
+                type: string
+          status:
+            description: TunnelStatus is the status for a Tunnel resource
+            type: object
+            properties:
+              hostIP:
+                type: string
+              hostId:
+                type: string
+              hostStatus:
+                type: string
     served: true
     storage: true
+    subresources:
+      status: {}
 status:
   acceptedNames:
     kind: ""
