@@ -25,7 +25,7 @@ You can also install the inlets-operator with [arkade install inlets-operator](h
     ```
 
 * Install the CRD:
-
+    Requires Kubernetes 1.16+
     ```sh
     kubectl apply -f ./artifacts/crds
     ```
