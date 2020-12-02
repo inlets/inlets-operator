@@ -18,7 +18,7 @@ build-local:
 	@docker buildx create --use --name=multiarch --node multiarch && \
 	docker buildx build \
 		--progress=plain \
-		--build-arg VERSION=$(Version) --build-arg GIT_COMMIT=$(GitCommit) \
+		--build-arg Version=$(Version) --build-arg GitCommit=$(GitCommit) \
 		--platform linux/amd64 \
 		--output "type=docker,push=false" \
 		--tag inlets/inlets-operator:$(Version) .
@@ -28,7 +28,7 @@ build:
 	@docker buildx create --use --name=multiarch --node multiarch && \
 	docker buildx build \
 		--progress=plain \
-		--build-arg VERSION=$(Version) --build-arg GIT_COMMIT=$(GitCommit) \
+		--build-arg Version=$(Version) --build-arg GitCommit=$(GitCommit) \
 		--platform $(PLATFORM) \
 		--output "type=image,push=false" \
 		--tag inlets/inlets-operator:$(Version) .
@@ -46,7 +46,7 @@ push:
 	@docker buildx create --use --name=multiarch --node multiarch && \
 	docker buildx build \
 		--progress=plain \
-		--build-arg VERSION=$(Version) --build-arg GIT_COMMIT=$(GitCommit) \
+		--build-arg Version=$(Version) --build-arg GitCommit=$(GitCommit) \
 		--platform $(PLATFORM) \
 		--output "type=image,push=true" \
 		--tag inlets/inlets-operator:$(Version) .
@@ -56,7 +56,7 @@ push-ghcr:
 	@docker buildx create --use --name=multiarch --node multiarch && \
 	docker buildx build \
 		--progress=plain \
-		--build-arg VERSION=$(Version) --build-arg GIT_COMMIT=$(GitCommit) \
+		--build-arg Version=$(Version) --build-arg GitCommit=$(GitCommit) \
 		--platform $(PLATFORM) \
 		--output "type=image,push=true" \
 		--tag ghcr.io/inlets/inlets-operator:$(Version) .

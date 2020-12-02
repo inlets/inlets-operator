@@ -20,6 +20,7 @@ import (
 	clientset "github.com/inlets/inlets-operator/pkg/generated/clientset/versioned"
 	informers "github.com/inlets/inlets-operator/pkg/generated/informers/externalversions"
 	"github.com/inlets/inlets-operator/pkg/signals"
+	"github.com/inlets/inlets-operator/pkg/version"
 
 	// required for generating code from CRD
 	_ "k8s.io/code-generator/cmd/client-gen/generators"
@@ -104,6 +105,7 @@ func main() {
 	flag.BoolVar(&infra.AnnotatedOnly, "annotated-only", false, "Only create a tunnel for annotated services. Annotate with dev.inlets.manage=true.")
 
 	flag.Parse()
+	log.Printf("Operator version: %s SHA: %s\n", version.Release, version.SHA)
 
 	err := validateFlags(*infra)
 
