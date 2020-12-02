@@ -33,6 +33,7 @@ RUN CGO_ENABLED=${CGO_ENABLED} GOOS=${TARGETOS} GOARCH=${TARGETARCH} \
 
 RUN license-check -path ./ --verbose=false "Alex Ellis" "inlets Authors" "inlets Author(s)"
 
+RUN echo LDFLAGS=${LDFLAGS} 
 RUN CGO_ENABLED=${CGO_ENABLED} GOOS=${TARGETOS} GOARCH=${TARGETARCH} \
   go build -ldflags "${LDFLAGS}" \
   -a -installsuffix cgo -o /usr/bin/inlets-operator .
