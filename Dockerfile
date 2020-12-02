@@ -6,6 +6,9 @@ ARG BUILDPLATFORM
 ARG TARGETOS
 ARG TARGETARCH
 
+ARG Version
+ARG GitCommit
+
 ENV CGO_ENABLED=0
 ENV GO111MODULE=on
 
@@ -33,9 +36,9 @@ RUN CGO_ENABLED=${CGO_ENABLED} GOOS=${TARGETOS} GOARCH=${TARGETARCH} \
 
 RUN license-check -path ./ --verbose=false "Alex Ellis" "inlets Authors" "inlets Author(s)"
 
-RUN echo LDFLAGS=${LDFLAGS} 
+RUN echo flags=${Version} ${GitCommit} 
 RUN CGO_ENABLED=${CGO_ENABLED} GOOS=${TARGETOS} GOARCH=${TARGETARCH} \
-  go build -ldflags "${LDFLAGS}" \
+  go build -ldflags "-s -w -X github.com/inlets/inlets-operator/pkg/version.Release=${Version} -X github.com/inlets/inlets-operator/pkg/version.SHA=${GitCommit}" \
   -a -installsuffix cgo -o /usr/bin/inlets-operator .
 
 FROM --platform=${BUILDPLATFORM:-linux/amd64} gcr.io/distroless/static:nonroot
