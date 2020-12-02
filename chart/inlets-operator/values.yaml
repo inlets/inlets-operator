@@ -12,9 +12,9 @@ region: "lon1"
 # zone: "us-central1-a"
 # projectID: "<Your GCP Project ID>"
 
-# provider: "packet"
+# provider: "equinix-metal"
 # region: "ams1"
-# projectID: "<Your Packet Project ID>"
+# projectID: "<Your equinix-metal Project ID>"
 
 # provider: "scaleway"
 # region: "ams1"
@@ -37,8 +37,8 @@ annotatedOnly: false
 
 image: "inlets/inlets-operator:0.9.2"
 pullPolicy: "IfNotPresent"
-clientImage: "inlets/inlets:2.7.4"
-proClientImage: "inlets/inlets-pro:0.7.0"
+clientImage: "inlets/inlets:2.7.10"
+proClientImage: "inlets/inlets-pro:0.7.2"
 
 nameOverride: ""
 fullnameOverride: ""

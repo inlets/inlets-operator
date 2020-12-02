@@ -84,18 +84,18 @@ func main() {
 		ProConfig: InletsProConfig{},
 	}
 
-	flag.StringVar(&infra.Provider, "provider", "packet", "Your infrastructure provider - 'packet', 'digitalocean', 'scaleway', 'civo', 'gce', 'linode', 'azure' or 'ec2'")
+	flag.StringVar(&infra.Provider, "provider", "equinix-metal", "Your infrastructure provider - 'equinix-metal', 'digitalocean', 'scaleway', 'gce', 'linode', 'azure' or 'ec2'")
 	flag.StringVar(&infra.Region, "region", "", "The region to provision hosts into")
 	flag.StringVar(&infra.Zone, "zone", "us-central1-a", "The zone where the exit node is to be provisioned")
 	flag.StringVar(&infra.AccessKey, "access-key", "", "The access key for your infrastructure provider")
 	flag.StringVar(&infra.AccessKeyFile, "access-key-file", "", "Read the access key for your infrastructure provider from a file (recommended)")
-	flag.StringVar(&infra.SecretKey, "secret-key", "", "The secret key if using Scaleway or EC2 as the provider")
+	flag.StringVar(&infra.SecretKey, "secret-key", "", "The secret key if using scaleway or ec2 as the provider")
 	flag.StringVar(&infra.SecretKeyFile, "secret-key-file", "", "Read the access key for your infrastructure provider from a file (recommended)")
-	flag.StringVar(&infra.SubscriptionID, "subscription-id", "", "The Azure Subscription ID")
-	flag.StringVar(&infra.OrganizationID, "organization-id", "", "The organization id if using Scaleway as the provider")
-	flag.StringVar(&infra.VpcID, "vpc-id", "", "The VPC ID to create the exit-server in (EC2)")
-	flag.StringVar(&infra.SubnetID, "subnet-id", "", "The Subnet ID where the exit-server should be placed (EC2)")
-	flag.StringVar(&infra.ProjectID, "project-id", "", "The project ID if using Packet.com, or Google Compute Engine as the provider")
+	flag.StringVar(&infra.SubscriptionID, "subscription-id", "", "The azure Subscription ID")
+	flag.StringVar(&infra.OrganizationID, "organization-id", "", "The organization id if using scaleway as the provider")
+	flag.StringVar(&infra.VpcID, "vpc-id", "", "The VPC ID to create the exit-server in (ec2)")
+	flag.StringVar(&infra.SubnetID, "subnet-id", "", "The Subnet ID where the exit-server should be placed (ec2)")
+	flag.StringVar(&infra.ProjectID, "project-id", "", "The project ID if using equinix-metal, or gce as the provider")
 	flag.StringVar(&infra.ProConfig.License, "license", "", "Supply a license for use with inlets-pro")
 	flag.StringVar(&infra.ProConfig.LicenseFile, "license-file", "", "Supply a file to read for the inlets-pro license")
 	flag.StringVar(&infra.ProConfig.ClientImage, "pro-client-image", "", "Supply a Docker image for the inlets-pro client")
@@ -108,7 +108,8 @@ func main() {
 	err := validateFlags(*infra)
 
 	if err != nil {
-		fmt.Fprintf(os.Stderr, err.Error())
+		fmt.Fprintf(os.Stderr, "%s\n", err.Error())
+		os.Exit(1)
 	}
 
 	infra.InletsClientImage = os.Getenv("client_image")
@@ -166,13 +167,13 @@ func main() {
 func (i *InfraConfig) GetInletsClientImage() string {
 	if i.UsePro() {
 		if i.ProConfig.ClientImage == "" {
-			return "inlets/inlets-pro:0.7.0"
+			return "inlets/inlets-pro:0.7.2"
 		}
 		return i.ProConfig.ClientImage
 	}
 
 	if i.InletsClientImage == "" {
-		return "inlets/inlets:2.7.4"
+		return "inlets/inlets:2.7.10"
 	}
 
 	return i.InletsClientImage

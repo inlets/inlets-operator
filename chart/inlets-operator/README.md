@@ -87,18 +87,18 @@ helm upgrade inlets-operator --install inlets/inlets-operator \
   --set provider=gce,zone=us-central1-a,projectID=PROJECTID,inletsProLicense=JWT_GOES_HERE
 ```
 
-### Packet.com with inlets OSS
+### Equinix-Metal with inlets OSS
 
 ```sh
 helm upgrade inlets-operator --install inlets/inlets-operator \
-  --set provider=packet,region=ams1,projectID=PROJECTID
+  --set provider=equinix-metal,region=ams1,projectID=PROJECTID
 ```
 
-### Packet.com with inlets-pro
+### Equinix-Metal with inlets-pro
 
 ```sh
 helm upgrade inlets-operator --install inlets/inlets-operator \
-  --set provider=packet,region=ams1,projectID=PROJECTID,inletsProLicense=JWT_GOES_HERE
+  --set provider=equinix-metal,region=ams1,projectID=PROJECTID,inletsProLicense=JWT_GOES_HERE
 ```
 
 ### Scaleway with inlets OSS
@@ -131,14 +131,14 @@ and can be overwritten via the helm `--set` flag.
 Parameter | Description | Default
 ---                             | ---                                                                     | ---
 `image`                 | Docker image for the Inlets Operator                                            | `inlets/inlets-operator:0.7.4`
-`clientImage`           | Docker image for the inlets client                                              | `inlets/inlets:2.7.2`
-`provider`              | Your infrastructure provider - 'digitalocean', 'ec2', 'scaleway', 'packet', or 'gce'                       | `""`
+`clientImage`           | Docker image for the inlets client                                              | `inlets/inlets:2.7.10`
+`provider`              | Your infrastructure provider - 'digitalocean', 'ec2', 'scaleway', 'equinix-metal', or 'gce'                       | `""`
 `region`                | The region to provision hosts into                                              | `""`
 `zone`                  | The zone where the exit node is to be provisioned (Used when Google Compute Engine is used as provider) | `us-central1-a`
 `vpcId`                 | The VPC ID to create the exit-server in (EC2) | `""`
 `subnetId`              | The Subnet ID where the exit-server should be placed (EC2) | `""`
 `accessKeyFile`         | Read the access key for your infrastructure provider from a file (recommended)  | `/var/secrets/inlets/inlets-access-key`
-`projectId`             | The project ID if using Google Compute Engine or Packet.com  as the provider    | `""`
+`projectId`             | The project ID if using gce or equinix-metal as the provider    | `""`
 `annotatedOnly`         | Only create a tunnel for annotated services.                                    | `false`
 `inletsProLicense`      | License for use with inlets-pro                                                 | `""`
 `resources`             | Operator resources requests & limits                                            | `{"requests":{"cpu": "100m", "memory": "128Mi"}}`

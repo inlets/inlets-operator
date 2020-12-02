@@ -47,8 +47,8 @@ import (
 const controllerAgentName = "inlets-operator"
 const inletsOSSControlPort = 8080
 const inletsPROControlPort = 8123
-const inletsOSSVersion = "2.7.4"
-const inletsPROVersion = "0.7.0"
+const inletsOSSVersion = "2.7.10"
+const inletsPROVersion = "0.7.2"
 
 const (
 	// SuccessSynced is used as part of the Event 'reason' when a Tunnel is synced
@@ -524,7 +524,7 @@ func getHostConfig(c *Controller, tunnel *inletsv1alpha1.Tunnel) provision.Basic
 	var host provision.BasicHost
 
 	switch c.infraConfig.Provider {
-	case "packet":
+	case "equinix-metal":
 		host = provision.BasicHost{
 			Name:     tunnel.Name,
 			OS:       "ubuntu_16_04",
@@ -599,15 +599,6 @@ func getHostConfig(c *Controller, tunnel *inletsv1alpha1.Tunnel) provision.Basic
 			UserData:   base64.StdEncoding.EncodeToString([]byte(userData)),
 			Additional: additional,
 		}
-	case "civo":
-		host = provision.BasicHost{
-			Name:       tunnel.Name,
-			OS:         "811a8dfb-8202-49ad-b1ef-1e6320b20497",
-			Plan:       "g2.small",
-			Region:     c.infraConfig.Region,
-			UserData:   userData,
-			Additional: map[string]string{},
-		}
 	case "linode":
 		host = provision.BasicHost{
 			Name:       tunnel.Name,
@@ -652,8 +643,8 @@ func getProvisioner(c *Controller) (provision.Provisioner, error) {
 	var provisioner provision.Provisioner
 
 	switch c.infraConfig.Provider {
-	case "packet":
-		provisioner, _ = provision.NewPacketProvisioner(c.infraConfig.GetAccessKey())
+	case "equinix-metal":
+		provisioner, _ = provision.NewEquinixMetalProvisioner(c.infraConfig.GetAccessKey())
 	case "digitalocean":
 		provisioner, _ = provision.NewDigitalOceanProvisioner(c.infraConfig.GetAccessKey())
 	case "scaleway":
@@ -662,8 +653,6 @@ func getProvisioner(c *Controller) (provision.Provisioner, error) {
 		provisioner, _ = provision.NewGCEProvisioner(c.infraConfig.GetAccessKey())
 	case "ec2":
 		provisioner, _ = provision.NewEC2Provisioner(c.infraConfig.Region, c.infraConfig.GetAccessKey(), c.infraConfig.GetSecretKey())
-	case "civo":
-		provisioner, _ = provision.NewCivoProvisioner(c.infraConfig.GetAccessKey())
 	case "linode":
 		provisioner, _ = provision.NewLinodeProvisioner(c.infraConfig.GetAccessKey())
 	case "azure":
