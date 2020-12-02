@@ -24,6 +24,6 @@ jobs:
           outputs: "type=docker,push=false"
           platforms: linux/amd64
           build-args: |
-            LDFLAGS="-s -w -X github.com/inlets/inlets-operator/pkg/version.Release=dev -X github.com/inlets/inlets-operator/pkg/version.SHA=${{ github.sha }}"
+            LDFLAGS=-s -w -X github.com/inlets/inlets-operator/pkg/version.Release=dev -X github.com/inlets/inlets-operator/pkg/version.SHA=${{ github.sha }}
           tags: |
             ghcr.io/inlets/inlets-operator:${{ github.sha }}
