@@ -1,10 +1,10 @@
-FROM --platform=${BUILDPLATFORM:-linux/amd64} teamserverless/license-check:0.3.9 as license-check
-FROM --platform=${BUILDPLATFORM:-linux/amd64} golang:1.13 as builder
-
 ARG TARGETPLATFORM
 ARG BUILDPLATFORM
 ARG TARGETOS
 ARG TARGETARCH
+
+FROM --platform=${BUILDPLATFORM:-linux/amd64} teamserverless/license-check:0.3.9 as license-check
+FROM --platform=${BUILDPLATFORM:-linux/amd64} golang:1.13 as builder
 
 ARG Version
 ARG GitCommit
