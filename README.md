@@ -59,14 +59,13 @@ Inlets is a Cloud Native Tunnel and is [listed on the Cloud Native Landscape](ht
 Operator cloud host provisioning:
 
 - [x] Provision VMs/exit-nodes on public cloud
-  - [x] Provision to [Packet.com](https://packet.com)
-  - [x] Provision to DigitalOcean
-  - [x] Provision to Scaleway
-  - [x] Provision to GCP
-  - [x] Provision to AWS EC2
-  - [x] Provision to Linode
-  - [x] Provision to Azure
-- [x] Provision to Civo
+- [x] Provision to [Equinix-Metal](https://equinix-metal.com)
+- [x] Provision to DigitalOcean
+- [x] Provision to Scaleway
+- [x] Provision to GCP
+- [x] Provision to AWS EC2
+- [x] Provision to Linode
+- [x] Provision to Azure
 - [x] Publish stand-alone [Go provisioning library/SDK](https://github.com/inlets/inletsctl/tree/master/pkg/provision)
 
 With [`inlets-pro`](https://github.com/inlets/inlets-pro) configured, you get the following additional benefits:
@@ -81,7 +80,7 @@ Other features:
 - [x] Tunnel L7 `http` traffic
 - [x] In-cluster Role, Dockerfile and YAML files
 - [x] Raspberry Pi / armhf build and YAML file
-- [x] ARM64 (Graviton/Odroid/Packet.com) Dockerfile/build and K8s YAML files
+- [x] ARM64 (Graviton/Odroid/Equinix-Metal) Dockerfile/build and K8s YAML files
 - [x] Control which services get a LoadBalancer using annotations
 - [x] Garbage collect hosts when Service or CRD is deleted
 - [x] CI with Travis and automated release artifacts
@@ -242,7 +241,7 @@ These costs need to be treated as an estimate and will depend on your bandwidth 
 | Provider                                                           | Price per month | Price per hour |     OS image | CPU | Memory | Boot time |
 | ------------------------------------------------------------------ | --------------: | -------------: | -----------: | --: | -----: | --------: |
 | [Google Compute Engine](https://cloud.google.com/compute)                                          |         *  ~\$4.28 |       ~\$0.006 | Debian GNU Linux 9 (stretch) | 1 | 614MB | ~3-15s |
-| [Packet](https://www.packet.com/cloud/servers/t1-small/)           |           ~\$51 |         \$0.07 | Ubuntu 16.04 |   4 |    8GB | ~45-60s  |
+| [Equinix-Metal](https://equinix-metal.com)           |           ~\$51 |         \$0.07 | Ubuntu 16.04 |   4 |    8GB | ~45-60s  |
 | [Digital Ocean](https://www.digitalocean.com/pricing/#Compute)     |             \$5 |      ~\$0.0068 | Ubuntu 16.04 |   1 |  512MB | ~20-30s  |
 | [Scaleway](https://www.scaleway.com/en/pricing/#virtual-instances) |           2.99€ |         0.006€ | Ubuntu 18.04 |   2 |    2GB | 3-5m      |
 

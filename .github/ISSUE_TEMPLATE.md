@@ -40,5 +40,5 @@
 * Operating System and version (e.g. Linux, Windows, MacOS):
 
 
-* Cloud provisioner: (DigitalOcean.com / Packet.com / etc)
+* Cloud provisioner:
 

@@ -6,7 +6,7 @@ func Test_GetInletsClientImage_DefaultOSSNoOverride(t *testing.T) {
 
 	c := InfraConfig{}
 	got := c.GetInletsClientImage()
-	want := "inlets/inlets:2.7.4"
+	want := "inlets/inlets:2.7.10"
 	if got != want {
 		t.Errorf("for OSS variant want %s, but got %s", want, got)
 		t.Fail()
@@ -19,10 +19,11 @@ func Test_GetInletsClientImage_DefaultProNoOverride(t *testing.T) {
 		ProConfig: InletsProConfig{
 			License: "non-empty",
 		},
+		AccessKey: "key",
 	}
 
 	got := c.GetInletsClientImage()
-	want := "inlets/inlets-pro:0.7.0"
+	want := "inlets/inlets-pro:0.7.2"
 	if got != want {
 		t.Errorf("for OSS variant want %s, but got %s", want, got)
 		t.Fail()
@@ -36,6 +37,7 @@ func Test_GetInletsClientImage_DefaultProWithOverride(t *testing.T) {
 			License:     "non-empty",
 			ClientImage: "inlets/inlets-pro:0.6.0-armhf",
 		},
+		AccessKey: "key",
 	}
 
 	got := c.GetInletsClientImage()

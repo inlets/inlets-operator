@@ -7,7 +7,7 @@ import (
 )
 
 func validateFlags(c InfraConfig) error {
-	if c.Provider == "packet" {
+	if c.Provider == "equinix-metal" {
 		if len(c.ProjectID) == 0 {
 			return fmt.Errorf("project-id required for provider: %s", c.Provider)
 		}
@@ -29,6 +29,10 @@ func validateFlags(c InfraConfig) error {
 		if _, err := resource.ParseQuantity(c.MaxClientMemory); err != nil {
 			return fmt.Errorf("invalid memory value: %s", err.Error())
 		}
+	}
+
+	if len(c.AccessKey) == 0 && len(c.AccessKeyFile) == 0 {
+		return fmt.Errorf("access-key or access-key-file must be given")
 	}
 
 	return nil

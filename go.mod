@@ -6,7 +6,7 @@ go 1.13
 
 require (
 	github.com/aws/aws-sdk-go v1.27.3 // indirect
-	github.com/inlets/inletsctl v0.0.0-20200827152430-ac28a1e46c51
+	github.com/inlets/inletsctl v0.0.0-20201201134944-21dadc6da37e
 
 	github.com/sethvargo/go-password v0.2.0
 

@@ -1,15 +1,15 @@
 # Local dev with Go binary
 
-## Run the Go binary with Packet.com
+## Run the Go binary with Equinix Metal
 
 Assuming you're running a local cluster with [KinD](https://github.com/kubernetes-sigs/kind):
 
-Sign up to [Packet.com](https://packet.com) and get an access key, save it in `~/packet-token`
+Sign up to [Equnix Metal](https://equinix-metal.com) and get an access key, save it in `~/equinix-metal-token`
 
 ```sh
 kubectl apply -f ./artifacts/crd.yaml
 
-export PACKET_PROJECT_ID=""	# Populate from dashboard
+export EQUINIXMETAL_PROJECT_ID=""	# Populate from dashboard
 
 export GOPATH=$HOME/go/
 go get -u github.com/inlets/inlets-operator
@@ -17,7 +17,7 @@ cd $GOPATH/github.com/inlets/inlets-operator
 
 go get
 
-go build && ./inlets-operator  --kubeconfig "$(kind get kubeconfig-path --name="kind")" --access-key=$(cat ~/packet-token) --project-id="${PACKET_PROJECT_ID}"
+go build && ./inlets-operator  --kubeconfig "$(kind get kubeconfig-path --name="kind")" --access-key=$(cat ~/equinix-metal-token) --project-id="${EQUINIXMETAL_PROJECT_ID}"
 ```
 
 ## Run the Go binary with DigitalOcean
