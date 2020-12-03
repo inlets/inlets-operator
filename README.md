@@ -12,6 +12,12 @@ inlets-operator brings that same experience to your local Kubernetes cluster. Th
 
 This solution is for users who want to gain incoming network access (ingress) to private Kubernetes clusters. These may be running on-premises, on your laptop, within a VM or a Docker container. It even works behind NAT, and through HTTP proxies, without the need to open firewall ports. The cost of the LoadBalancer with a IaaS like DigitalOcean is around 5 USD / mo, which is several times cheaper than AWS or GCP.
 
+## Built for developers by developers
+
+<a href="https://github.com/sponsors/inlets/">
+<img alt="Sponsor this project" src="https://github.com/alexellis/alexellis/blob/master/sponsor-today.png" width="65%" height="65%">
+</a>
+
 ## Video demo
 
 Watch a video walk-through where we deploy an IngressController (ingress-nginx) to KinD, and then obtain LetsEncrypt certificates using cert-manager.
