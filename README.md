@@ -15,7 +15,7 @@ This solution is for users who want to gain incoming network access (ingress) to
 ## Built for developers by developers
 
 <a href="https://github.com/sponsors/inlets/">
-<img alt="Sponsor this project" src="https://github.com/alexellis/alexellis/blob/master/sponsor-today.png" width="65%" height="65%">
+<img alt="Sponsor this project" src="https://github.com/alexellis/alexellis/blob/master/sponsor-today.png" width="90%">
 </a>
 
 ## Video demo
