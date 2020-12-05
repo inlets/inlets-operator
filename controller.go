@@ -539,7 +539,7 @@ func getHostConfig(c *Controller, tunnel *inletsv1alpha1.Tunnel) provision.Basic
 		host = provision.BasicHost{
 			Name:       tunnel.Name,
 			OS:         "ubuntu-16-04-x64",
-			Plan:       "512mb",
+			Plan:       "s-1vcpu-1gb",
 			Region:     c.infraConfig.Region,
 			UserData:   userData,
 			Additional: map[string]string{},
