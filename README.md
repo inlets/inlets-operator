@@ -100,6 +100,21 @@ Backlog pending:
 
 Check out the reference documentation for inlets-operator to get exit-nodes provisioned on different cloud providers [here](https://docs.inlets.dev/#/tools/inlets-operator?id=inlets-operator-reference-documentation).
 
+## Get an IP address for your IngressController and LetsEncrypt certificates
+
+Unlike other solutions, this:
+
+* Integrates directly into Kubernetes
+* Gives you a TCP LoadBalancer, and updates its IP in `kubectl get svc`
+* Allows you to use any custom DNS you want
+* Works with LetsEncrypt
+
+Example tutorials:
+
+* [Setup Ingress, LetsEncrypt and a generic Node.js microservice](https://docs.inlets.dev/#/get-started/quickstart-ingresscontroller-cert-manager?id=expose-your-ingresscontroller-and-get-tls-from-letsencrypt)
+* [Setup Ingress, LetsEncrypt and OpenFaaS](https://inlets.dev/blog/2020/10/15/openfaas-public-endpoints.html)
+* [Setup Ingress, LetsEncrypt and a Docker Registry](https://blog.alexellis.io/get-a-tls-enabled-docker-registry-in-5-minutes/)
+
 ## Expose a service with a LoadBalancer
 
 The LoadBalancer type is usually provided by a cloud controller, but when that is not available, then you can use the inlets-operator to get a public IP and ingress.
