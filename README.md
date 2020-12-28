@@ -4,7 +4,9 @@
 
 Add public LoadBalancers to your local Kubernetes clusters.
 
-In cloud-based [Kubernetes](https://kubernetes.io/) solutions, Services can be exposed as type "LoadBalancer" and your cloud provider will provision a LoadBalancer and start routing traffic, in another words: you get "Ingress" to your services from the outside world. The inlets-operator brings that same experience to your local Kubernetes cluster by provisioning an exit-server on the public cloud and running an inlets server process there.
+When using a managed [Kubernetes](https://kubernetes.io/) engine, you can expose a Service as a "LoadBalancer" and your cloud provider will provision a cloud load-balancer for you, and start routing traffic to the selected service inside your cluster. In other words, you get network ingress to an internal service.
+
+The inlets-operator brings that same experience to your local Kubernetes cluster by provisioning an exit-server on the public cloud and running an inlets server process there.
 
 Once the inlets-operator is installed, any Service of type LoadBalancer will get an IP address, unless you exclude it with an annotation.
 
@@ -12,9 +14,9 @@ Once the inlets-operator is installed, any Service of type LoadBalancer will get
 kubectl expose deployment nginx-1 --port=80 --type=LoadBalancer
 
 $ kubectl get services -w
-NAME            TYPE        CLUSTER-IP        EXTERNAL-IP       PORT(S)   AGE
-service/nginx   ClusterIP   192.168.226.216   <pending>         80/TCP    78s
-service/nginx   ClusterIP   192.168.226.216   104.248.163.242   80/TCP    78s
+NAME               TYPE        CLUSTER-IP        EXTERNAL-IP       PORT(S)   AGE
+service/nginx-1    ClusterIP   192.168.226.216   <pending>         80/TCP    78s
+service/nginx-1    ClusterIP   192.168.226.216   104.248.163.242   80/TCP    78s
 ```
 
 ## Who is this for?
@@ -61,19 +63,18 @@ Pick inlets PRO or OSS.
 ### [inlets PRO](https://github.com/inlets/inlets-pro)
 
 * Automatic end-to-end encryption of the control-plane using PKI and TLS
+* Punch out multiple ports such as 80 and 443 over the same tunnel
 * Tunnel any TCP traffic at L4 i.e. Mongo, Postgres, MariaDB, Redis, NATS, SSH and TLS itself.
 * Tunnel an IngressController including TLS termination and LetsEncrypt certs from cert-manager
-* Punch out multiple ports such as 80 and 443 over the same tunnel
 * Commercially licensed and supported. For cloud native operators and developers.
 
 Heavily discounted [pricing available](https://inlets.dev/) for personal use.
 
 ### [inlets OSS](https://github.com/inlets/inlets)
 
-* No encryption enabled for the control-plane.
-* Tunnel L7 HTTP traffic.
+* No encryption configured
+* Tunnel L7 HTTP traffic only
 * Punch out only one port per tunnel, port name must be: `http`
-* Free, OSS, built for community developers.
 
 If you transfer any secrets, login info, business data, or confidential information then you should use inlets PRO for its built-in encryption using TLS and PKI.
 
