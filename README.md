@@ -4,13 +4,39 @@
 
 Add public LoadBalancers to your local Kubernetes clusters.
 
-In cloud-based [Kubernetes](https://kubernetes.io/) solutions, Services can be exposed as type "LoadBalancer" and your cloud provider will provision a LoadBalancer and start routing traffic, in another words: you get "Ingress" to your services from the outside world.
+In cloud-based [Kubernetes](https://kubernetes.io/) solutions, Services can be exposed as type "LoadBalancer" and your cloud provider will provision a LoadBalancer and start routing traffic, in another words: you get "Ingress" to your services from the outside world. The inlets-operator brings that same experience to your local Kubernetes cluster by provisioning an exit-server on the public cloud and running an inlets server process there.
 
-inlets-operator brings that same experience to your local Kubernetes cluster. The operator automates the creation of an [inlets](https://inlets.dev) exit-server on public cloud, and runs the client as a Pod inside your cluster. Your Kubernetes `Service` will be updated with the public IP of the exit-node and you can start receiving incoming traffic immediately.
+Once the inlets-operator is installed, any Service of type LoadBalancer will get an IP address, unless you exclude it with an annotation.
+
+```bash
+kubectl expose deployment nginx-1 --port=80 --type=LoadBalancer
+
+$ kubectl get services -w
+NAME            TYPE        CLUSTER-IP        EXTERNAL-IP       PORT(S)   AGE
+service/nginx   ClusterIP   192.168.226.216   <pending>         80/TCP    78s
+service/nginx   ClusterIP   192.168.226.216   104.248.163.242   80/TCP    78s
+```
 
 ## Who is this for?
 
-This solution is for users who want to gain incoming network access (ingress) to private Kubernetes clusters. These may be running on-premises, on your laptop, within a VM or a Docker container. It even works behind NAT, and through HTTP proxies, without the need to open firewall ports. The cost of the LoadBalancer with a IaaS like DigitalOcean is around 5 USD / mo, which is several times cheaper than AWS or GCP.
+Your cluster could be running anywhere: on your laptop, in an on-premises datacenter, within a VM, or on your Raspberry Pi. Ingress and LoadBalancers are a core-building block of Kubernetes clusters, so Ingress is especially important if you:
+
+* self-host applications and APIs
+* test and share work with colleagues or clients
+* want to build a realistic environment
+* are developing applications that integrate with other APIs and need to receive webhooks or OAuth callbacks
+
+There is no need to open a firewall port, set-up port-forwarding rules, configure dynamic DNS or any of the usual hacks. You will get a public IP and it will "just work" for any TCP traffic you may have.
+
+## How is it better than other solutions?
+
+* There are no limits for your services when exposed through a self-hosted inlets tunnel
+* You can use your own DNS
+* You can use your own IngressController
+
+Any LoadBalancer can be exposed within a few seconds.
+
+Since exit-servers are created in your preferred cloud (around a dozen are supported already), you'll only have to pay for the cost of the VM, and where possible, the cheapest plan has already been selected for you. For example with Hetzner that's about 3 EUR / mo, and with DigitalOcean it comes in at around 5 USD - both of these VPSes come with generous bandwidth allowances, global regions and fast network access.
 
 ## Built for developers by developers
 
