@@ -64,15 +64,7 @@ inlets is a Cloud Native Tunnel and is [listed on the Cloud Native Landscape](ht
 
 Operator cloud host provisioning:
 
-- [x] Provision VMs/exit-nodes on public cloud
-- [x] Provision to [Equinix-Metal](https://equinix-metal.com)
-- [x] Provision to DigitalOcean
-- [x] Provision to Scaleway
-- [x] Provision to GCP
-- [x] Provision to AWS EC2
-- [x] Provision to Linode
-- [x] Provision to Azure
-- [x] Publish stand-alone [Go provisioning library/SDK](https://github.com/inlets/inletsctl/tree/master/pkg/provision)
+- [x] Provision VMs/exit-nodes on public cloud: [Equinix-Metal](https://equinix-metal.com), DigitalOcean, Scaleway, GCP, AWS EC2, Linode and Azure
 
 With [`inlets-pro`](https://github.com/inlets/inlets-pro) configured, you get the following additional benefits:
 
@@ -91,10 +83,6 @@ Other features:
 - [x] Garbage collect hosts when Service or CRD is deleted
 - [x] CI with Travis and automated release artifacts
 - [x] One-line installer [arkade](https://get-arkade.dev/) - `arkade install inlets-operator --help`
-
-Backlog pending:
-
-- [x] Feel free to request features.
 
 ## inlets-operator reference documentation for different cloud providers
 
