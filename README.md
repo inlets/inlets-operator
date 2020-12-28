@@ -23,10 +23,11 @@ service/nginx-1    ClusterIP   192.168.226.216   104.248.163.242   80/TCP    78s
 
 Your cluster could be running anywhere: on your laptop, in an on-premises datacenter, within a VM, or on your Raspberry Pi. Ingress and LoadBalancers are a core-building block of Kubernetes clusters, so Ingress is especially important if you:
 
+* run a private-cloud or a homelab
 * self-host applications and APIs
 * test and share work with colleagues or clients
 * want to build a realistic environment
-* are developing applications that integrate with other APIs and need to receive webhooks or OAuth callbacks
+* integrate with webhooks and third-party APIs
 
 There is no need to open a firewall port, set-up port-forwarding rules, configure dynamic DNS or any of the usual hacks. You will get a public IP and it will "just work" for any TCP traffic you may have.
 
@@ -72,7 +73,7 @@ Heavily discounted [pricing available](https://inlets.dev/) for personal use.
 
 ### [inlets OSS](https://github.com/inlets/inlets)
 
-* No encryption configured
+* No encryption configured by default
 * Tunnel L7 HTTP traffic only
 * Punch out only one port per tunnel, port name must be: `http`
 
