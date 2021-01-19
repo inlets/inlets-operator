@@ -1,6 +1,6 @@
 module github.com/inlets/inlets-operator
 
-go 1.13
+go 1.15
 
 // replace github.com/inlets/inletsctl => /home/alex/inletsctl
 
