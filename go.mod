@@ -6,10 +6,8 @@ go 1.15
 
 require (
 	github.com/aws/aws-sdk-go v1.27.3 // indirect
-	github.com/inlets/inletsctl v0.0.0-20201201134944-21dadc6da37e
-
+	github.com/inlets/cloud-provision/provision v0.0.0-20210119113012-d52e792ff883
 	github.com/sethvargo/go-password v0.2.0
-
 	k8s.io/api v0.18.3
 	k8s.io/apimachinery v0.18.3
 	k8s.io/client-go v0.18.3

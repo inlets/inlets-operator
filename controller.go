@@ -35,7 +35,7 @@ import (
 	"k8s.io/client-go/util/workqueue"
 	"k8s.io/klog"
 
-	provision "github.com/inlets/inletsctl/pkg/provision"
+	provision "github.com/inlets/cloud-provision/provision"
 
 	inletsv1alpha1 "github.com/inlets/inlets-operator/pkg/apis/inletsoperator/v1alpha1"
 	clientset "github.com/inlets/inlets-operator/pkg/generated/clientset/versioned"

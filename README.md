@@ -221,7 +221,7 @@ Use the same commands as described in the section above.
 
 # Provider Pricing
 
-The host [provisioning code](https://github.com/inlets/inletsctl/tree/master/pkg/provision) used by the inlets-operator is shared with [inletsctl](https://github.com/inlets/inletsctl), both tools use the configuration in the grid below.
+The host [provisioning code](https://github.com/inlets/cloud-provision) used by the inlets-operator is shared with [inletsctl](https://github.com/inlets/inletsctl), both tools use the configuration in the grid below.
 
 These costs need to be treated as an estimate and will depend on your bandwidth usage and how many hosts you decide to create. You can at all times check your cloud provider's dashboard, API, or CLI to view your exit-nodes. The hosts provided have been chosen because they are the absolute lowest-cost option that the maintainers could find.
 
