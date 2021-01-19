@@ -42,12 +42,6 @@ Any Service of type `LoadBalancer` can be exposed within a few seconds.
 
 Since exit-servers are created in your preferred cloud (around a dozen are supported already), you'll only have to pay for the cost of the VM, and where possible, the cheapest plan has already been selected for you. For example with Hetzner that's about 3 EUR / mo, and with DigitalOcean it comes in at around 5 USD - both of these VPSes come with generous bandwidth allowances, global regions and fast network access.
 
-## Built for developers by developers
-
-<a href="https://github.com/sponsors/inlets/">
-<img alt="Sponsor this project" src="https://github.com/alexellis/alexellis/blob/master/sponsor-today.png" width="90%">
-</a>
-
 ## Video demo
 
 Watch a video walk-through where we deploy an IngressController (ingress-nginx) to KinD, and then obtain LetsEncrypt certificates using cert-manager.
