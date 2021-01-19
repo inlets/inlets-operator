@@ -33,11 +33,12 @@ There is no need to open a firewall port, set-up port-forwarding rules, configur
 
 ## How is it better than other solutions?
 
-* There are no limits for your services when exposed through a self-hosted inlets tunnel
+* There are no rate limits for your services when exposed through a self-hosted inlets tunnel
 * You can use your own DNS
 * You can use your own IngressController
+* You can take your IP address with you - wherever you go
 
-Any LoadBalancer can be exposed within a few seconds.
+Any Service of type `LoadBalancer` can be exposed within a few seconds.
 
 Since exit-servers are created in your preferred cloud (around a dozen are supported already), you'll only have to pay for the cost of the VM, and where possible, the cheapest plan has already been selected for you. For example with Hetzner that's about 3 EUR / mo, and with DigitalOcean it comes in at around 5 USD - both of these VPSes come with generous bandwidth allowances, global regions and fast network access.
 
@@ -59,9 +60,7 @@ Watch a video walk-through where we deploy an IngressController (ingress-nginx) 
 
 The operator detects Services of type LoadBalancer, and then creates a `Tunnel` Custom Resource. Its next step is to provision a small VM with a public IP on the public cloud, where it will run the inlets tunnel server. Then an inlets client is deployed as a Pod within your local cluster, which connects to the server and acts like a gateway to your chosen local service.
 
-Pick inlets PRO or OSS.
-
-### [inlets PRO](https://github.com/inlets/inlets-pro)
+### Powered by [inlets PRO](https://github.com/inlets/inlets-pro)
 
 * Automatic end-to-end encryption of the control-plane using PKI and TLS
 * Punch out multiple ports such as 80 and 443 over the same tunnel
@@ -70,23 +69,6 @@ Pick inlets PRO or OSS.
 * Commercially licensed and supported. For cloud native operators and developers.
 
 Heavily discounted [pricing available](https://inlets.dev/) for personal use.
-
-### [inlets OSS](https://github.com/inlets/inlets)
-
-* No encryption configured by default
-* Tunnel L7 HTTP traffic only
-* Punch out only one port per tunnel, port name must be: `http`
-
-If you transfer any secrets, login info, business data, or confidential information then you should use inlets PRO for its built-in encryption using TLS and PKI.
-
-### inlets projects
-
-inlets is a Cloud Native Tunnel and is [listed on the Cloud Native Landscape](https://landscape.cncf.io/category=service-proxy&format=card-mode&grouping=category&sort=stars) under *Service Proxies*.
-
-* [inlets PRO](https://inlets.dev) - Cloud Native Tunnel - TCP, HTTP & websockets with automated TLS encryption
-* [inlets](https://github.com/inlets/inlets) - Cloud Native Tunnel for HTTP only - configure TLS separately
-* [inlets-operator](https://github.com/inlets/inlets-operator) - Public IPs for your private Kubernetes Services and CRD
-* [inletsctl](https://github.com/inlets/inletsctl) - The fastest way to create self-hosted exit-servers
 
 ## Status and backlog
 
@@ -103,7 +85,7 @@ With [`inlets-pro`](https://github.com/inlets/inlets-pro) configured, you get th
 Other features:
 
 - [x] Automatically update Service type LoadBalancer with a public IP
-- [x] Tunnel L7 `http` traffic
+- [x] Tunnel L4 `tcp` traffic
 - [x] In-cluster Role, Dockerfile and YAML files
 - [x] Raspberry Pi / armhf build and YAML file
 - [x] ARM64 (Graviton/Odroid/Equinix-Metal) Dockerfile/build and K8s YAML files
@@ -135,8 +117,6 @@ Example tutorials:
 
 The LoadBalancer type is usually provided by a cloud controller, but when that is not available, then you can use the inlets-operator to get a public IP and ingress.
 
-> The free OSS version of inlets provides a HTTP tunnel, inlets PRO can provide TCP and full functionality to an IngressController.
-
 First create a deployment for Nginx.
 
 For Kubernetes 1.17 and lower:
@@ -163,30 +143,6 @@ kubectl logs deploy/nginx-1-tunnel-client
 ```
 
 Check the IP of the LoadBalancer and then access it via the Internet.
-
-## Notes on OSS inlets
-
-inlets PRO can tunnel multiple ports, but inlets OSS is set to take the first port named "http" for your service. With the OSS version of inlets (see example with OpenFaaS), make sure you give the `port` a `name` of `http`, otherwise a default of `80` will be used incorrectly.
-
-```yaml
-apiVersion: v1
-kind: Service
-metadata:
-  name: gateway
-  namespace: openfaas
-  labels:
-    app: gateway
-spec:
-  ports:
-    - name: http
-      port: 8080
-      protocol: TCP
-      targetPort: 8080
-      nodePort: 31112
-  selector:
-    app: gateway
-  type: LoadBalancer
-```
 
 ## Annotations, ignoring services and running with other LoadBalancers controllers
 
@@ -291,7 +247,7 @@ Contributions are welcome, see the [CONTRIBUTING.md](CONTRIBUTING.md) guide.
 ## Similar projects / products and alternatives
 
 - [inlets pro](https://github.com/inlets/inlets-pro) - L4 TCP tunnel, which can tunnel any TCP traffic with automatic, built-in encryption. Kubernetes-ready with Docker images and YAML manifests. 
-- [inlets](https://inlets.dev) - inlets provides an L7 HTTP tunnel for applications through the use of an exit node, it is used by the inlets operator. Encryption can be configured separately.
+- [inlets](https://inlets.dev) - inlets provides an L7 HTTP tunnel for applications through the use of an exit node, it is used by the inlets operator. Encryption must be configured separately.
 - [metallb](https://github.com/danderson/metallb) - open source LoadBalancer for private Kubernetes clusters, no tunnelling.
 - [Cloudflare Argo](https://www.cloudflare.com/en-gb/products/argo-tunnel/) - paid SaaS product from Cloudflare for Cloudflare customers and domains - K8s integration available through Ingress
 - [ngrok](https://ngrok.com) - a popular tunnelling tool, restarts every 7 hours, limits connections per minute, paid SaaS product with no K8s integration available

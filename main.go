@@ -72,6 +72,10 @@ func (c InletsProConfig) GetLicenseKey() (string, error) {
 		return "", fmt.Errorf("error with GetLicenseKey: %s", err.Error())
 	}
 
+	if len(string(body)) == 0 {
+		return "", fmt.Errorf("--license or --license-key is required for inlets PRO")
+	}
+
 	return string(body), nil
 }
 
@@ -119,7 +123,6 @@ func main() {
 	log.Printf("Inlets client: %s\n", infra.GetInletsClientImage())
 
 	pro := infra.UsePro()
-
 	if pro {
 		log.Printf("Using inlets PRO.\n")
 		_, err := infra.ProConfig.GetLicenseKey()

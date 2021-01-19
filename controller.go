@@ -45,9 +45,7 @@ import (
 )
 
 const controllerAgentName = "inlets-operator"
-const inletsOSSControlPort = 8080
 const inletsPROControlPort = 8123
-const inletsOSSVersion = "2.7.10"
 const inletsPROVersion = "0.7.2"
 
 const (
@@ -515,13 +513,15 @@ func createClientDeployment(tunnel *inletsv1alpha1.Tunnel, c *Controller) error 
 func getHostConfig(c *Controller, tunnel *inletsv1alpha1.Tunnel) provision.BasicHost {
 
 	userData := provision.MakeExitServerUserdata(
-		inletsOSSControlPort,
+		0,
 		tunnel.Spec.AuthToken,
-		inletsOSSVersion,
+		"",
 		inletsPROVersion,
-		c.infraConfig.UsePro())
+		true)
 
 	var host provision.BasicHost
+
+	inletsPort := inletsPROControlPort
 
 	switch c.infraConfig.Provider {
 	case "equinix-metal":
@@ -555,11 +555,6 @@ func getHostConfig(c *Controller, tunnel *inletsv1alpha1.Tunnel) provision.Basic
 		}
 	case "gce":
 		firewallRuleName := "inlets"
-		inletsPort := inletsOSSControlPort
-
-		if c.infraConfig.UsePro() {
-			inletsPort = inletsPROControlPort
-		}
 
 		host = provision.BasicHost{
 			Name:     tunnel.Name,
@@ -574,11 +569,6 @@ func getHostConfig(c *Controller, tunnel *inletsv1alpha1.Tunnel) provision.Basic
 			},
 		}
 	case "ec2":
-		inletsPort := inletsOSSControlPort
-
-		if c.infraConfig.UsePro() {
-			inletsPort = inletsPROControlPort
-		}
 
 		var additional = map[string]string{
 			"inlets-port": strconv.Itoa(inletsPort),
@@ -614,11 +604,6 @@ func getHostConfig(c *Controller, tunnel *inletsv1alpha1.Tunnel) provision.Basic
 		// An image includes more than one property, it has publisher, offer, sku and version.
 		// So they have to be in "Additional" instead of just "OS".
 
-		inletsPort := inletsOSSControlPort
-
-		if c.infraConfig.UsePro() {
-			inletsPort = inletsPROControlPort
-		}
 		host = provision.BasicHost{
 			Name:     tunnel.Name,
 			OS:       "Additional.imageOffer",
@@ -693,37 +678,20 @@ func syncProvisioningHostStatus(tunnel *inletsv1alpha1.Tunnel, c *Controller) er
 func makeClient(tunnel *inletsv1alpha1.Tunnel, targetPort int32, clientImage string, usePro bool, ports, license string, maxMemory string) *appsv1.Deployment {
 	replicas := int32(1)
 	name := tunnel.Name + "-client"
-	var container corev1.Container
 
-	if usePro {
-		container = corev1.Container{
-			Name:            "client",
-			Image:           clientImage,
-			Command:         []string{"inlets-pro"},
-			ImagePullPolicy: corev1.PullIfNotPresent,
-			Args: []string{
-				"client",
-				"--url=" + fmt.Sprintf("wss://%s:%d/connect", tunnel.Status.HostIP, inletsPROControlPort),
-				"--token=" + tunnel.Spec.AuthToken,
-				"--upstream=" + tunnel.Spec.ServiceName,
-				"--ports=" + ports,
-				"--license=" + license,
-			},
-		}
-
-	} else {
-		container = corev1.Container{
-			Name:            "client",
-			Image:           clientImage,
-			Command:         []string{"inlets"},
-			ImagePullPolicy: corev1.PullIfNotPresent,
-			Args: []string{
-				"client",
-				"--upstream=" + fmt.Sprintf("http://%s:%d", tunnel.Spec.ServiceName, targetPort),
-				"--remote=" + fmt.Sprintf("ws://%s:%d", tunnel.Status.HostIP, inletsOSSControlPort),
-				"--token=" + tunnel.Spec.AuthToken,
-			},
-		}
+	container := corev1.Container{
+		Name:            "client",
+		Image:           clientImage,
+		Command:         []string{"inlets-pro"},
+		ImagePullPolicy: corev1.PullIfNotPresent,
+		Args: []string{
+			"client",
+			"--url=" + fmt.Sprintf("wss://%s:%d/connect", tunnel.Status.HostIP, inletsPROControlPort),
+			"--token=" + tunnel.Spec.AuthToken,
+			"--upstream=" + tunnel.Spec.ServiceName,
+			"--ports=" + ports,
+			"--license=" + license,
+		},
 	}
 
 	container.Resources = corev1.ResourceRequirements{
