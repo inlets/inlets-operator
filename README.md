@@ -40,7 +40,7 @@ There is no need to open a firewall port, set-up port-forwarding rules, configur
 
 Any Service of type `LoadBalancer` can be exposed within a few seconds.
 
-Since exit-servers are created in your preferred cloud (around a dozen are supported already), you'll only have to pay for the cost of the VM, and where possible, the cheapest plan has already been selected for you. For example with Hetzner that's about 3 EUR / mo, and with DigitalOcean it comes in at around 5 USD - both of these VPSes come with generous bandwidth allowances, global regions and fast network access.
+Since exit-servers are created in your preferred cloud (around a dozen are supported already), you'll only have to pay for the cost of the VM, and where possible, the cheapest plan has already been selected for you. For example with Hetzner ([coming soon](https://github.com/inlets/inlets-operator/issues/115)) that's about 3 EUR / mo, and with DigitalOcean it comes in at around 5 USD - both of these VPSes come with generous bandwidth allowances, global regions and fast network access.
 
 ## Video demo
 
