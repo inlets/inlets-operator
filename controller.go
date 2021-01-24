@@ -619,6 +619,16 @@ func getHostConfig(c *Controller, tunnel *inletsv1alpha1.Tunnel) provision.Basic
 				"imageVersion":   "latest",
 			},
 		}
+
+	case "hetzner":
+		host = provision.BasicHost{
+			Name:       tunnel.Name,
+			OS:         "ubuntu-20.04",
+			Plan:       "cx11",
+			Region:     c.infraConfig.Region,
+			UserData:   userData,
+			Additional: map[string]string{},
+		}
 	}
 	return host
 }
@@ -642,6 +652,8 @@ func getProvisioner(c *Controller) (provision.Provisioner, error) {
 		provisioner, _ = provision.NewLinodeProvisioner(c.infraConfig.GetAccessKey())
 	case "azure":
 		provisioner, _ = provision.NewAzureProvisioner(c.infraConfig.SubscriptionID, c.infraConfig.GetAccessKey())
+	case "hetzner":
+		provisioner, _ = provision.NewHetznerProvisioner(c.infraConfig.GetAccessKey())
 	default:
 		return nil, fmt.Errorf("unsupported provider: %s", c.infraConfig.Provider)
 	}
