@@ -68,7 +68,7 @@ Heavily discounted [pricing available](https://inlets.dev/) for personal use.
 
 Operator cloud host provisioning:
 
-- [x] Provision VMs/exit-nodes on public cloud: [Equinix-Metal](https://equinix-metal.com), DigitalOcean, Scaleway, GCP, AWS EC2, Linode and Azure
+- [x] Provision VMs/exit-nodes on public cloud: [Equinix-Metal](https://metal.equinix.com/), DigitalOcean, Scaleway, GCP, AWS EC2, Linode and Azure
 
 With [`inlets-pro`](https://github.com/inlets/inlets-pro) configured, you get the following additional benefits:
 
@@ -228,7 +228,7 @@ These costs need to be treated as an estimate and will depend on your bandwidth 
 | Provider                                                           | Price per month | Price per hour |     OS image | CPU | Memory | Boot time |
 | ------------------------------------------------------------------ | --------------: | -------------: | -----------: | --: | -----: | --------: |
 | [Google Compute Engine](https://cloud.google.com/compute)                                          |         *  ~\$4.28 |       ~\$0.006 | Debian GNU Linux 9 (stretch) | 1 | 614MB | ~3-15s |
-| [Equinix-Metal](https://equinix-metal.com)           |           ~\$51 |         \$0.07 | Ubuntu 16.04 |   4 |    8GB | ~45-60s  |
+| [Equinix-Metal](https://metal.equinix.com/)           |           ~\$51 |         \$0.07 | Ubuntu 16.04 |   4 |    8GB | ~45-60s  |
 | [Digital Ocean](https://www.digitalocean.com/pricing/#Compute)     |             \$5 |      ~\$0.0068 | Ubuntu 16.04 |   1 |  1GB | ~20-30s  |
 | [Scaleway](https://www.scaleway.com/en/pricing/#virtual-instances) |           2.99€ |         0.006€ | Ubuntu 18.04 |   2 |    2GB | 3-5m      |
 
