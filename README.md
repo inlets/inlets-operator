@@ -42,13 +42,19 @@ Any Service of type `LoadBalancer` can be exposed within a few seconds.
 
 Since exit-servers are created in your preferred cloud (around a dozen are supported already), you'll only have to pay for the cost of the VM, and where possible, the cheapest plan has already been selected for you. For example with Hetzner ([coming soon](https://github.com/inlets/inlets-operator/issues/115)) that's about 3 EUR / mo, and with DigitalOcean it comes in at around 5 USD - both of these VPSes come with generous bandwidth allowances, global regions and fast network access.
 
-## Video demo
+## Animation
 
-Watch a video walk-through where we deploy an IngressController (ingress-nginx) to KinD, and then obtain LetsEncrypt certificates using cert-manager.
+Watch an animation created by [Ivan Velichko](https://iximiuz.com/en/posts/kubernetes-operator-pattern)
+
+![Demo GIF](https://iximiuz.com/kubernetes-operator-pattern/kube-operator-example-opt.gif)
+
+## Video walk-through
+
+In this video walk-through Alex will guide you through creating a Kubernetes cluster on your laptop with KinD, then he'll install ingress-nginx (an IngressController), followed by cert-manager and then after the inlets-operator creates a LoadBalancer on the cloud, you'll see a TLS certificate obtained by LetsEncrypt.
 
 ![Video demo](https://img.youtube.com/vi/4wFSdNW-p4Q/hqdefault.jpg)
 
-[Try the step-by-step tutorial](https://docs.inlets.dev/#/get-started/quickstart-ingresscontroller-cert-manager?id=quick-start-expose-your-ingresscontroller-and-get-tls-from-letsencrypt-and-cert-manager)
+[Try the step-by-step tutorial in the docs](https://docs.inlets.dev/#/get-started/quickstart-ingresscontroller-cert-manager?id=quick-start-expose-your-ingresscontroller-and-get-tls-from-letsencrypt-and-cert-manager)
 
 ## inlets tunnel capabilities
 
