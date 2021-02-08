@@ -513,11 +513,8 @@ func createClientDeployment(tunnel *inletsv1alpha1.Tunnel, c *Controller) error 
 func getHostConfig(c *Controller, tunnel *inletsv1alpha1.Tunnel) provision.BasicHost {
 
 	userData := provision.MakeExitServerUserdata(
-		0,
 		tunnel.Spec.AuthToken,
-		"",
-		inletsPROVersion,
-		true)
+		inletsPROVersion)
 
 	var host provision.BasicHost
 
