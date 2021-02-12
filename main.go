@@ -172,7 +172,7 @@ func main() {
 func (i *InfraConfig) GetInletsClientImage() string {
 	if i.UsePro() {
 		if i.ProConfig.ClientImage == "" {
-			return "inlets/inlets-pro:0.7.2"
+			return "ghcr.io/inlets/inlets-pro:0.8.1"
 		}
 		return i.ProConfig.ClientImage
 	}
