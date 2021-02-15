@@ -1,8 +1,10 @@
 # inlets-operator chart
 
-Install the inlets-operator with this chart or with [arkade](https://get-arkade.dev).
+The easiest way to install the inlets-operator is with [arkade](https://get-arkade.dev), an open-source Kubernetes marketplace.
 
-You can also install the inlets-operator with [arkade install inlets-operator](https://get-arkade.dev) to any Kubernetes cluster. arkade provides strongly-typed flags and validation for parameters.
+See [inlets-operator reference documentation](https://docs.inlets.dev/#/tools/inlets-operator?id=inlets-operator-reference-documentation)
+
+If you would like to use Helm instead, read on.
 
 ## Pre-reqs
 
@@ -32,96 +34,17 @@ You can also install the inlets-operator with [arkade install inlets-operator](h
 
 ## Deploy an example configuration
 
-### DigitalOcean with inlets OSS (recommended)
-
-```sh
-helm upgrade inlets-operator --install inlets/inlets-operator
-```
-
-### DigitalOcean with inlets-pro
+### DigitalOcean
 
 ```sh
 helm upgrade inlets-operator --install inlets/inlets-operator \
-  --set inletsProLicense=JWT_GOES_HERE
+  --set inletsProLicense=JWT_GOES_HERE \
+  --set region=lon1
 ```
 
-### AWS EC2 with inlets OSS
+### Other clouds
 
-```bash
-kubectl create secret generic inlets-secret-key \
---from-literal inlets-secret-key="$(cat ~/Downloads/aws-secret-access-key)"
-
-kubectl create secret generic inlets-access-key \
---from-literal inlets-access-key="$(cat ~/Downloads/aws-access-key)"
-
-helm upgrade inlets-operator --install inlets/inlets-operator \
-  --set provider=ec2,region=us-east-1,accessKeyFile=/var/secrets/inlets/inlets-access-key,\
-  secretKeyFile=/var/secrets/inlets/secret/inlets-secret-key
-```
-
-### AWS EC2 with inlets-pro
-
-```bash
-kubectl create secret generic inlets-secret-key \
---from-literal inlets-secret-key="$(cat ~/Downloads/aws-secret-access-key)"
-
-kubectl create secret generic inlets-access-key \
---from-literal inlets-access-key="$(cat ~/Downloads/aws-access-key)"
-
-helm upgrade inlets-operator --install inlets/inlets-operator \
-  --set provider=ec2,region=us-east-1,accessKeyFile=/var/secrets/inlets/inlets-access-key,\
-  secretKeyFile=/var/secrets/inlets/secret/inlets-secret-key,inletsProLicense=JWT_GOES_HERE
-```
-
-### Google Compute Engine with inlets OSS
-
-```sh
-helm upgrade inlets-operator --install inlets/inlets-operator \
-  --set provider=gce,zone=us-central1-a,projectID=PROJECTID
-```
-
-### Google Compute Engine with inlets-pro
-
-```sh
-helm upgrade inlets-operator --install inlets/inlets-operator \
-  --set provider=gce,zone=us-central1-a,projectID=PROJECTID,inletsProLicense=JWT_GOES_HERE
-```
-
-### Equinix-Metal with inlets OSS
-
-```sh
-helm upgrade inlets-operator --install inlets/inlets-operator \
-  --set provider=equinix-metal,region=ams1,projectID=PROJECTID
-```
-
-### Equinix-Metal with inlets-pro
-
-```sh
-helm upgrade inlets-operator --install inlets/inlets-operator \
-  --set provider=equinix-metal,region=ams1,projectID=PROJECTID,inletsProLicense=JWT_GOES_HERE
-```
-
-### Scaleway with inlets OSS
-
-```sh
-helm upgrade inlets-operator --install inlets/inlets-operator \
-  --set provider=scaleway,region=ams1,organizationID=ORGANIZATIONID
-```
-
-### Linode with inlets OSS
-
-```sh
-helm upgrade inlets-operator --install inlets/inlets-operator \
-  --set provider=linode,region=us-east
-```
-
-### Linode with inlets-pro
-
-```sh
-helm upgrade inlets-operator --install inlets/inlets-operator \
-  --set provider=linode,region=us-east,inletsProLicense=JWT_GOES_HERE
-```
-
+See the [reference documentation](https://docs.inlets.dev/#/tools/inlets-operator?id=inlets-operator-reference-documentation)
 
 ## Chart parameters
 
@@ -130,8 +53,9 @@ and can be overwritten via the helm `--set` flag.
 
 Parameter | Description | Default
 ---                             | ---                                                                     | ---
-`image`                 | Docker image for the Inlets Operator                                            | `inlets/inlets-operator:0.7.4`
-`clientImage`           | Docker image for the inlets client                                              | `inlets/inlets:2.7.10`
+`inletsProLicense`      | License for use with inlets-pro                                                 | `""`
+`image`                 | Docker image for the inlets-operator                                            | `ghcr.io/inlets/inlets-operator:0.12.0`
+`proClientImage`           | Docker image for the inlets client                                              | `ghcr.io/inlets/inlets-pro:0.8.1`
 `provider`              | Your infrastructure provider - 'digitalocean', 'ec2', 'scaleway', 'equinix-metal', or 'gce'                       | `""`
 `region`                | The region to provision hosts into                                              | `""`
 `zone`                  | The zone where the exit node is to be provisioned (Used when Google Compute Engine is used as provider) | `us-central1-a`
@@ -140,7 +64,6 @@ Parameter | Description | Default
 `accessKeyFile`         | Read the access key for your infrastructure provider from a file (recommended)  | `/var/secrets/inlets/inlets-access-key`
 `projectId`             | The project ID if using gce or equinix-metal as the provider    | `""`
 `annotatedOnly`         | Only create a tunnel for annotated services.                                    | `false`
-`inletsProLicense`      | License for use with inlets-pro                                                 | `""`
 `resources`             | Operator resources requests & limits                                            | `{"requests":{"cpu": "100m", "memory": "128Mi"}}`
 `nodeSelector`          | Node labels for data pod assignment                                             | `{}`
 `tolerations`           | Node tolerations                                                                | `[]`
