@@ -532,6 +532,7 @@ func getHostConfig(c *Controller, tunnel *inletsv1alpha1.Tunnel) provision.Basic
 				"project_id": c.infraConfig.ProjectID,
 			},
 		}
+
 	case "digitalocean":
 		host = provision.BasicHost{
 			Name:       tunnel.Name,
@@ -541,6 +542,7 @@ func getHostConfig(c *Controller, tunnel *inletsv1alpha1.Tunnel) provision.Basic
 			UserData:   userData,
 			Additional: map[string]string{},
 		}
+
 	case "scaleway":
 		host = provision.BasicHost{
 			Name:       tunnel.Name,
@@ -550,6 +552,7 @@ func getHostConfig(c *Controller, tunnel *inletsv1alpha1.Tunnel) provision.Basic
 			UserData:   userData,
 			Additional: map[string]string{},
 		}
+
 	case "gce":
 		firewallRuleName := "inlets"
 
@@ -565,8 +568,8 @@ func getHostConfig(c *Controller, tunnel *inletsv1alpha1.Tunnel) provision.Basic
 				"firewall-port": strconv.Itoa(inletsPort),
 			},
 		}
-	case "ec2":
 
+	case "ec2":
 		var additional = map[string]string{
 			"inlets-port": strconv.Itoa(inletsPort),
 		}
@@ -586,6 +589,7 @@ func getHostConfig(c *Controller, tunnel *inletsv1alpha1.Tunnel) provision.Basic
 			UserData:   base64.StdEncoding.EncodeToString([]byte(userData)),
 			Additional: additional,
 		}
+
 	case "linode":
 		host = provision.BasicHost{
 			Name:       tunnel.Name,
@@ -616,6 +620,16 @@ func getHostConfig(c *Controller, tunnel *inletsv1alpha1.Tunnel) provision.Basic
 				"imageVersion":   "latest",
 			},
 		}
+
+	case "hetzner":
+		host = provision.BasicHost{
+			Name:       tunnel.Name,
+			OS:         "ubuntu-20.04", // https://docs.hetzner.cloud/#images-get-all-images
+			Plan:       "cx11",         // https://docs.hetzner.cloud/#server-types-get-a-server-type
+			Region:     c.infraConfig.Region,
+			UserData:   userData,
+			Additional: map[string]string{},
+		}
 	}
 	return host
 }
@@ -639,6 +653,8 @@ func getProvisioner(c *Controller) (provision.Provisioner, error) {
 		provisioner, _ = provision.NewLinodeProvisioner(c.infraConfig.GetAccessKey())
 	case "azure":
 		provisioner, _ = provision.NewAzureProvisioner(c.infraConfig.SubscriptionID, c.infraConfig.GetAccessKey())
+	case "hetzner":
+		provisioner, _ = provision.NewHetznerProvisioner(c.infraConfig.GetAccessKey())
 	default:
 		return nil, fmt.Errorf("unsupported provider: %s", c.infraConfig.Provider)
 	}
