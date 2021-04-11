@@ -20,6 +20,9 @@ region: "lon1"
 # region: "ams1"
 # organizationID: "<Your Organization ID>"
 
+# provider: "hetzner"
+# region: "fsn1"
+
 accessKeyFile: "/var/secrets/inlets/inlets-access-key"
 
 # Set to /var/secrets/inlets/secret/inlets-secret-key for a provider

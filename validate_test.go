@@ -136,3 +136,29 @@ func Test_validateFlags_EmptyMemoryValue(t *testing.T) {
 		t.Errorf("expected no error, got: %s", err.Error())
 	}
 }
+
+func Test_validateFlags_Hetzner(t *testing.T) {
+	c := InfraConfig{
+		Provider:  "hetzner",
+		Region:    "fsn1",
+		AccessKey: "set",
+	}
+	err := validateFlags(c)
+
+	if err != nil {
+		t.Errorf("expected no error for valid Hetzner config, but got: %s", err.Error())
+	}
+}
+
+func Test_validateFlags_Region_Hetzner(t *testing.T) {
+	c := InfraConfig{
+		Provider:  "hetzner",
+		Region:    "",
+		AccessKey: "set",
+	}
+	err := validateFlags(c)
+	want := "region required for provider: hetzner"
+	if err.Error() != want {
+		t.Errorf("expected error: %s, got: %s", want, err)
+	}
+}
