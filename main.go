@@ -170,18 +170,10 @@ func main() {
 
 // GetInletsClientImage returns the image for the client-side tunnel
 func (i *InfraConfig) GetInletsClientImage() string {
-	if i.UsePro() {
-		if i.ProConfig.ClientImage == "" {
-			return "ghcr.io/inlets/inlets-pro:0.8.1"
-		}
-		return i.ProConfig.ClientImage
+	if i.ProConfig.ClientImage == "" {
+		return "ghcr.io/inlets/inlets-pro:0.8.1"
 	}
-
-	if i.InletsClientImage == "" {
-		return "inlets/inlets:2.7.10"
-	}
-
-	return i.InletsClientImage
+	return i.ProConfig.ClientImage
 }
 
 // GetAccessKey from parameter or file trimming

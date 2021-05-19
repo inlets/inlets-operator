@@ -2,17 +2,6 @@ package main
 
 import "testing"
 
-func Test_GetInletsClientImage_DefaultOSSNoOverride(t *testing.T) {
-
-	c := InfraConfig{}
-	got := c.GetInletsClientImage()
-	want := "inlets/inlets:2.7.10"
-	if got != want {
-		t.Errorf("for OSS variant want %s, but got %s", want, got)
-		t.Fail()
-	}
-}
-
 func Test_GetInletsClientImage_DefaultProNoOverride(t *testing.T) {
 
 	c := InfraConfig{
