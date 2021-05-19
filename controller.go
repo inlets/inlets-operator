@@ -340,7 +340,10 @@ func (c *Controller) syncHandler(key string) error {
 		return nil
 	}
 
-	service, _ := c.serviceLister.Services(namespace).Get(name)
+	service, err := c.serviceLister.Services(namespace).Get(name)
+	if err != nil {
+		return fmt.Errorf("error listing services: %s", err)
+	}
 
 	if service != nil {
 		tunnels := c.operatorclientset.InletsV1alpha1().
@@ -348,13 +351,13 @@ func (c *Controller) syncHandler(key string) error {
 
 		ops := metav1.GetOptions{}
 		name := service.Name + "-tunnel"
-		found, err := tunnels.Get(context.Background(), name, ops)
 
+		found, err := tunnels.Get(context.Background(), name, ops)
 		if errors.IsNotFound(err) {
 			if manageService(*c, *service) {
-				pwdRes, pwdErr := password.Generate(64, 10, 0, false, true)
-				if pwdErr != nil {
-					log.Fatalf("Error generating password for inlets server %s", pwdErr.Error())
+				pwdRes, err := password.Generate(64, 10, 0, false, true)
+				if err != nil {
+					return fmt.Errorf("unable to generate password for server: %s", err.Error())
 				}
 
 				log.Printf("Creating tunnel for %s.%s\n", name, namespace)
@@ -377,21 +380,17 @@ func (c *Controller) syncHandler(key string) error {
 				}
 
 				ops := metav1.CreateOptions{}
-				_, err := tunnels.Create(context.Background(), tunnel, ops)
-
-				if err != nil {
+				if _, err := tunnels.Create(context.Background(), tunnel, ops); err != nil {
 					log.Printf("Error creating tunnel: %s", err.Error())
 				}
 			}
 		} else {
 			log.Printf("Tunnel exists: %s\n", found.Name)
 
-			if manageService(*c, *service) == false {
-				log.Printf("Removing tunnel: %s\n", found.Name)
+			if !manageService(*c, *service) {
+				log.Printf("Removing tunnel: %s", found.Name)
 
-				err := tunnels.Delete(context.Background(), found.Name, metav1.DeleteOptions{})
-
-				if err != nil {
+				if err := tunnels.Delete(context.Background(), found.Name, metav1.DeleteOptions{}); err != nil {
 					log.Printf("Error deleting tunnel: %s", err.Error())
 				}
 			}
@@ -427,22 +426,21 @@ func (c *Controller) syncHandler(key string) error {
 		if err != nil {
 			return err
 		}
-		log.Printf("Provisioning call took: %fs\n", time.Since(start).Seconds())
-		// End of Provisioning Host
 
-		// Updating Status
-		err = c.updateTunnelProvisioningStatus(tunnel, "provisioning", res.ID, "")
-		if err != nil {
+		log.Printf("Provisioning call took: %fs\n", time.Since(start).Seconds())
+
+		// Update Status
+		if err := c.updateTunnelProvisioningStatus(tunnel, "provisioning", res.ID, ""); err != nil {
 			return fmt.Errorf("tunnel %s (%s) update error: %s", tunnel.Name, "provisioning", err)
 		}
+
 		break
 
 	case "provisioning":
-		err = syncProvisioningHostStatus(tunnel, c)
 		// If an error occurs during Update, we'll requeue the item so we can
 		// attempt processing again later. THis could have been caused by a
 		// temporary network failure, or any other transient reason.
-		if err != nil {
+		if err := syncProvisioningHostStatus(tunnel, c); err != nil {
 			return err
 		}
 		break
@@ -490,12 +488,12 @@ func createClientDeployment(tunnel *inletsv1alpha1.Tunnel, c *Controller) error 
 		c.infraConfig.ProConfig.License,
 		c.infraConfig.MaxClientMemory)
 
-	deployment, createDeployErr := c.kubeclientset.AppsV1().
+	deployment, err := c.kubeclientset.AppsV1().
 		Deployments(tunnel.Namespace).
 		Create(context.Background(), client, metav1.CreateOptions{})
 
-	if createDeployErr != nil {
-		log.Println(createDeployErr)
+	if err != nil {
+		log.Printf("Error updating deployment: %s", err)
 	}
 
 	tunnel.Spec.ClientDeploymentRef = &metav1.ObjectMeta{
@@ -503,13 +501,11 @@ func createClientDeployment(tunnel *inletsv1alpha1.Tunnel, c *Controller) error 
 		Namespace: deployment.Namespace,
 	}
 
-	_, updateErr := c.operatorclientset.InletsV1alpha1().
+	if _, err := c.operatorclientset.InletsV1alpha1().
 		Tunnels(tunnel.Namespace).
-		Update(context.Background(), tunnel, metav1.UpdateOptions{})
-
-	if updateErr != nil {
-		log.Println(updateErr)
-		return fmt.Errorf("tunnel update error %s", updateErr)
+		Update(context.Background(), tunnel, metav1.UpdateOptions{}); err != nil {
+		log.Printf("Error updating tunnel: %s", err)
+		return fmt.Errorf("tunnel update error %s", err)
 	}
 
 	return nil
@@ -671,8 +667,8 @@ func syncProvisioningHostStatus(tunnel *inletsv1alpha1.Tunnel, c *Controller) er
 	if err != nil {
 		return err
 	}
-	host, err := provisioner.Status(tunnel.Status.HostID)
 
+	host, err := provisioner.Status(tunnel.Status.HostID)
 	if err != nil {
 		return err
 	}
@@ -680,13 +676,12 @@ func syncProvisioningHostStatus(tunnel *inletsv1alpha1.Tunnel, c *Controller) er
 	if host.Status != provision.ActiveStatus || host.IP == "" {
 		return nil
 	}
-	err = c.updateTunnelProvisioningStatus(tunnel, provision.ActiveStatus, host.ID, host.IP)
-	if err != nil {
+
+	if err := c.updateTunnelProvisioningStatus(tunnel, provision.ActiveStatus, host.ID, host.IP); err != nil {
 		return err
 	}
 
-	err = c.updateService(tunnel, host.IP)
-	if err != nil {
+	if err := c.updateService(tunnel, host.IP); err != nil {
 		log.Printf("Error updating service: %s, %s", tunnel.Spec.ServiceName, err.Error())
 		return fmt.Errorf("tunnel update error %s", err)
 	}
