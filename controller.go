@@ -137,7 +137,12 @@ func NewController(
 				log.Println("Status.HostID is empty")
 				return
 			}
-			provisioner, _ := getProvisioner(controller)
+			provisioner, err := getProvisioner(controller)
+			if err != nil {
+				log.Printf("Error creating provisioner: %s", err.Error())
+				return
+			}
+
 			if provisioner != nil {
 				log.Printf("Deleting exit-node for %s: %s, ip: %s\n", r.Spec.ServiceName, r.Status.HostID, r.Status.HostIP)
 
@@ -640,21 +645,21 @@ func getProvisioner(c *Controller) (provision.Provisioner, error) {
 
 	switch c.infraConfig.Provider {
 	case "equinix-metal":
-		provisioner, _ = provision.NewEquinixMetalProvisioner(c.infraConfig.GetAccessKey())
+		provisioner, err = provision.NewEquinixMetalProvisioner(c.infraConfig.GetAccessKey())
 	case "digitalocean":
-		provisioner, _ = provision.NewDigitalOceanProvisioner(c.infraConfig.GetAccessKey())
+		provisioner, err = provision.NewDigitalOceanProvisioner(c.infraConfig.GetAccessKey())
 	case "scaleway":
-		provisioner, _ = provision.NewScalewayProvisioner(c.infraConfig.GetAccessKey(), c.infraConfig.GetSecretKey(), c.infraConfig.OrganizationID, c.infraConfig.Region)
+		provisioner, err = provision.NewScalewayProvisioner(c.infraConfig.GetAccessKey(), c.infraConfig.GetSecretKey(), c.infraConfig.OrganizationID, c.infraConfig.Region)
 	case "gce":
-		provisioner, _ = provision.NewGCEProvisioner(c.infraConfig.GetAccessKey())
+		provisioner, err = provision.NewGCEProvisioner(c.infraConfig.GetAccessKey())
 	case "ec2":
-		provisioner, _ = provision.NewEC2Provisioner(c.infraConfig.Region, c.infraConfig.GetAccessKey(), c.infraConfig.GetSecretKey())
+		provisioner, err = provision.NewEC2Provisioner(c.infraConfig.Region, c.infraConfig.GetAccessKey(), c.infraConfig.GetSecretKey())
 	case "linode":
-		provisioner, _ = provision.NewLinodeProvisioner(c.infraConfig.GetAccessKey())
+		provisioner, err = provision.NewLinodeProvisioner(c.infraConfig.GetAccessKey())
 	case "azure":
-		provisioner, _ = provision.NewAzureProvisioner(c.infraConfig.SubscriptionID, c.infraConfig.GetAccessKey())
+		provisioner, err = provision.NewAzureProvisioner(c.infraConfig.SubscriptionID, c.infraConfig.GetAccessKey())
 	case "hetzner":
-		provisioner, _ = provision.NewHetznerProvisioner(c.infraConfig.GetAccessKey())
+		provisioner, err = provision.NewHetznerProvisioner(c.infraConfig.GetAccessKey())
 	default:
 		return nil, fmt.Errorf("unsupported provider: %s", c.infraConfig.Provider)
 	}
