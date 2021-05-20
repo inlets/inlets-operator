@@ -464,10 +464,10 @@ func createClientDeployment(tunnel *inletsv1alpha1.Tunnel, c *Controller) error 
 	}
 
 	get := metav1.GetOptions{}
-	service, getServiceErr := c.kubeclientset.CoreV1().Services(tunnel.Namespace).Get(context.Background(), tunnel.Spec.ServiceName, get)
+	service, err := c.kubeclientset.CoreV1().Services(tunnel.Namespace).Get(context.Background(), tunnel.Spec.ServiceName, get)
 
-	if getServiceErr != nil {
-		return getServiceErr
+	if err != nil {
+		return err
 	}
 
 	firstPort := int32(80)
@@ -480,10 +480,8 @@ func createClientDeployment(tunnel *inletsv1alpha1.Tunnel, c *Controller) error 
 	}
 
 	ports := getPortsString(service)
-
 	client := makeClient(tunnel, firstPort,
 		c.infraConfig.GetInletsClientImage(),
-		c.infraConfig.UsePro(),
 		ports,
 		c.infraConfig.ProConfig.License,
 		c.infraConfig.MaxClientMemory)
@@ -606,6 +604,7 @@ func getHostConfig(c *Controller, tunnel *inletsv1alpha1.Tunnel) provision.Basic
 		// An image includes more than one property, it has publisher, offer, sku and version.
 		// So they have to be in "Additional" instead of just "OS".
 
+		pro := true
 		host = provision.BasicHost{
 			Name:     tunnel.Name,
 			OS:       "Additional.imageOffer",
@@ -614,7 +613,7 @@ func getHostConfig(c *Controller, tunnel *inletsv1alpha1.Tunnel) provision.Basic
 			UserData: userData,
 			Additional: map[string]string{
 				"inlets-port":    strconv.Itoa(inletsPort),
-				"pro":            fmt.Sprint(c.infraConfig.UsePro()),
+				"pro":            fmt.Sprint(pro),
 				"imagePublisher": "Canonical",
 				"imageOffer":     "UbuntuServer",
 				"imageSku":       "16.04-LTS",
@@ -688,7 +687,7 @@ func syncProvisioningHostStatus(tunnel *inletsv1alpha1.Tunnel, c *Controller) er
 	return nil
 }
 
-func makeClient(tunnel *inletsv1alpha1.Tunnel, targetPort int32, clientImage string, usePro bool, ports, license string, maxMemory string) *appsv1.Deployment {
+func makeClient(tunnel *inletsv1alpha1.Tunnel, targetPort int32, clientImage string, ports, license string, maxMemory string) *appsv1.Deployment {
 	replicas := int32(1)
 	name := tunnel.Name + "-client"
 

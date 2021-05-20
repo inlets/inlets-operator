@@ -14,7 +14,7 @@ func Test_GetInletsClientImage_DefaultProNoOverride(t *testing.T) {
 	got := c.GetInletsClientImage()
 	want := "ghcr.io/inlets/inlets-pro:0.8.1"
 	if got != want {
-		t.Errorf("for OSS variant want %s, but got %s", want, got)
+		t.Errorf("want %s, but got %s", want, got)
 		t.Fail()
 	}
 }
@@ -32,7 +32,7 @@ func Test_GetInletsClientImage_DefaultProWithOverride(t *testing.T) {
 	got := c.GetInletsClientImage()
 	want := "inlets/inlets-pro:0.6.0-armhf"
 	if got != want {
-		t.Errorf("for OSS variant want %s, but got %s", want, got)
+		t.Errorf("want %s, but got %s", want, got)
 		t.Fail()
 	}
 }

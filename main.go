@@ -52,10 +52,6 @@ type InfraConfig struct {
 	MaxClientMemory   string
 }
 
-func (i InfraConfig) UsePro() bool {
-	return len(i.ProConfig.License) > 0
-}
-
 type InletsProConfig struct {
 	License     string
 	LicenseFile string
@@ -120,15 +116,10 @@ func main() {
 
 	infra.InletsClientImage = os.Getenv("client_image")
 
-	log.Printf("Inlets client: %s\n", infra.GetInletsClientImage())
+	log.Printf("Client image: %s\n", infra.GetInletsClientImage())
 
-	pro := infra.UsePro()
-	if pro {
-		log.Printf("Using inlets PRO.\n")
-		_, err := infra.ProConfig.GetLicenseKey()
-		if err != nil {
-			panic(err)
-		}
+	if _, err := infra.ProConfig.GetLicenseKey(); err != nil {
+		panic(err)
 	}
 
 	// set up signals so we handle the first shutdown signal gracefully
