@@ -59,20 +59,26 @@ type InletsProConfig struct {
 }
 
 func (c InletsProConfig) GetLicenseKey() (string, error) {
+	val := ""
 	if len(c.License) > 0 {
-		return c.License, nil
+		val = c.License
+	} else {
+		data, err := ioutil.ReadFile(c.LicenseFile)
+		if err != nil {
+			return "", fmt.Errorf("error with GetLicenseKey: %s", err.Error())
+		}
+		val = string(data)
 	}
 
-	body, err := ioutil.ReadFile(c.LicenseFile)
-	if err != nil {
-		return "", fmt.Errorf("error with GetLicenseKey: %s", err.Error())
-	}
-
-	if len(string(body)) == 0 {
+	if len(string(val)) == 0 {
 		return "", fmt.Errorf("--license or --license-key is required for inlets PRO")
 	}
 
-	return string(body), nil
+	if total := strings.Count(val, "."); total >= 2 {
+		return val, nil
+	}
+
+	return "", fmt.Errorf("inlets PRO license may be invalid")
 }
 
 func init() {
@@ -119,7 +125,8 @@ func main() {
 	log.Printf("Client image: %s\n", infra.GetInletsClientImage())
 
 	if _, err := infra.ProConfig.GetLicenseKey(); err != nil {
-		panic(err)
+		fmt.Fprintf(os.Stderr, "%s\n", err.Error())
+		os.Exit(1)
 	}
 
 	// set up signals so we handle the first shutdown signal gracefully
