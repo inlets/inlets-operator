@@ -38,7 +38,7 @@ subnetId: ""
 # Only provide LoadBalancers for Services annotated with "dev.inlets.manage=true"
 annotatedOnly: false
 
-image: "ghcr.io/inlets/inlets-operator:0.12.2"
+image: "ghcr.io/inlets/inlets-operator:0.12.3"
 pullPolicy: "IfNotPresent"
 proClientImage: "ghcr.io/inlets/inlets-pro:0.8.4"
 
