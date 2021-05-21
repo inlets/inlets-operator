@@ -341,7 +341,10 @@ func (c *Controller) syncHandler(key string) error {
 	}
 
 	service, err := c.serviceLister.Services(namespace).Get(name)
-	if err != nil {
+	// An error is expected when the tunnel is not found.
+	// If we get a different error, it could be related to RBAC, so
+	// in that case we should exit.
+	if err != nil && !errors.IsNotFound(err) {
 		return fmt.Errorf("error listing services: %s", err)
 	}
 
