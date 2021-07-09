@@ -1,0 +1,57 @@
+package main
+
+import (
+	"fmt"
+	"io/ioutil"
+	"strings"
+)
+
+// InfraConfig is the configuration for
+// creating Infrastructure Resources
+type InfraConfig struct {
+	Provider          string
+	Region            string
+	Zone              string
+	AccessKey         string
+	SecretKey         string
+	OrganizationID    string
+	SubscriptionID    string
+	VpcID             string
+	SubnetID          string
+	AccessKeyFile     string
+	SecretKeyFile     string
+	ProjectID         string
+	InletsClientImage string
+	AnnotatedOnly     bool
+	ProConfig         InletsProConfig
+	MaxClientMemory   string
+}
+
+type InletsProConfig struct {
+	License     string
+	LicenseFile string
+	ClientImage string
+}
+
+func (c InletsProConfig) GetLicenseKey() (string, error) {
+	val := ""
+	if len(c.License) > 0 {
+		val = c.License
+	} else {
+		data, err := ioutil.ReadFile(c.LicenseFile)
+		if err != nil {
+			return "", fmt.Errorf("error with GetLicenseKey: %s", err.Error())
+		}
+		val = string(data)
+	}
+
+	if len(string(val)) == 0 {
+		return "", fmt.Errorf("--license or --license-key is required for inlets PRO")
+	}
+
+	if total := strings.Count(val, "."); total >= 2 {
+		return strings.TrimSpace(val), nil
+	}
+
+	return "", fmt.Errorf("inlets PRO license may be invalid")
+}
