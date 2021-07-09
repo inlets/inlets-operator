@@ -45,7 +45,7 @@ func (c InletsProConfig) GetLicenseKey() (string, error) {
 		val = string(data)
 	}
 
-	if len(string(val)) == 0 {
+	if len(val) == 0 {
 		return "", fmt.Errorf("--license or --license-key is required for inlets PRO")
 	}
 
