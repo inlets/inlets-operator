@@ -563,7 +563,7 @@ func getHostConfig(c *Controller, tunnel *inletsv1alpha1.Tunnel) provision.Basic
 
 		host = provision.BasicHost{
 			Name:     tunnel.Name,
-			OS:       "projects/debian-cloud/global/images/debian-9-stretch-v20191121",
+			OS:       "projects/ubuntu-os-cloud/global/images/ubuntu-minimal-2004-focal-v20210707",
 			Plan:     "f1-micro",
 			UserData: userData,
 			Additional: map[string]string{
