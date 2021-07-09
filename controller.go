@@ -482,11 +482,14 @@ func createClientDeployment(tunnel *inletsv1alpha1.Tunnel, c *Controller) error 
 		}
 	}
 
+	// Swallow error since it's handled on start-up already
+	licenseKey, _ := c.infraConfig.ProConfig.GetLicenseKey()
+
 	ports := getPortsString(service)
 	client := makeClient(tunnel, firstPort,
 		c.infraConfig.GetInletsClientImage(),
 		ports,
-		c.infraConfig.ProConfig.License,
+		licenseKey,
 		c.infraConfig.MaxClientMemory)
 
 	deployment, err := c.kubeclientset.AppsV1().
