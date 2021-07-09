@@ -28,6 +28,8 @@ COPY image_test.go  image_test.go
 COPY controller.go  controller.go
 COPY validate.go validate.go
 COPY validate_test.go validate_test.go
+COPY config.go  config.go
+COPY config_test.go  config_test.go
 
 RUN gofmt -l -d $(find . -type f -name '*.go' -not -path "./vendor/*")
 
