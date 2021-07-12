@@ -551,7 +551,7 @@ func getHostConfig(c *Controller, tunnel *inletsv1alpha1.Tunnel) provision.Basic
 	case "scaleway":
 		host = provision.BasicHost{
 			Name:       tunnel.Name,
-			OS:         "ubuntu-bionic",
+			OS:         "ubuntu-focal",
 			Plan:       "DEV1-S",
 			Region:     c.infraConfig.Region,
 			UserData:   userData,
