@@ -12,7 +12,7 @@ func Test_GetInletsClientImage_DefaultProNoOverride(t *testing.T) {
 	}
 
 	got := c.GetInletsClientImage()
-	want := "ghcr.io/inlets/inlets-pro:0.8.1"
+	want := "ghcr.io/inlets/inlets-pro:0.8.5"
 	if got != want {
 		t.Errorf("want %s, but got %s", want, got)
 		t.Fail()
