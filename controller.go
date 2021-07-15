@@ -422,7 +422,8 @@ func (c *Controller) syncHandler(key string) error {
 		}
 
 		// Start Provisioning Host
-		log.Printf("Provisioning started with provider:%s host:%s\n", c.infraConfig.Provider, tunnel.Name)
+		log.Printf("Provisioning started with provider: %s host: %s", c.infraConfig.Provider, tunnel.Name)
+
 		start := time.Now()
 		host := getHostConfig(c, tunnel)
 		res, err := provisioner.Provision(host)
@@ -780,7 +781,10 @@ func (c *Controller) updateService(tunnel *inletsv1alpha1.Tunnel, ip string) err
 		copy.Spec.ExternalIPs = append(copy.Spec.ExternalIPs, ip)
 	}
 
-	res, err = c.kubeclientset.CoreV1().Services(tunnel.Namespace).Update(context.Background(), copy, metav1.UpdateOptions{})
+	res, err = c.kubeclientset.CoreV1().
+		Services(tunnel.Namespace).
+		Update(context.Background(), copy, metav1.UpdateOptions{})
+
 	if err != nil {
 		return err
 	}
@@ -804,7 +808,10 @@ func (c *Controller) updateTunnelProvisioningStatus(tunnel *inletsv1alpha1.Tunne
 	tunnelCopy.Status.HostID = id
 	tunnelCopy.Status.HostIP = ip
 
-	_, err := c.operatorclientset.InletsV1alpha1().Tunnels(tunnel.Namespace).UpdateStatus(context.Background(), tunnelCopy, metav1.UpdateOptions{})
+	_, err := c.operatorclientset.InletsV1alpha1().
+		Tunnels(tunnel.Namespace).
+		UpdateStatus(context.Background(), tunnelCopy, metav1.UpdateOptions{})
+
 	return err
 }
 
