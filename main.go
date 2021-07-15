@@ -119,7 +119,7 @@ func main() {
 // GetInletsClientImage returns the image for the client-side tunnel
 func (i *InfraConfig) GetInletsClientImage() string {
 	if i.ProConfig.ClientImage == "" {
-		return "ghcr.io/inlets/inlets-pro:0.8.1"
+		return "ghcr.io/inlets/inlets-pro:0.8.5"
 	}
 	return i.ProConfig.ClientImage
 }

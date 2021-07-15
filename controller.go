@@ -46,7 +46,7 @@ import (
 
 const controllerAgentName = "inlets-operator"
 const inletsPROControlPort = 8123
-const inletsPROVersion = "0.8.1"
+const inletsPROVersion = "0.8.5"
 
 const (
 	// SuccessSynced is used as part of the Event 'reason' when a Tunnel is synced
