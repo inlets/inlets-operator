@@ -529,8 +529,8 @@ func getHostConfig(c *Controller, tunnel *inletsv1alpha1.Tunnel) provision.Basic
 	case "equinix-metal":
 		host = provision.BasicHost{
 			Name:     tunnel.Name,
-			OS:       "ubuntu_16_04",
-			Plan:     "t1.small.x86",
+			OS:       "ubuntu_20_04",
+			Plan:     "c3.small.x86",
 			Region:   c.infraConfig.Region,
 			UserData: userData,
 			Additional: map[string]string{
