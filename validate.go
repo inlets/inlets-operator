@@ -7,6 +7,10 @@ import (
 )
 
 func validateFlags(c InfraConfig) error {
+	if len(c.Provider) == 0 {
+		return fmt.Errorf("provider flag is required")
+	}
+
 	if c.Provider == "equinix-metal" {
 		if len(c.ProjectID) == 0 {
 			return fmt.Errorf("project-id required for provider: %s", c.Provider)

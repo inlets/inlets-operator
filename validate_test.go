@@ -4,6 +4,18 @@ import (
 	"testing"
 )
 
+func Test_validateFlags_NoProvider(t *testing.T) {
+	c := InfraConfig{
+		Provider: "",
+	}
+
+	err := validateFlags(c)
+	want := "provider flag is required"
+	if err.Error() != want {
+		t.Errorf("want error: %q, but got: %q", want, err.Error())
+	}
+}
+
 func Test_validateFlags_DO(t *testing.T) {
 	c := InfraConfig{
 		Provider:  "digitalocean",

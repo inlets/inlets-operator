@@ -1,8 +1,7 @@
 replicaCount: 1
 
 # inlets PRO enables L4 TCP LoadBalancers in Kubernetes
-## To enable, obtain a free 14-day trial from https://github.com/inlets/inlets-pro
-## Or purchase at https://store.openfaas.com/
+## Purchase from https://inlets.dev/pricing
 inletsProLicense: ""
 
 provider: "digitalocean"
@@ -13,7 +12,7 @@ region: "lon1"
 # projectID: "<Your GCP Project ID>"
 
 # provider: "equinix-metal"
-# region: "ams1"
+# region: "am6"
 # projectID: "<Your equinix-metal Project ID>"
 
 # provider: "scaleway"
