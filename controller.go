@@ -425,7 +425,7 @@ func (c *Controller) syncHandler(key string) error {
 		log.Printf("Provisioning started with provider: %s host: %s", c.infraConfig.Provider, tunnel.Name)
 
 		start := time.Now()
-		host := getHostConfig(c, tunnel)
+		host := getHostConfig(c, tunnel, c.infraConfig.Plan)
 		res, err := provisioner.Provision(host)
 		if err != nil {
 			return err
@@ -516,7 +516,7 @@ func createClientDeployment(tunnel *inletsv1alpha1.Tunnel, c *Controller) error 
 	return nil
 }
 
-func getHostConfig(c *Controller, tunnel *inletsv1alpha1.Tunnel) provision.BasicHost {
+func getHostConfig(c *Controller, tunnel *inletsv1alpha1.Tunnel, planOverride string) provision.BasicHost {
 
 	userData := provision.MakeExitServerUserdata(
 		tunnel.Spec.AuthToken,
@@ -528,10 +528,16 @@ func getHostConfig(c *Controller, tunnel *inletsv1alpha1.Tunnel) provision.Basic
 
 	switch c.infraConfig.Provider {
 	case "equinix-metal":
+
+		plan := "c3.small.x86"
+		if len(planOverride) > 0 {
+			plan = planOverride
+		}
+
 		host = provision.BasicHost{
 			Name:     tunnel.Name,
 			OS:       "ubuntu_20_04",
-			Plan:     "c3.small.x86",
+			Plan:     plan,
 			Region:   c.infraConfig.Region,
 			UserData: userData,
 			Additional: map[string]string{

@@ -58,6 +58,8 @@ func main() {
 	flag.StringVar(&infra.ProConfig.ClientImage, "pro-client-image", "", "Supply a Docker image for the inlets-pro client")
 	flag.StringVar(&infra.MaxClientMemory, "max-client-memory", "128Mi", "Maximum memory limit for the tunnel clients")
 
+	flag.StringVar(&infra.Plan, "plan", "", "Plan code for cloud host")
+
 	flag.BoolVar(&infra.AnnotatedOnly, "annotated-only", false, "Only create a tunnel for annotated services. Annotate with dev.inlets.manage=true.")
 
 	flag.Parse()

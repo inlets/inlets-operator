@@ -25,6 +25,7 @@ type InfraConfig struct {
 	AnnotatedOnly     bool
 	ProConfig         InletsProConfig
 	MaxClientMemory   string
+	Plan              string
 }
 
 type InletsProConfig struct {
