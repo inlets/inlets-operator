@@ -596,7 +596,7 @@ func getHostConfig(c *Controller, tunnel *inletsv1alpha1.Tunnel, planOverride st
 
 		host = provision.BasicHost{
 			Name:       tunnel.Name,
-			OS:         "ubuntu/images/hvm-ssd/ubuntu-xenial-16.04-amd64-server-20191114",
+			OS:         "ubuntu/images/hvm-ssd/ubuntu-focal-20.04-amd64-server-20210621",
 			Plan:       "t3.micro",
 			UserData:   base64.StdEncoding.EncodeToString([]byte(userData)),
 			Additional: additional,
