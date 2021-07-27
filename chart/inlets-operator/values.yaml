@@ -39,7 +39,7 @@ annotatedOnly: false
 
 image: "ghcr.io/inlets/inlets-operator:0.13.0"
 pullPolicy: "IfNotPresent"
-proClientImage: "ghcr.io/inlets/inlets-pro:0.8.4"
+proClientImage: "ghcr.io/inlets/inlets-pro:0.8.7"
 
 nameOverride: ""
 fullnameOverride: ""
