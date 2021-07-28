@@ -47,6 +47,7 @@ import (
 const controllerAgentName = "inlets-operator"
 const inletsPROControlPort = 8123
 const inletsPROVersion = "0.8.5"
+const inletsPortsAnnotation = "inlets.dev/ports"
 
 const (
 	// SuccessSynced is used as part of the Event 'reason' when a Tunnel is synced
@@ -389,6 +390,7 @@ func (c *Controller) syncHandler(key string) error {
 			}
 		} else {
 			log.Printf("Tunnel exists: %s\n", found.Name)
+			c.enqueueTunnel(found)
 
 			if !manageService(*c, *service) {
 				log.Printf("Removing tunnel: %s", found.Name)
@@ -463,57 +465,78 @@ func (c *Controller) syncHandler(key string) error {
 
 func createClientDeployment(tunnel *inletsv1alpha1.Tunnel, c *Controller) error {
 	if tunnel.Spec.ClientDeploymentRef != nil {
-		// already existing
+		get := metav1.GetOptions{}
+		deployment, err := c.kubeclientset.AppsV1().Deployments(tunnel.Namespace).Get(context.Background(), tunnel.Name+"-client", get)
+		if err != nil {
+			return err
+		}
+		service, err := c.kubeclientset.CoreV1().Services(tunnel.Namespace).Get(context.Background(), tunnel.Spec.ServiceName, get)
+		if err != nil {
+			return err
+		}
+
+		if deployment.ObjectMeta.Annotations != nil && deployment.ObjectMeta.Annotations[inletsPortsAnnotation] != getPortsString(service) {
+			// Swallow error since it's handled on start-up already
+			licenseKey, _ := c.infraConfig.ProConfig.GetLicenseKey()
+
+			ports := getPortsString(service)
+			client := makeClient(tunnel,
+				c.infraConfig.GetInletsClientImage(),
+				ports,
+				licenseKey,
+				c.infraConfig.MaxClientMemory)
+
+			_, err = c.kubeclientset.AppsV1().
+				Deployments(tunnel.Namespace).
+				Update(context.Background(), client, metav1.UpdateOptions{})
+
+			if err != nil {
+				log.Printf("Error updating deployment: %s", err)
+			}
+		}
+
+		return nil
+	} else {
+
+		get := metav1.GetOptions{}
+		service, err := c.kubeclientset.CoreV1().Services(tunnel.Namespace).Get(context.Background(), tunnel.Spec.ServiceName, get)
+
+		if err != nil {
+			return err
+		}
+
+		// Swallow error since it's handled on start-up already
+		licenseKey, _ := c.infraConfig.ProConfig.GetLicenseKey()
+
+		ports := getPortsString(service)
+		client := makeClient(tunnel,
+			c.infraConfig.GetInletsClientImage(),
+			ports,
+			licenseKey,
+			c.infraConfig.MaxClientMemory)
+
+		deployment, err := c.kubeclientset.AppsV1().
+			Deployments(tunnel.Namespace).
+			Create(context.Background(), client, metav1.CreateOptions{})
+
+		if err != nil {
+			log.Printf("Error creating deployment: %s", err)
+		}
+
+		tunnel.Spec.ClientDeploymentRef = &metav1.ObjectMeta{
+			Name:      deployment.ObjectMeta.Name,
+			Namespace: deployment.ObjectMeta.Namespace,
+		}
+
+		if _, err := c.operatorclientset.InletsV1alpha1().
+			Tunnels(tunnel.Namespace).
+			Update(context.Background(), tunnel, metav1.UpdateOptions{}); err != nil {
+			log.Printf("Error updating tunnel: %s", err)
+			return fmt.Errorf("tunnel update error %s", err)
+		}
+
 		return nil
 	}
-
-	get := metav1.GetOptions{}
-	service, err := c.kubeclientset.CoreV1().Services(tunnel.Namespace).Get(context.Background(), tunnel.Spec.ServiceName, get)
-
-	if err != nil {
-		return err
-	}
-
-	firstPort := int32(80)
-
-	for _, port := range service.Spec.Ports {
-		if port.Name == "http" {
-			firstPort = port.Port
-			break
-		}
-	}
-
-	// Swallow error since it's handled on start-up already
-	licenseKey, _ := c.infraConfig.ProConfig.GetLicenseKey()
-
-	ports := getPortsString(service)
-	client := makeClient(tunnel, firstPort,
-		c.infraConfig.GetInletsClientImage(),
-		ports,
-		licenseKey,
-		c.infraConfig.MaxClientMemory)
-
-	deployment, err := c.kubeclientset.AppsV1().
-		Deployments(tunnel.Namespace).
-		Create(context.Background(), client, metav1.CreateOptions{})
-
-	if err != nil {
-		log.Printf("Error updating deployment: %s", err)
-	}
-
-	tunnel.Spec.ClientDeploymentRef = &metav1.ObjectMeta{
-		Name:      deployment.Name,
-		Namespace: deployment.Namespace,
-	}
-
-	if _, err := c.operatorclientset.InletsV1alpha1().
-		Tunnels(tunnel.Namespace).
-		Update(context.Background(), tunnel, metav1.UpdateOptions{}); err != nil {
-		log.Printf("Error updating tunnel: %s", err)
-		return fmt.Errorf("tunnel update error %s", err)
-	}
-
-	return nil
 }
 
 func getHostConfig(c *Controller, tunnel *inletsv1alpha1.Tunnel, planOverride string) provision.BasicHost {
@@ -700,7 +723,7 @@ func syncProvisioningHostStatus(tunnel *inletsv1alpha1.Tunnel, c *Controller) er
 	return nil
 }
 
-func makeClient(tunnel *inletsv1alpha1.Tunnel, targetPort int32, clientImage string, ports, license string, maxMemory string) *appsv1.Deployment {
+func makeClient(tunnel *inletsv1alpha1.Tunnel, clientImage string, ports, license string, maxMemory string) *appsv1.Deployment {
 	replicas := int32(1)
 	name := tunnel.Name + "-client"
 
@@ -731,8 +754,9 @@ func makeClient(tunnel *inletsv1alpha1.Tunnel, targetPort int32, clientImage str
 
 	deployment := appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      name,
-			Namespace: tunnel.Namespace,
+			Name:        name,
+			Namespace:   tunnel.Namespace,
+			Annotations: map[string]string{inletsPortsAnnotation: ports},
 			OwnerReferences: []metav1.OwnerReference{
 				*metav1.NewControllerRef(tunnel, schema.GroupVersionKind{
 					Group:   inletsv1alpha1.SchemeGroupVersion.Group,
