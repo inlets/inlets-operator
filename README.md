@@ -233,10 +233,14 @@ These costs need to be treated as an estimate and will depend on your bandwidth 
 
 | Provider                                                           | Price per month | Price per hour |     OS image | CPU | Memory | Boot time |
 | ------------------------------------------------------------------ | --------------: | -------------: | -----------: | --: | -----: | --------: |
-| [Google Compute Engine](https://cloud.google.com/compute)                                          |         *  ~\$4.28 |       ~\$0.006 | Debian GNU Linux 9 (stretch) | 1 | 614MB | ~3-15s |
-| [Equinix-Metal](https://metal.equinix.com/)           |           ~\$51 |         \$0.07 | Ubuntu 16.04 |   4 |    8GB | ~45-60s  |
-| [Digital Ocean](https://www.digitalocean.com/pricing/#Compute)     |             \$5 |      ~\$0.0068 | Ubuntu 16.04 |   1 |  1GB | ~20-30s  |
-| [Scaleway](https://www.scaleway.com/en/pricing/#virtual-instances) |           2.99€ |         0.006€ | Ubuntu 18.04 |   2 |    2GB | 3-5m      |
+| [Google Compute Engine](https://cloud.google.com/compute)          |      *  ~\$4.28 |       ~\$0.006 | Ubuntu 20.04 | 1 | 614MB | ~3-15s |
+| [Equinix-Metal](https://metal.equinix.com/)                        |           ~\$360 |         \$0.50 | Ubuntu 20.04 |   1 |    32GB | ~45-60s  |
+| [Digital Ocean](https://www.digitalocean.com/pricing/#Compute)     |             \$5 |      ~\$0.0068 | Ubuntu 18.04 |   1 |  1GB   | ~20-30s  |
+| [Scaleway](https://www.scaleway.com/en/pricing/#virtual-instances) |           5.84€ |         0.01€ | Ubuntu 20.04 |   2 |    2GB | 3-5m     |
+| [Amazon Elastic Computing 2](https://calculator.aws/#/createCalculator/EC2s) |           $3.796 |         $0.0052 | Ubuntu 20.04 |   1 |    1GB | 3-5m     |
+| [Linode](https://www.linode.com/pricing/) |           $5 |         $0.0075 | Ubuntu 20.04 |   1 |    1GB | ~10-30s    |
+| [Azure](https://azureprice.net/?cores=1,1&ram=0,11400) |           $4.53	 |         $0.0062 | Ubuntu 20.04 |   1 |    0.5GB | 2-4min    |
+| [Hetzner](https://www.hetzner.com/cloud) |           2.96€	 |         €0.005 | Ubuntu 20.04 |   1 |    2GB | ~5-10s    |
 
 * The first f1-micro instance in a GCP Project (the default instance type for inlets-operator) is free for 720hrs(30 days) a month
 
