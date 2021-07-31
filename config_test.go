@@ -53,7 +53,7 @@ func Test_GetLicenseKey_FromFile(t *testing.T) {
 	}
 }
 
-func Test_GetLicenseKey_FromFileTrimsWhitespace(t *testing.T) {
+func Test_GetLicenseKey_FromFileTrimsWhitespace_JWT(t *testing.T) {
 	want := `static.key.text`
 
 	tmp := os.TempDir()
@@ -76,6 +76,23 @@ func Test_GetLicenseKey_FromFileTrimsWhitespace(t *testing.T) {
 
 	key, err := c.GetLicenseKey()
 
+	if err != nil {
+		t.Fatalf("no error wanted for a valid key")
+	}
+
+	if want != key {
+		t.Fatalf("want %q but got %q", want, key)
+	}
+}
+
+func Test_GetLicenseKey_FromLiteral_WithDashes(t *testing.T) {
+	want := `static-dashes-key-text`
+
+	c := InletsProConfig{
+		License: want,
+	}
+
+	key, err := c.GetLicenseKey()
 	if err != nil {
 		t.Fatalf("no error wanted for a valid key")
 	}

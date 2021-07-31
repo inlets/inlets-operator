@@ -50,9 +50,13 @@ func (c InletsProConfig) GetLicenseKey() (string, error) {
 		return "", fmt.Errorf("--license or --license-key is required for inlets PRO")
 	}
 
-	if total := strings.Count(val, "."); total >= 2 {
+	if dots := strings.Count(val, "."); dots >= 2 {
 		return strings.TrimSpace(val), nil
 	}
 
-	return "", fmt.Errorf("inlets PRO license may be invalid")
+	if dashes := strings.Count(val, "-"); dashes == 3 {
+		return strings.TrimSpace(val), nil
+	}
+
+	return "", fmt.Errorf("inlets license may be invalid")
 }
