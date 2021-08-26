@@ -684,7 +684,9 @@ func getProvisioner(c *Controller) (provision.Provisioner, error) {
 	case "gce":
 		provisioner, err = provision.NewGCEProvisioner(c.infraConfig.GetAccessKey())
 	case "ec2":
-		provisioner, err = provision.NewEC2Provisioner(c.infraConfig.Region, c.infraConfig.GetAccessKey(), c.infraConfig.GetSecretKey())
+		// No STS Token can be made available when running in-cluster as a service.
+		emptySTSToken := ""
+		provisioner, err = provision.NewEC2Provisioner(c.infraConfig.Region, c.infraConfig.GetAccessKey(), c.infraConfig.GetSecretKey(), emptySTSToken)
 	case "linode":
 		provisioner, err = provision.NewLinodeProvisioner(c.infraConfig.GetAccessKey())
 	case "azure":
