@@ -10,8 +10,24 @@ GitCommit := $(shell git rev-parse HEAD)
 # but for now it's still experimental feature so we need to enable that
 export DOCKER_CLI_EXPERIMENTAL=enabled
 
+TOOLS_DIR := .tools
+
+GOPATH := $(shell go env GOPATH)
+CODEGEN_VERSION := $(shell hack/print-codegen-version.sh)
+CODEGEN_PKG := $(GOPATH)/pkg/mod/k8s.io/code-generator@${CODEGEN_VERSION}
+
+
 .PHONY: all
 all: build
+
+$(TOOLS_DIR)/code-generator.mod: go.mod
+	@echo "syncing code-generator tooling version"
+	@cd $(TOOLS_DIR) && go mod edit -require "k8s.io/code-generator@${CODEGEN_VERSION}"
+
+${CODEGEN_PKG}: $(TOOLS_DIR)/code-generator.mod
+	@echo "(re)installing k8s.io/code-generator-${CODEGEN_VERSION}"
+	@cd $(TOOLS_DIR) && go mod download -modfile=code-generator.mod
+
 
 .PHONY: build-local
 build-local:
@@ -64,8 +80,13 @@ push-ghcr:
 test:
 	go test ./...
 
-verify-codegen:
+.PHONY: verify-codegen
+verify-codegen: ${CODEGEN_PKG}
 	./hack/verify-codegen.sh
+
+.PHONY: update-codegen
+update-codegen: ${CODEGEN_PKG}
+	./hack/update-codegen.sh
 
 charts:
 	cd chart && helm package inlets-operator/
