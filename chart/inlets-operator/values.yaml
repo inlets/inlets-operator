@@ -35,6 +35,10 @@ vpcId: ""
 subnetId: ""
 
 # Only provide LoadBalancers for Services annotated with "dev.inlets.manage=true"
+proLicenseSecret:
+  name: ""
+  key: ""
+
 annotatedOnly: false
 
 image: "ghcr.io/inlets/inlets-operator:0.14.1"

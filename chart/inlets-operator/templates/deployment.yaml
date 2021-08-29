@@ -58,6 +58,13 @@ spec:
         env:
         - name: client_image
           value: "{{.Values.clientImage}}"
+        {{- if and .Values.proLicenseSecret.name .Values.proLicenseSecret.key }}
+        - name: LICENSE
+          valueFrom:
+            secretKeyRef:
+              name: {{  .Values.proLicenseSecret.name }}
+              key: {{  .Values.proLicenseSecret.key }}
+        {{- end }}
         volumeMounts:
         - mountPath: /var/secrets/inlets/
           name: inlets-access-key
