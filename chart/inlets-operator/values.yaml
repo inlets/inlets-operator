@@ -7,6 +7,8 @@ inletsProLicense: ""
 provider: "digitalocean"
 region: "lon1"
 
+#plan: <The plan or size for your cloud instance>
+
 # provider: "gce"
 # zone: "us-central1-a"
 # projectID: "<Your GCP Project ID>"
