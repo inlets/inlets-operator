@@ -551,23 +551,16 @@ func getHostConfig(c *Controller, tunnel *inletsv1alpha1.Tunnel, planOverride st
 
 	switch c.infraConfig.Provider {
 	case "equinix-metal":
-
-		plan := "c3.small.x86"
-		if len(planOverride) > 0 {
-			plan = planOverride
-		}
-
 		host = provision.BasicHost{
 			Name:     tunnel.Name,
 			OS:       "ubuntu_20_04",
-			Plan:     plan,
+			Plan:     "c3.small.x86",
 			Region:   c.infraConfig.Region,
 			UserData: userData,
 			Additional: map[string]string{
 				"project_id": c.infraConfig.ProjectID,
 			},
 		}
-
 	case "digitalocean":
 		host = provision.BasicHost{
 			Name:       tunnel.Name,
@@ -666,6 +659,10 @@ func getHostConfig(c *Controller, tunnel *inletsv1alpha1.Tunnel, planOverride st
 			UserData:   userData,
 			Additional: map[string]string{},
 		}
+	}
+	// override default plan/size when provided
+	if len(c.infraConfig.Plan) > 0 {
+		host.Plan = c.infraConfig.Plan
 	}
 	return host
 }

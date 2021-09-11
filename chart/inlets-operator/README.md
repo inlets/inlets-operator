@@ -69,3 +69,4 @@ Parameter | Description | Default
 `tolerations`           | Node tolerations                                                                | `[]`
 `affinity`              | Node affinity policy                                                            | `{}`
 `secretKeyFile`         | If we are using a provider that requires a secret key as well as an access key, set to `/var/secrets/inlets/secret/inlets-secret-key` | `""`
+`plan`                  | The plan or size for your cloud instance                                        | different defaults, depending of the infrastructure provider

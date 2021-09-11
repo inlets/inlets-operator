@@ -53,6 +53,9 @@ spec:
         {{- if .Values.secretKeyFile }}
         - "-secret-key-file=/var/secrets/inlets/secret/inlets-secret-key"
         {{- end }}
+        {{- if .Values.plan }}
+        - "-plan={{.Values.plan}}"
+        {{- end }}
         resources:
           {{- toYaml .Values.resources | nindent 12 }}
         env:
