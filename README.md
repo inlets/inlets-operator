@@ -2,7 +2,7 @@
 
 [![Build Status](https://travis-ci.com/inlets/inlets-operator.svg?branch=master)](https://travis-ci.com/inlets/inlets-operator) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) [![Go Report Card](https://goreportcard.com/badge/github.com/inlets/inlets-operator)](https://goreportcard.com/report/github.com/inlets/inlets-operator) [![Documentation](https://godoc.org/github.com/inlets/inlets-operator?status.svg)](http://godoc.org/github.com/inlets/inlets-operator)
 
-Add public LoadBalancers to your local Kubernetes clusters.
+Get public LoadBalancers on your local Kubernetes clusters.
 
 When using a managed [Kubernetes](https://kubernetes.io/) engine, you can expose a Service as a "LoadBalancer" and your cloud provider will provision a cloud load-balancer for you, and start routing traffic to the selected service inside your cluster. In other words, you get network ingress to an internal service.
 
