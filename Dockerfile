@@ -44,6 +44,9 @@ RUN CGO_ENABLED=${CGO_ENABLED} GOOS=${TARGETOS} GOARCH=${TARGETARCH} \
   -a -installsuffix cgo -o /usr/bin/inlets-operator .
 
 FROM --platform=${BUILDPLATFORM:-linux/amd64} gcr.io/distroless/static:nonroot
+
+LABEL org.opencontainers.image.source=https://github.com/inlets/inlets-operator
+
 WORKDIR /
 COPY --from=builder /usr/bin/inlets-operator /
 USER nonroot:nonroot
