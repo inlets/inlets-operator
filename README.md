@@ -1,6 +1,6 @@
 # inlets-operator
 
-[![Build Status](https://travis-ci.com/inlets/inlets-operator.svg?branch=master)](https://travis-ci.com/inlets/inlets-operator) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) [![Go Report Card](https://goreportcard.com/badge/github.com/inlets/inlets-operator)](https://goreportcard.com/report/github.com/inlets/inlets-operator) [![Documentation](https://godoc.org/github.com/inlets/inlets-operator?status.svg)](http://godoc.org/github.com/inlets/inlets-operator)
+[![Build Status](https://github.com/inlets/inlets-operator/actions/workflows/ci-only.yaml/badge.svg)](https://github.com/inlets/inlets-operator/actions/workflows/ci-only.yaml) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) [![Go Report Card](https://goreportcard.com/badge/github.com/inlets/inlets-operator)](https://goreportcard.com/report/github.com/inlets/inlets-operator) [![Documentation](https://godoc.org/github.com/inlets/inlets-operator?status.svg)](http://godoc.org/github.com/inlets/inlets-operator)
 
 Get public LoadBalancers on your local Kubernetes clusters.
 
