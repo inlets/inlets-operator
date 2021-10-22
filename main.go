@@ -36,6 +36,8 @@ func init() {
 	flag.StringVar(&masterURL, "master", "", "The address of the Kubernetes API server. Overrides any value in kubeconfig. Only required if out-of-cluster.")
 }
 
+const defaultRelease = "0.9.1"
+
 func main() {
 	infra := &InfraConfig{
 		ProConfig: InletsProConfig{},
@@ -55,7 +57,9 @@ func main() {
 	flag.StringVar(&infra.ProjectID, "project-id", "", "The project ID if using equinix-metal, or gce as the provider")
 	flag.StringVar(&infra.ProConfig.License, "license", "", "Supply a license for use with inlets-pro")
 	flag.StringVar(&infra.ProConfig.LicenseFile, "license-file", "", "Supply a file to read for the inlets-pro license")
-	flag.StringVar(&infra.ProConfig.ClientImage, "pro-client-image", "", "Supply a Docker image for the inlets-pro client")
+	flag.StringVar(&infra.ProConfig.ClientImage, "client-image", "", "Container image for inlets tunnel clients run in the cluster")
+	flag.StringVar(&infra.ProConfig.InletsRelease, "inlets-release", defaultRelease, "Inlets version to use to create tunnel servers")
+
 	flag.StringVar(&infra.MaxClientMemory, "max-client-memory", "128Mi", "Maximum memory limit for the tunnel clients")
 
 	flag.StringVar(&infra.Plan, "plan", "", "Plan code for cloud host")
@@ -74,7 +78,9 @@ func main() {
 
 	infra.InletsClientImage = os.Getenv("client_image")
 
-	log.Printf("Client image: %s\n", infra.GetInletsClientImage())
+	log.Printf("Client image: %s\tServer version: %s\n",
+		infra.GetInletsClientImage(),
+		infra.GetInletsRelease())
 
 	if _, err := infra.ProConfig.GetLicenseKey(); err != nil {
 		fmt.Fprintf(os.Stderr, "%s\n", err.Error())
@@ -121,9 +127,17 @@ func main() {
 // GetInletsClientImage returns the image for the client-side tunnel
 func (i *InfraConfig) GetInletsClientImage() string {
 	if i.ProConfig.ClientImage == "" {
-		return "ghcr.io/inlets/inlets-pro:0.8.5"
+		return "ghcr.io/inlets/inlets-pro:0.9.1"
 	}
-	return i.ProConfig.ClientImage
+	return strings.TrimSpace(i.ProConfig.ClientImage)
+}
+
+func (i *InfraConfig) GetInletsRelease() string {
+	if i.ProConfig.InletsRelease == "" {
+		return "0.9.1"
+	}
+
+	return strings.TrimSpace(i.ProConfig.InletsRelease)
 }
 
 // GetAccessKey from parameter or file trimming

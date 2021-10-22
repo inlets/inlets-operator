@@ -55,7 +55,8 @@ Parameter | Description | Default
 ---                             | ---                                                                     | ---
 `inletsProLicense`      | License for use with inlets-pro                                                 | `""`
 `image`                 | Docker image for the inlets-operator                                            | `ghcr.io/inlets/inlets-operator:0.12.0`
-`proClientImage`           | Docker image for the inlets client                                              | `ghcr.io/inlets/inlets-pro:0.8.5`
+`inletsClientImage`           | Docker image for the inlets client                                              | `ghcr.io/inlets/inlets-pro:0.8.5`
+`inletsRelease`           |Release version of inlets for tunnel servers                                              | `0.8.5`
 `provider`              | Your infrastructure provider - 'digitalocean', 'ec2', 'scaleway', 'equinix-metal', or 'gce'                       | `""`
 `region`                | The region to provision hosts into                                              | `""`
 `zone`                  | The zone where the exit node is to be provisioned (Used when Google Compute Engine is used as provider) | `us-central1-a`

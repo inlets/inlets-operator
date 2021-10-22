@@ -47,8 +47,11 @@ spec:
         {{- if .Values.organizationID }}
         - "-organization-id={{.Values.organizationID}}"
         {{- end }}
-        {{- if .Values.proClientImage }}
-        - "-pro-client-image={{.Values.proClientImage}}"
+        {{- if .Values.inletsClientImage }}
+        - "-client-image={{.Values.inletsClientImage}}"
+        {{- end }}
+        {{- if .Values.inletsRelease }}
+        - "-inlets-release={{.Values.inletsRelease}}"
         {{- end }}
         {{- if .Values.secretKeyFile }}
         - "-secret-key-file=/var/secrets/inlets/secret/inlets-secret-key"
