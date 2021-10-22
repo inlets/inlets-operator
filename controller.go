@@ -46,7 +46,6 @@ import (
 
 const controllerAgentName = "inlets-operator"
 const inletsPROControlPort = 8123
-const inletsPROVersion = "0.8.5"
 const inletsPortsAnnotation = "inlets.dev/ports"
 
 const (
@@ -427,7 +426,11 @@ func (c *Controller) syncHandler(key string) error {
 		log.Printf("Provisioning started with provider: %s host: %s", c.infraConfig.Provider, tunnel.Name)
 
 		start := time.Now()
-		host := getHostConfig(c, tunnel, c.infraConfig.Plan)
+		host := getHostConfig(c,
+			tunnel,
+			c.infraConfig.Plan,
+			c.infraConfig.GetInletsRelease())
+
 		res, err := provisioner.Provision(host)
 		if err != nil {
 			return err
@@ -539,11 +542,11 @@ func createClientDeployment(tunnel *inletsv1alpha1.Tunnel, c *Controller) error 
 	}
 }
 
-func getHostConfig(c *Controller, tunnel *inletsv1alpha1.Tunnel, planOverride string) provision.BasicHost {
+func getHostConfig(c *Controller, tunnel *inletsv1alpha1.Tunnel, planOverride, inletsVersion string) provision.BasicHost {
 
 	userData := provision.MakeExitServerUserdata(
 		tunnel.Spec.AuthToken,
-		inletsPROVersion)
+		inletsVersion)
 
 	var host provision.BasicHost
 

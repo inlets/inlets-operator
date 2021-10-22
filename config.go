@@ -29,9 +29,10 @@ type InfraConfig struct {
 }
 
 type InletsProConfig struct {
-	License     string
-	LicenseFile string
-	ClientImage string
+	License       string
+	LicenseFile   string
+	ClientImage   string
+	InletsRelease string
 }
 
 func (c InletsProConfig) GetLicenseKey() (string, error) {

@@ -12,7 +12,24 @@ func Test_GetInletsClientImage_DefaultProNoOverride(t *testing.T) {
 	}
 
 	got := c.GetInletsClientImage()
-	want := "ghcr.io/inlets/inlets-pro:0.8.5"
+	want := "ghcr.io/inlets/inlets-pro:0.9.1"
+	if got != want {
+		t.Errorf("want %s, but got %s", want, got)
+		t.Fail()
+	}
+}
+
+func Test_GetInletsVersion_DefaultProNoOverride(t *testing.T) {
+
+	c := InfraConfig{
+		ProConfig: InletsProConfig{
+			License: "non-empty",
+		},
+		AccessKey: "key",
+	}
+
+	got := c.GetInletsRelease()
+	want := "0.9.1"
 	if got != want {
 		t.Errorf("want %s, but got %s", want, got)
 		t.Fail()
