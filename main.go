@@ -57,7 +57,7 @@ func main() {
 	flag.StringVar(&infra.ProjectID, "project-id", "", "The project ID if using equinix-metal, or gce as the provider")
 	flag.StringVar(&infra.ProConfig.License, "license", "", "Supply a license for use with inlets-pro")
 	flag.StringVar(&infra.ProConfig.LicenseFile, "license-file", "", "Supply a file to read for the inlets-pro license")
-	flag.StringVar(&infra.ProConfig.ClientImage, "client-image", "", "Container image for inlets tunnel clients run in the cluster")
+	flag.StringVar(&infra.ProConfig.ClientImage, "client-image", "ghcr.io/inlets/inlets-pro:"+defaultRelease, "Container image for inlets tunnel clients run in the cluster")
 	flag.StringVar(&infra.ProConfig.InletsRelease, "inlets-release", defaultRelease, "Inlets version to use to create tunnel servers")
 
 	flag.StringVar(&infra.MaxClientMemory, "max-client-memory", "128Mi", "Maximum memory limit for the tunnel clients")
