@@ -8,7 +8,7 @@ When using a managed [Kubernetes](https://kubernetes.io/) engine, you can expose
 
 The inlets-operator brings that same experience to your local Kubernetes cluster by provisioning an exit-server on the public cloud and running an inlets server process there.
 
-You can use [`arkade`](https://github.com/alexellis/arkade#getting-arkade) to install the inlets-operator, `ark install inlets-operator --token-file <filename>`. In this case the `token-file` is the API credential for your internet hosting provider.
+You can use [`arkade`](https://github.com/alexellis/arkade#getting-arkade) to install the inlets-operator, `ark install inlets-operator --token-file <filename>  --license-file <inlets pro license file>`. In this case the `token-file` is the API credential for your internet hosting provider.
 
 Once the inlets-operator is installed, any Service of type LoadBalancer will get an IP address, unless you exclude it with an annotation.
 
