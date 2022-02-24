@@ -92,7 +92,7 @@ Other features:
 - [x] Control which services get a LoadBalancer using annotations
 - [x] Garbage collect hosts when Service or CRD is deleted
 - [x] CI with Travis and automated release artifacts
-- [x] One-line installer [arkade](https://get-arkade.dev/) - `arkade install inlets-operator --help`
+- [x] One-line installer [arkade](https://arkade.dev/) - `arkade install inlets-operator --help`
 
 ## inlets-operator reference documentation for different cloud providers
 
