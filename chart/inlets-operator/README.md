@@ -8,7 +8,7 @@ If you would like to use Helm instead, read on.
 
 ## Pre-reqs
 
-* Configure [helm 3](https://github.com/openfaas/faas-netes/blob/master/HELM.md) (Tiller is not required)
+* Download Helm, i.e. `arkade get helm` or `brew install helm`
 
 * Add the chart repo
 
@@ -38,9 +38,11 @@ If you would like to use Helm instead, read on.
 
 ```sh
 helm upgrade inlets-operator --install inlets/inlets-operator \
-  --set inletsProLicense=JWT_GOES_HERE \
+  --set inletsProLicense=LICENSE_VALUE \
   --set region=lon1
 ```
+
+The `LICENSE_VALUE` will be a code from your Gumroad subscription, or a JWT a static token was purchased.
 
 ### Other clouds
 
@@ -53,10 +55,10 @@ and can be overwritten via the helm `--set` flag.
 
 Parameter | Description | Default
 ---                             | ---                                                                     | ---
-`inletsProLicense`      | License for use with inlets-pro                                                 | `""`
+`inletsProLicense`      | The value received for the inlets-pro license                                                 | `""`
 `image`                 | Docker image for the inlets-operator                                            | `ghcr.io/inlets/inlets-operator:0.12.0`
-`inletsClientImage`           | Docker image for the inlets client                                              | `ghcr.io/inlets/inlets-pro:0.8.5`
-`inletsRelease`           |Release version of inlets for tunnel servers                                              | `0.8.5`
+`inletsClientImage`           | Docker image for the inlets client                                              | `ghcr.io/inlets/inlets-pro:0.9.1`
+`inletsRelease`           |Release version of inlets for tunnel servers                                              | `0.9.1`
 `provider`              | Your infrastructure provider - 'digitalocean', 'ec2', 'scaleway', 'equinix-metal', or 'gce'                       | `""`
 `region`                | The region to provision hosts into                                              | `""`
 `zone`                  | The zone where the exit node is to be provisioned (Used when Google Compute Engine is used as provider) | `us-central1-a`
