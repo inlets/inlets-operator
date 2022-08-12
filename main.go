@@ -36,7 +36,7 @@ func init() {
 	flag.StringVar(&masterURL, "master", "", "The address of the Kubernetes API server. Overrides any value in kubeconfig. Only required if out-of-cluster.")
 }
 
-const defaultRelease = "0.9.1"
+const defaultRelease = "0.9.5"
 
 func main() {
 	infra := &InfraConfig{
@@ -76,9 +76,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	infra.InletsClientImage = os.Getenv("client_image")
-
-	log.Printf("Client image: %s\tServer version: %s\n",
+	log.Printf("Inlets client: %s\tServer version: %s\n",
 		infra.GetInletsClientImage(),
 		infra.GetInletsRelease())
 
@@ -127,14 +125,14 @@ func main() {
 // GetInletsClientImage returns the image for the client-side tunnel
 func (i *InfraConfig) GetInletsClientImage() string {
 	if i.ProConfig.ClientImage == "" {
-		return "ghcr.io/inlets/inlets-pro:0.9.1"
+		return "ghcr.io/inlets/inlets-pro:0.9.5"
 	}
 	return strings.TrimSpace(i.ProConfig.ClientImage)
 }
 
 func (i *InfraConfig) GetInletsRelease() string {
 	if i.ProConfig.InletsRelease == "" {
-		return "0.9.1"
+		return "0.9.5"
 	}
 
 	return strings.TrimSpace(i.ProConfig.InletsRelease)
