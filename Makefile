@@ -1,5 +1,9 @@
 .PHONY: build push manifest test verify-codegen charts
 TAG?=latest
+OWNER?=openfaas
+SERVER?=ghcr.io
+IMG_NAME?=inlets-operator
+
 LDFLAGS := "-s -w -X github.com/inlets/inlets-operator/pkg/version.Release=$(Version) -X github.com/inlets/inlets-operator/pkg/version.SHA=$(GitCommit)"
 PLATFORM := "linux/amd64,linux/arm/v7,linux/arm64"
 
@@ -28,7 +32,6 @@ ${CODEGEN_PKG}: $(TOOLS_DIR)/code-generator.mod
 	@echo "(re)installing k8s.io/code-generator-${CODEGEN_VERSION}"
 	@cd $(TOOLS_DIR) && go mod download -modfile=code-generator.mod
 
-
 .PHONY: build-local
 build-local:
 	@docker buildx create --use --name=multiarch --node multiarch && \
@@ -37,45 +40,29 @@ build-local:
 		--build-arg Version=$(Version) --build-arg GitCommit=$(GitCommit) \
 		--platform linux/amd64 \
 		--output "type=docker,push=false" \
-		--tag inlets/inlets-operator:$(Version) .
+		--tag $(SERVER)/$(OWNER)/$(IMG_NAME):$(Version) .
 
 .PHONY: build
 build:
-	@docker buildx create --use --name=multiarch --node multiarch && \
+	@echo $(SERVER)/$(OWNER)/$(IMG_NAME):$(Version) && \
+	docker buildx create --use --name=multiarch --node multiarch && \
 	docker buildx build \
 		--progress=plain \
 		--build-arg Version=$(Version) --build-arg GitCommit=$(GitCommit) \
 		--platform $(PLATFORM) \
 		--output "type=image,push=false" \
-		--tag inlets/inlets-operator:$(Version) .
-
-.PHONY: docker-login
-docker-login:
-	echo -n "${DOCKER_PASSWORD}" | docker login -u "${DOCKER_USERNAME}" --password-stdin
-
-.PHONY: docker-login-ghcr
-docker-login-ghcr:
-	echo -n "${GHCR_PASSWORD}" | docker login -u "${GHCR_USERNAME}" --password-stdin ghcr.io
+		--tag $(SERVER)/$(OWNER)/$(IMG_NAME):$(Version) .
 
 .PHONY: push
 push:
-	@docker buildx create --use --name=multiarch --node multiarch && \
+	@echo $(SERVER)/$(OWNER)/$(IMG_NAME):$(Version) && \
+	docker buildx create --use --name=multiarch --node multiarch && \
 	docker buildx build \
 		--progress=plain \
 		--build-arg Version=$(Version) --build-arg GitCommit=$(GitCommit) \
 		--platform $(PLATFORM) \
 		--output "type=image,push=true" \
-		--tag inlets/inlets-operator:$(Version) .
-
-.PHONY: push-ghcr
-push-ghcr:
-	@docker buildx create --use --name=multiarch --node multiarch && \
-	docker buildx build \
-		--progress=plain \
-		--build-arg Version=$(Version) --build-arg GitCommit=$(GitCommit) \
-		--platform $(PLATFORM) \
-		--output "type=image,push=true" \
-		--tag ghcr.io/inlets/inlets-operator:$(Version) .
+		--tag $(SERVER)/$(OWNER)/$(IMG_NAME):$(Version) .
 
 test:
 	go test ./...
