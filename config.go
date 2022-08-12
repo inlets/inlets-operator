@@ -9,23 +9,22 @@ import (
 // InfraConfig is the configuration for
 // creating Infrastructure Resources
 type InfraConfig struct {
-	Provider          string
-	Region            string
-	Zone              string
-	AccessKey         string
-	SecretKey         string
-	OrganizationID    string
-	SubscriptionID    string
-	VpcID             string
-	SubnetID          string
-	AccessKeyFile     string
-	SecretKeyFile     string
-	ProjectID         string
-	InletsClientImage string
-	AnnotatedOnly     bool
-	ProConfig         InletsProConfig
-	MaxClientMemory   string
-	Plan              string
+	Provider        string
+	Region          string
+	Zone            string
+	AccessKey       string
+	SecretKey       string
+	OrganizationID  string
+	SubscriptionID  string
+	VpcID           string
+	SubnetID        string
+	AccessKeyFile   string
+	SecretKeyFile   string
+	ProjectID       string
+	AnnotatedOnly   bool
+	MaxClientMemory string
+	Plan            string
+	ProConfig       InletsProConfig
 }
 
 type InletsProConfig struct {

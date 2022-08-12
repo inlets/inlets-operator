@@ -43,8 +43,8 @@ image: "ghcr.io/inlets/inlets-operator:0.15.0"
 pullPolicy: "IfNotPresent"
 
 # These should match
-inletsClientImage: "ghcr.io/inlets/inlets-pro:0.9.1"
-inletsRelease: "0.9.1"
+inletsClientImage: "ghcr.io/inlets/inlets-pro:0.9.5"
+inletsRelease: "0.9.5"
 
 nameOverride: ""
 fullnameOverride: ""
