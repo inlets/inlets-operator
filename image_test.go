@@ -13,7 +13,7 @@ func Test_GetInletsReleaseDefault(t *testing.T) {
 
 	got := c.GetInletsRelease()
 
-	want := "0.9.5"
+	want := "0.9.6"
 	if got != want {
 		t.Fatalf("want %s, but got %s", want, got)
 	}
@@ -48,7 +48,7 @@ func Test_InletsClientImageDefault(t *testing.T) {
 	}
 
 	got := c.GetInletsClientImage()
-	want := "ghcr.io/inlets/inlets-pro:0.9.5"
+	want := "ghcr.io/inlets/inlets-pro:0.9.6"
 	if got != want {
 		t.Fatalf("want %s, but got %s", want, got)
 	}
