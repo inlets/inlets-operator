@@ -52,7 +52,7 @@ Watch an animation created by [Ivan Velichko](https://iximiuz.com/en/posts/kuber
 
 In this video walk-through Alex will guide you through creating a Kubernetes cluster on your laptop with KinD, then he'll install ingress-nginx (an IngressController), followed by cert-manager and then after the inlets-operator creates a LoadBalancer on the cloud, you'll see a TLS certificate obtained by LetsEncrypt.
 
-![Video demo](https://img.youtube.com/vi/4wFSdNW-p4Q/hqdefault.jpg)
+[![Video demo](https://img.youtube.com/vi/4wFSdNW-p4Q/hqdefault.jpg)](https://www.youtube.com/watch?v=4wFSdNW-p4Q)
 
 [Try the step-by-step tutorial in the docs](https://docs.inlets.dev/#/get-started/quickstart-ingresscontroller-cert-manager?id=quick-start-expose-your-ingresscontroller-and-get-tls-from-letsencrypt-and-cert-manager)
 
@@ -60,7 +60,7 @@ In this video walk-through Alex will guide you through creating a Kubernetes clu
 
 The operator detects Services of type LoadBalancer, and then creates a `Tunnel` Custom Resource. Its next step is to provision a small VM with a public IP on the public cloud, where it will run the inlets tunnel server. Then an inlets client is deployed as a Pod within your local cluster, which connects to the server and acts like a gateway to your chosen local service.
 
-### Powered by [inlets PRO](https://github.com/inlets/inlets-pro)
+### Powered by [inlets Pro](https://github.com/inlets/inlets-pro)
 
 * Automatic end-to-end encryption of the control-plane using PKI and TLS
 * Punch out multiple ports such as 80 and 443 over the same tunnel
@@ -250,10 +250,10 @@ Contributions are welcome, see the [CONTRIBUTING.md](CONTRIBUTING.md) guide.
 
 ## Similar projects / products and alternatives
 
-- [inlets](https://github.com/inlets/inlets-pro) - L7 HTTP / L4 TCP tunnel which can tunnel any TCP traffic. Secure by default with built-in TLS encryption. Kubernetes-ready with Operator, helm chart, container images and YAML manifests.
+- [inlets-pro](https://github.com/inlets/inlets-pro) - L7 HTTP / L4 TCP tunnel which can tunnel any TCP traffic. Secure by default with built-in TLS encryption. Kubernetes-ready with Operator, helm chart, container images and YAML manifests.
 - [metallb](https://github.com/danderson/metallb) - open source LoadBalancer for private Kubernetes clusters, no tunnelling.
 - [Cloudflare Argo](https://www.cloudflare.com/en-gb/products/argo-tunnel/) - paid SaaS product from Cloudflare for Cloudflare customers and domains - K8s integration available through Cloudflare DNS and ingress controller
-- [ngrok](https://ngrok.com) - a popular tunnelling tool, restarts every 7 hours, limits connections per minute, SaaS-only. No K8s integration available
+- [ngrok](https://ngrok.com) - a free SasS tunnel service tool, restarts every 7 hours, limits connections per minute, SaaS-only, no K8s integration available, TCP tunnels can only use high/unconventional ports
 
 ## Author / vendor
 
