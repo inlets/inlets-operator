@@ -65,7 +65,7 @@ Parameter | Description | Default
 `vpcId`                 | The VPC ID to create the exit-server in (EC2) | `""`
 `subnetId`              | The Subnet ID where the exit-server should be placed (EC2) | `""`
 `accessKeyFile`         | Read the access key for your infrastructure provider from a file (recommended)  | `/var/secrets/inlets/inlets-access-key`
-`projectId`             | The project ID if using gce or equinix-metal as the provider    | `""`
+`projectID`             | The project ID if using gce or equinix-metal as the provider    | `""`
 `annotatedOnly`         | Only create a tunnel for annotated services.                                    | `false`
 `resources`             | Operator resources requests & limits                                            | `{"requests":{"cpu": "100m", "memory": "128Mi"}}`
 `nodeSelector`          | Node labels for data pod assignment                                             | `{}`
