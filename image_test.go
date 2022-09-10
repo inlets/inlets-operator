@@ -13,7 +13,7 @@ func Test_GetInletsReleaseDefault(t *testing.T) {
 
 	got := c.GetInletsRelease()
 
-	want := "0.9.6"
+	want := "0.9.9"
 	if got != want {
 		t.Fatalf("want %s, but got %s", want, got)
 	}
@@ -24,14 +24,14 @@ func Test_GetInletsReleaseOverride(t *testing.T) {
 	c := InfraConfig{
 		ProConfig: InletsProConfig{
 			License:       "non-empty",
-			InletsRelease: "0.9.6",
+			InletsRelease: "0.9.9",
 		},
 		AccessKey: "key",
 	}
 
 	got := c.GetInletsRelease()
 
-	want := "0.9.6"
+	want := "0.9.9"
 
 	if got != want {
 		t.Fatalf("want %s, but got %s", want, got)
@@ -48,7 +48,7 @@ func Test_InletsClientImageDefault(t *testing.T) {
 	}
 
 	got := c.GetInletsClientImage()
-	want := "ghcr.io/inlets/inlets-pro:0.9.6"
+	want := "ghcr.io/inlets/inlets-pro:0.9.9"
 	if got != want {
 		t.Fatalf("want %s, but got %s", want, got)
 	}
