@@ -735,6 +735,7 @@ func makeClient(tunnel *inletsv1alpha1.Tunnel, clientImage string, ports, licens
 		Command:         []string{"inlets-pro"},
 		ImagePullPolicy: corev1.PullIfNotPresent,
 		Args: []string{
+			"tcp",
 			"client",
 			"--url=" + fmt.Sprintf("wss://%s:%d/connect", tunnel.Status.HostIP, inletsPROControlPort),
 			"--token=" + tunnel.Spec.AuthToken,
