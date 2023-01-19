@@ -26,6 +26,9 @@ jobs:
       - name: Get TAG
         id: get_tag
         run: echo TAG=${GITHUB_REF#refs/tags/} >> $GITHUB_ENV
+      - name: Get Repo Owner
+        id: get_repo_owner
+        run: echo "REPO_OWNER=$(echo ${{ github.repository_owner }} | tr '[:upper:]' '[:lower:]')" > $GITHUB_ENV
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
