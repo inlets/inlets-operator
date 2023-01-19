@@ -7,34 +7,47 @@ on:
 
 jobs:
   publish:
+    permissions:
+      actions: read
+      checks: write
+      contents: read
+      issues: read
+      packages: write
+      pull-requests: read
+      repository-projects: read
+      statuses: read
+
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@master
         with:
           fetch-depth: 1
+
       - name: Get TAG
         id: get_tag
-        run: echo ::set-output name=TAG::${GITHUB_REF#refs/tags/}
+        run: echo TAG=${GITHUB_REF#refs/tags/} >> $GITHUB_ENV
+
       - name: Set up QEMU
-        uses: docker/setup-qemu-action@v1
+        uses: docker/setup-qemu-action@v2
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1
-      - name: Login to Docker Registry
-        uses: docker/login-action@v1
+        uses: docker/setup-buildx-action@v2
+      - name: Login to container Registry
+        uses: docker/login-action@v2
         with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
           registry: ghcr.io
+
       - name: Release build
         id: release_build
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v3
         with:
           outputs: "type=registry,push=true"
           platforms: linux/amd64,linux/arm/v6,linux/arm64
           build-args: |
-            Version=${{ steps.get_tag.outputs.TAG }}
+            Version=${{  env.TAG }}
             GitCommit=${{ github.sha }}
           tags: |
-            ghcr.io/inlets/inlets-operator:${{ github.sha }}
-            ghcr.io/inlets/inlets-operator:${{ steps.get_tag.outputs.TAG }}
-            ghcr.io/inlets/inlets-operator:latest
+            ghcr.io/${{ env.REPO_OWNER }}/inlets-operator:${{ github.sha }}
+            ghcr.io/${{ env.REPO_OWNER }}/inlets-operator:${{ env.TAG }}
+            ghcr.io/${{ env.REPO_OWNER }}/inlets-operator:latest
