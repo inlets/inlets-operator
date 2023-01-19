@@ -39,12 +39,12 @@ subnetId: ""
 # Only provide LoadBalancers for Services annotated with "dev.inlets.manage=true"
 annotatedOnly: false
 
-image: "ghcr.io/inlets/inlets-operator:0.16.2"
+image: "ghcr.io/inlets/inlets-operator:0.16.3"
 pullPolicy: "IfNotPresent"
 
 # These should match
-inletsClientImage: "ghcr.io/inlets/inlets-pro:0.9.9"
-inletsRelease: "0.9.9"
+inletsClientImage: "ghcr.io/inlets/inlets-pro:0.9.12"
+inletsRelease: "0.9.12"
 
 nameOverride: ""
 fullnameOverride: ""
