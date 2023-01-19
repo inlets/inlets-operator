@@ -9,6 +9,8 @@ import (
 	"strings"
 	"time"
 
+	restclient "k8s.io/client-go/rest"
+
 	kubeinformers "k8s.io/client-go/informers"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
@@ -88,9 +90,9 @@ func main() {
 	// set up signals so we handle the first shutdown signal gracefully
 	stopCh := signals.SetupSignalHandler()
 
-	cfg, err := clientcmd.BuildConfigFromFlags(masterURL, kubeconfig)
+	cfg, err := getClientCmdConfig(masterURL, kubeconfig)
 	if err != nil {
-		klog.Fatalf("Error building kubeconfig: %s", err.Error())
+		log.Fatalf("Error building kubeconfig: %s", err.Error())
 	}
 
 	kubeClient, err := kubernetes.NewForConfig(cfg)
@@ -168,4 +170,22 @@ func (i *InfraConfig) GetSecretKey() string {
 	}
 
 	return strings.TrimSpace(i.SecretKey)
+}
+
+func getClientCmdConfig(masterURL, kubeconfig string) (*restclient.Config, error) {
+	var err error
+
+	var cfg *restclient.Config
+	if len(kubeconfig) == 0 {
+		cfg, err = restclient.InClusterConfig()
+		if err != nil {
+			if _, statErr := os.Stat("/var/run/secrets/kubernetes.io/serviceaccount/token"); os.IsNotExist(statErr) {
+				err = fmt.Errorf("set the -kubeconfig flag, if running outside of a cluster")
+			}
+		}
+	} else {
+		cfg, err = clientcmd.BuildConfigFromFlags(masterURL, kubeconfig)
+	}
+
+	return cfg, err
 }
