@@ -82,6 +82,10 @@ func main() {
 		infra.GetInletsClientImage(),
 		infra.GetInletsRelease())
 
+	if len(infra.ProConfig.License) == 0 {
+		infra.ProConfig.License = os.Getenv("LICENSE")
+	}
+
 	if _, err := infra.ProConfig.GetLicenseKey(); err != nil {
 		fmt.Fprintf(os.Stderr, "%s\n", err.Error())
 		os.Exit(1)
