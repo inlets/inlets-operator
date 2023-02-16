@@ -32,13 +32,13 @@ import (
 
 // FakeTunnels implements TunnelInterface
 type FakeTunnels struct {
-	Fake *FakeInletsV1alpha1
+	Fake *FakeOperatorV1alpha1
 	ns   string
 }
 
-var tunnelsResource = schema.GroupVersionResource{Group: "inlets.inlets.dev", Version: "v1alpha1", Resource: "tunnels"}
+var tunnelsResource = schema.GroupVersionResource{Group: "operator.inlets.dev", Version: "v1alpha1", Resource: "tunnels"}
 
-var tunnelsKind = schema.GroupVersionKind{Group: "inlets.inlets.dev", Version: "v1alpha1", Kind: "Tunnel"}
+var tunnelsKind = schema.GroupVersionKind{Group: "operator.inlets.dev", Version: "v1alpha1", Kind: "Tunnel"}
 
 // Get takes name of the tunnel, and returns the corresponding tunnel object, and an error if there is any.
 func (c *FakeTunnels) Get(ctx context.Context, name string, options v1.GetOptions) (result *v1alpha1.Tunnel, err error) {
@@ -117,7 +117,7 @@ func (c *FakeTunnels) UpdateStatus(ctx context.Context, tunnel *v1alpha1.Tunnel,
 // Delete takes name of the tunnel and deletes it. Returns an error if one occurs.
 func (c *FakeTunnels) Delete(ctx context.Context, name string, opts v1.DeleteOptions) error {
 	_, err := c.Fake.
-		Invokes(testing.NewDeleteAction(tunnelsResource, c.ns, name), &v1alpha1.Tunnel{})
+		Invokes(testing.NewDeleteActionWithOptions(tunnelsResource, c.ns, name, opts), &v1alpha1.Tunnel{})
 
 	return err
 }

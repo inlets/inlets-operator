@@ -1,5 +1,5 @@
-FROM --platform=${BUILDPLATFORM:-linux/amd64} ghcr.io/openfaas/license-check:0.4.0 as license-check
-FROM --platform=${BUILDPLATFORM:-linux/amd64} golang:1.18 as builder
+FROM --platform=${BUILDPLATFORM:-linux/amd64} ghcr.io/openfaas/license-check:0.4.1 as license-check
+FROM --platform=${BUILDPLATFORM:-linux/amd64} golang:1.19 as builder
 
 ARG TARGETPLATFORM
 ARG BUILDPLATFORM
@@ -38,10 +38,8 @@ RUN CGO_ENABLED=${CGO_ENABLED} GOOS=${TARGETOS} GOARCH=${TARGETARCH} \
 
 RUN license-check -path ./ --verbose=false "Alex Ellis" "inlets Authors" "inlets Author(s)"
 
-RUN echo flags=${Version} ${GitCommit} 
 RUN CGO_ENABLED=${CGO_ENABLED} GOOS=${TARGETOS} GOARCH=${TARGETARCH} \
-  go build -ldflags "-s -w -X github.com/inlets/inlets-operator/pkg/version.Release=${Version} -X github.com/inlets/inlets-operator/pkg/version.SHA=${GitCommit}" \
-  -a -installsuffix cgo -o /usr/bin/inlets-operator .
+  go build -ldflags "-s -w -X github.com/inlets/inlets-operator/pkg/version.Release=${Version} -X github.com/inlets/inlets-operator/pkg/version.SHA=${GitCommit}" -o /usr/bin/inlets-operator .
 
 FROM --platform=${BUILDPLATFORM:-linux/amd64} gcr.io/distroless/static:nonroot
 

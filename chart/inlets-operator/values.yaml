@@ -1,8 +1,9 @@
 replicaCount: 1
 
-# inlets PRO enables L4 TCP LoadBalancers in Kubernetes
-## Purchase from https://inlets.dev/pricing
-inletsProLicense: ""
+# You must create a secret called "inlets-license"
+
+# kubectl create secret generic -n inlets \
+# inlets-license --from-file license=$HOME/.inlets/LICENSE
 
 provider: "digitalocean"
 region: "lon1"
@@ -43,8 +44,8 @@ image: "ghcr.io/inlets/inlets-operator:0.16.3"
 pullPolicy: "IfNotPresent"
 
 # These should match
-inletsClientImage: "ghcr.io/inlets/inlets-pro:0.9.13"
-inletsRelease: "0.9.13"
+inletsClientImage: "ghcr.io/inlets/inlets-pro:0.9.14"
+inletsRelease: "0.9.14"
 
 nameOverride: ""
 fullnameOverride: ""

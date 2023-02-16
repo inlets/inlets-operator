@@ -5,7 +5,7 @@ SERVER?=ghcr.io
 IMG_NAME?=inlets-operator
 
 LDFLAGS := "-s -w -X github.com/inlets/inlets-operator/pkg/version.Release=$(Version) -X github.com/inlets/inlets-operator/pkg/version.SHA=$(GitCommit)"
-PLATFORM := "linux/amd64,linux/arm/v7,linux/arm64"
+PLATFORM?= "linux/amd64,linux/arm/v7,linux/arm64"
 
 Version := $(shell git describe --tags --dirty)
 GitCommit := $(shell git rev-parse HEAD)

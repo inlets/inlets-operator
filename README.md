@@ -184,7 +184,7 @@ spec:
   selector:
     app: nginx
 ---
-apiVersion: inlets.inlets.dev/v1alpha1
+apiVersion: operator.inlets.dev/v1alpha1
 kind: Tunnel
 metadata:
   name: nginx
@@ -201,7 +201,7 @@ NAME            TYPE        CLUSTER-IP        EXTERNAL-IP       PORT(S)   AGE
 service/nginx   ClusterIP   192.168.226.216   104.248.163.242   80/TCP    78s
 
 NAME                             SERVICE   TUNNEL         HOSTSTATUS   HOSTIP            HOSTID
-tunnel.inlets.inlets.dev/nginx   nginx     nginx-client   active       104.248.163.242   214795742
+tunnel.operator.inlets.dev/nginx   nginx     nginx-client   active       104.248.163.242   214795742
 ```
 
 or use a jsonpath to get the value:

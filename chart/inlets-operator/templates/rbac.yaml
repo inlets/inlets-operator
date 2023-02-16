@@ -11,11 +11,14 @@ metadata:
   name: inlets-operator-rw
   namespace: {{ .Release.Namespace }}
 rules:
-- apiGroups: ["inlets.inlets.dev"]
+- apiGroups: ["operator.inlets.dev"]
   resources: ["tunnels", "tunnels/finalizers", "tunnels/status"]
   verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
 - apiGroups: [""]
   resources: ["services", "services/status", "services/finalizers"]
+  verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+- apiGroups: [""]
+  resources: ["secrets"]
   verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
 - apiGroups: [""]
   resources: ["events"]
