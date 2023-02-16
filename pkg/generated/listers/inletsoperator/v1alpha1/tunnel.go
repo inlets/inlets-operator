@@ -26,8 +26,10 @@ import (
 )
 
 // TunnelLister helps list Tunnels.
+// All objects returned here must be treated as read-only.
 type TunnelLister interface {
 	// List lists all Tunnels in the indexer.
+	// Objects returned here must be treated as read-only.
 	List(selector labels.Selector) (ret []*v1alpha1.Tunnel, err error)
 	// Tunnels returns an object that can list and get Tunnels.
 	Tunnels(namespace string) TunnelNamespaceLister
@@ -58,10 +60,13 @@ func (s *tunnelLister) Tunnels(namespace string) TunnelNamespaceLister {
 }
 
 // TunnelNamespaceLister helps list and get Tunnels.
+// All objects returned here must be treated as read-only.
 type TunnelNamespaceLister interface {
 	// List lists all Tunnels in the indexer for a given namespace.
+	// Objects returned here must be treated as read-only.
 	List(selector labels.Selector) (ret []*v1alpha1.Tunnel, err error)
 	// Get retrieves the Tunnel from the indexer for a given namespace and name.
+	// Objects returned here must be treated as read-only.
 	Get(name string) (*v1alpha1.Tunnel, error)
 	TunnelNamespaceListerExpansion
 }

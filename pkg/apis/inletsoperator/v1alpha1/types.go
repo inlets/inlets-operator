@@ -24,11 +24,12 @@ import (
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
 // Tunnel is a specification for a Tunnel resource
-// +kubebuilder:printcolumn:name="Service",type=string,JSONPath=`.spec.serviceName`
-// +kubebuilder:printcolumn:name="Tunnel",type=string,JSONPath=`.spec.client_deployment.name`
+// +kubebuilder:printcolumn:name="Service",type=string,JSONPath=`.spec.serviceRef.name`
+// +kubebuilder:printcolumn:name="Tunnel",type=string,JSONPath=`.spec.clientDeployment.name`
 // +kubebuilder:printcolumn:name="HostStatus",type=string,JSONPath=`.status.hostStatus`
 // +kubebuilder:printcolumn:name="HostIP",type=string,JSONPath=`.status.hostIP`
 // +kubebuilder:printcolumn:name="HostID",type=string,JSONPath=`.status.hostId`
+// +kubebuilder:printcolumn:name="UpdateServiceIP",type=boolean,JSONPath=`.spec.updateServiceIP`
 // +kubebuilder:subresource:status
 type Tunnel struct {
 	metav1.TypeMeta   `json:",inline"`
@@ -42,22 +43,54 @@ type Tunnel struct {
 
 // TunnelSpec is the spec for a Tunnel resource
 type TunnelSpec struct {
-	ServiceName string `json:"serviceName,omitempty"`
+	// ServiceRef is the internal service to tunnel to the remote host
+	ServiceRef *ResourceRef `json:"serviceRef,omitempty"`
 
 	// +nullable
 	// +kubebuilder:validation:Optional
-	ClientDeploymentRef *metav1.ObjectMeta `json:"client_deployment,omitempty"`
-	AuthToken           string             `json:"auth_token,omitempty"`
+
+	// AuthToken is the secret used to authenticate the tunnel client with the remote tunnel server VM
+	AuthTokenRef *ResourceRef `json:"authTokenRef,omitempty"`
+
+	// +nullable
+	// +kubebuilder:validation:Optional
+	// LicenseRef is the secret used to load the inlets-client
+	// license, and is the same for each tunnel within the cluster
+	LicenseRef *ResourceRef `json:"licenseRef,omitempty"`
+
+	// +nullable
+	// +kubebuilder:validation:Optional
+	UpdateServiceIP bool `json:"updateServiceIP,omitempty"`
 }
 
 // TunnelStatus is the status for a Tunnel resource
 type TunnelStatus struct {
+	// Generated is set to true when the tunnel is created by the operator and false
+	// when a user creates the Tunnel via YAML
+	Generated bool `json:"generated,omitempty"`
+
 	// + optional
 	HostStatus string `json:"hostStatus,omitempty"`
+
 	// + optional
 	HostIP string `json:"hostIP,omitempty"`
+
 	// + optional
 	HostID string `json:"hostId,omitempty"`
+
+	// + optional
+	// +kubebuilder:validation:Optional
+	AuthTokenRef *ResourceRef `json:"authTokenRef,omitempty"`
+
+	// +nullable
+	// +kubebuilder:validation:Optional
+	ClientDeploymentRef *ResourceRef `json:"clientDeploymentRef,omitempty"`
+}
+
+// ResourceRef references resources across namespaces
+type ResourceRef struct {
+	Name      string `json:"name,omitempty"`
+	Namespace string `json:"namespace,omitempty"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object

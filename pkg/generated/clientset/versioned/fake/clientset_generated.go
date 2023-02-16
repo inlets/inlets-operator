@@ -20,8 +20,8 @@ package fake
 
 import (
 	clientset "github.com/inlets/inlets-operator/pkg/generated/clientset/versioned"
-	inletsv1alpha1 "github.com/inlets/inlets-operator/pkg/generated/clientset/versioned/typed/inletsoperator/v1alpha1"
-	fakeinletsv1alpha1 "github.com/inlets/inlets-operator/pkg/generated/clientset/versioned/typed/inletsoperator/v1alpha1/fake"
+	operatorv1alpha1 "github.com/inlets/inlets-operator/pkg/generated/clientset/versioned/typed/inletsoperator/v1alpha1"
+	fakeoperatorv1alpha1 "github.com/inlets/inlets-operator/pkg/generated/clientset/versioned/typed/inletsoperator/v1alpha1/fake"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/watch"
 	"k8s.io/client-go/discovery"
@@ -74,9 +74,12 @@ func (c *Clientset) Tracker() testing.ObjectTracker {
 	return c.tracker
 }
 
-var _ clientset.Interface = &Clientset{}
+var (
+	_ clientset.Interface = &Clientset{}
+	_ testing.FakeClient  = &Clientset{}
+)
 
-// InletsV1alpha1 retrieves the InletsV1alpha1Client
-func (c *Clientset) InletsV1alpha1() inletsv1alpha1.InletsV1alpha1Interface {
-	return &fakeinletsv1alpha1.FakeInletsV1alpha1{Fake: &c.Fake}
+// OperatorV1alpha1 retrieves the OperatorV1alpha1Client
+func (c *Clientset) OperatorV1alpha1() operatorv1alpha1.OperatorV1alpha1Interface {
+	return &fakeoperatorv1alpha1.FakeOperatorV1alpha1{Fake: &c.Fake}
 }

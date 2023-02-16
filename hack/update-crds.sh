@@ -1,7 +1,10 @@
 #!/bin/bash
 
+set -o pipefail -e -u -x -a 
+
+
 export controllergen="$GOPATH/bin/controller-gen"
-export PKG=sigs.k8s.io/controller-tools/cmd/controller-gen@v0.4.0
+export PKG=sigs.k8s.io/controller-tools/cmd/controller-gen@v0.7.0
 
 if [ ! -e "$controllergen" ]
 then

@@ -62,13 +62,13 @@ func NewFilteredTunnelInformer(client versioned.Interface, namespace string, res
 				if tweakListOptions != nil {
 					tweakListOptions(&options)
 				}
-				return client.InletsV1alpha1().Tunnels(namespace).List(context.TODO(), options)
+				return client.OperatorV1alpha1().Tunnels(namespace).List(context.TODO(), options)
 			},
 			WatchFunc: func(options v1.ListOptions) (watch.Interface, error) {
 				if tweakListOptions != nil {
 					tweakListOptions(&options)
 				}
-				return client.InletsV1alpha1().Tunnels(namespace).Watch(context.TODO(), options)
+				return client.OperatorV1alpha1().Tunnels(namespace).Watch(context.TODO(), options)
 			},
 		},
 		&inletsoperatorv1alpha1.Tunnel{},

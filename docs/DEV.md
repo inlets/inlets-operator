@@ -37,7 +37,7 @@ go get -u github.com/inlets/inlets-operator
 cd $GOPATH/github.com/inlets/inlets-operator
 ```
 
-Download dependencies and apply the required CRD for `tunnels.inlets.inlets.dev`
+Download dependencies and apply the required CRD for `tunnels.operator.inlets.dev`
 
 ```sh
 go get
