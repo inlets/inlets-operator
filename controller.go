@@ -201,7 +201,7 @@ func NewController(
 
 			newSvc := new.(*corev1.Service)
 			oldSvc := old.(*corev1.Service)
-			if !apiequality.Semantic.DeepEqual(oldSvc.Spec, newSvc.Spec) {
+			if !apiequality.Semantic.DeepEqual(oldSvc.Spec, newSvc.Spec) || cmp.Diff(oldSvc.Annotations, newSvc.Annotations) != "" {
 				controller.enqueueService(new)
 			}
 		},
@@ -575,6 +575,7 @@ func createTunnelResource(service *corev1.Service, c *Controller) error {
 		if !manageService(*c, *service) {
 			return nil
 		}
+
 		klog.Infof("Creating Tunnel: %s.%s\n", name, namespace)
 
 		tunnel := &inletsv1alpha1.Tunnel{
@@ -1189,13 +1190,15 @@ func (c *Controller) handleObject(obj interface{}) {
 func manageService(controller Controller, service corev1.Service) bool {
 	annotations := service.Annotations
 
-	value, ok := annotations["dev.inlets.manage"]
+	// If the service has the annotation, use that value
+	v, ok := annotations["operator.inlets.dev/manage"]
 	if ok {
-		valueBool, _ := strconv.ParseBool(value)
-		return valueBool
+		valueBool, _ := strconv.ParseBool(v)
+		return valueBool || v == "1"
 	}
 
-	return !controller.infraConfig.AnnotatedOnly
+	// Else only manage if AnnotationOnly is false
+	return controller.infraConfig.AnnotatedOnly == false
 }
 
 func getPortsString(service *corev1.Service) string {

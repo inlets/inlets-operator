@@ -5,3 +5,4 @@ kubectl logs -n {{ .Release.Namespace }} deploy/inlets-operator
 2. Once you've exposed a LoadBalancer or created a Tunnel, view them with:
 
 kubectl get tunnel -A
+

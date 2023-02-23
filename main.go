@@ -66,10 +66,17 @@ func main() {
 
 	flag.StringVar(&infra.Plan, "plan", "", "Plan code for cloud host")
 
-	flag.BoolVar(&infra.AnnotatedOnly, "annotated-only", false, "Only create a tunnel for annotated services. Annotate with dev.inlets.manage=true.")
+	flag.BoolVar(&infra.AnnotatedOnly, "annotated-only", false, "Only create a tunnel for annotated services. Annotate with operator.inlets.dev/manage=true.")
 
 	flag.Parse()
-	log.Printf("Operator version: %s SHA: %s\n", version.Release, version.SHA)
+	log.Printf("Inlets Operator version: %s SHA: %s\n", version.Release, version.SHA)
+
+	create := "all tunnels"
+	if infra.AnnotatedOnly {
+		create = "tunnels annotated with: operator.inlets.dev/manage=1"
+	}
+
+	log.Printf("Creating tunnels for: %s ", create)
 
 	err := validateFlags(*infra)
 
@@ -78,7 +85,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	log.Printf("Inlets client: %s\tServer version: %s\n",
+	log.Printf("Inlets client image: %s\tInlets server version: %s\n",
 		infra.GetInletsClientImage(),
 		infra.GetInletsRelease())
 

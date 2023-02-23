@@ -152,12 +152,12 @@ There are three ways to override the behaviour:
 
 ### 1) Create LoadBalancers for every service, unless annotated
 
-To ignore a service such as `traefik` type in: `kubectl annotate svc/traefik -n kube-system dev.inlets.manage=false`
+To ignore a service such as `traefik` type in: `kubectl annotate svc/traefik -n kube-system operator.inlets.dev/manage=false`
 
 ### 2) Create LoadBalancers for only annotated services
 
 You can also set the operator to ignore the services by default and only manage them when the annotation is true with the flag `-annotated-only`
-To create a service such as `traefik` type in: `kubectl annotate svc/traefik -n kube-system dev.inlets.manage=true`
+To create a service such as `traefik` type in: `kubectl annotate svc/traefik -n kube-system operator.inlets.dev/manage=true`
 
 ### 3) Create a Tunnel resource for ClusterIP services
 
