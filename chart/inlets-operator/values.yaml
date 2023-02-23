@@ -8,6 +8,9 @@ replicaCount: 1
 provider: "digitalocean"
 region: "lon1"
 
+# Only provide LoadBalancers for Services annotated with "operator.inlets.dev/manage=true"
+annotatedOnly: false
+
 #plan: <The plan or size for your cloud instance>
 
 # provider: "gce"
@@ -37,8 +40,6 @@ vpcId: ""
 # The Subnet ID where the exit-server should be placed (EC2)
 subnetId: ""
 
-# Only provide LoadBalancers for Services annotated with "dev.inlets.manage=true"
-annotatedOnly: false
 
 image: "ghcr.io/inlets/inlets-operator:0.16.3"
 pullPolicy: "IfNotPresent"
