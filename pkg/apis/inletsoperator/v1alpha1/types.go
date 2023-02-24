@@ -28,6 +28,7 @@ import (
 // +kubebuilder:printcolumn:name="Client",priority=1,type=string,JSONPath=`.status.clientDeploymentRef.name`
 // +kubebuilder:printcolumn:name="HostStatus",type=string,JSONPath=`.status.hostStatus`
 // +kubebuilder:printcolumn:name="HostIP",type=string,JSONPath=`.status.hostIP`
+// +kubebuilder:printcolumn:name="Age",type=date,JSONPath=`.metadata.creationTimestamp`
 // +kubebuilder:printcolumn:name="HostID",priority=1,type=string,JSONPath=`.status.hostId`
 // +kubebuilder:printcolumn:name="UpdateServiceIP",priority=1,type=boolean,JSONPath=`.spec.updateServiceIP`
 // +kubebuilder:printcolumn:name="Generated",priority=1,type=boolean,JSONPath=`.status.generated`

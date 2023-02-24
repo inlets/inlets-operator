@@ -13,7 +13,7 @@ If you would like to use Helm instead, read on.
 * Add the chart repo
 
   ```sh
-  helm repo add inlets https://inlets.github.io/inlets-operator/ && \
+  helm repo add inlets https://inlets.github.io/inlets-operator/
   helm repo update
   ```
 
@@ -75,15 +75,15 @@ helm upgrade inlets-operator --install ./chart/inlets-operator \
 The following table lists the configurable parameters of the `inlets-operator` chart and their default values,
 and can be overwritten via the helm `--set` flag.
 
-Parameter | Description | Default
+Parameter | Description | Default value
 ---                     | ---                                                                     | ---
+`annotatedOnly`         | Only create tunnels for LoadBalancer with a `operator.inlets.dev/manage=1` annotation         | `false`
 `inletsClientImage`     | Docker image for the inlets client                                              | See values.yaml
 `image`                 | Docker image for the inlets-operator                                            | See values.yaml
 `secretKeyFile`         | If we are using a provider that requires a secret key as well as an access key, set to `/var/secrets/inlets/secret/inlets-secret-key` | `""`
 `affinity`              | Node affinity policy                                                            | `{}`
 `nodeSelector`          | Node labels for data pod assignment                                             | `{}`
 `tolerations`           | Node tolerations                                                                | `[]`
-`annotatedOnly`         | Only create a tunnel for annotated services.                                    | `false`
 `resources`             | Operator resources requests & limits                                            | `{"requests":{"cpu": "100m", "memory": "128Mi"}}`
 `accessKeyFile`         | Read the access key for your infrastructure provider from a file (recommended)  | `/var/secrets/inlets/inlets-access-key`
 `inletsRelease`           |Release version of inlets for tunnel servers                                              | See values.yaml

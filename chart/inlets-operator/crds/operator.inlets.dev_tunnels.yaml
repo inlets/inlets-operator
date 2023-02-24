@@ -28,8 +28,12 @@ spec:
         - jsonPath: .status.hostIP
           name: HostIP
           type: string
+        - jsonPath: .metadata.creationTimestamp
+          name: Created
+          type: date
         - jsonPath: .status.hostId
           name: HostID
+          priority: 1
           type: string
         - jsonPath: .spec.updateServiceIP
           name: UpdateServiceIP
