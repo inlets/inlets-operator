@@ -3,7 +3,28 @@ entries:
   inlets-operator:
   - apiVersion: v1
     appVersion: "1.0"
-    created: "2023-02-24T14:25:02.242074077Z"
+    created: "2023-02-24T14:39:24.033451398Z"
+    description: inlets-operator for Kubernetes
+    digest: 4b13b979b3209b0a8f75372333285737809f38ea13b2ddd94d0996dc56c25fec
+    keywords:
+    - networking
+    - loadbalancer
+    - ingress
+    - selfhosting
+    - tunnels
+    - inlets
+    maintainers:
+    - email: alex@openfaas.com
+      name: alexellis
+    - email: han@openfaas.com
+      name: han
+    name: inlets-operator
+    urls:
+    - https://inlets.github.io/inlets-operator/inlets-operator-0.17.1.tgz
+    version: 0.17.1
+  - apiVersion: v1
+    appVersion: "1.0"
+    created: "2023-02-24T14:39:24.0332121Z"
     description: inlets-operator for Kubernetes
     digest: fe21ba5d09005e843cca46a49274e4e3ed2691d0ccf4e9c1f6e46db28aaf9370
     keywords:
@@ -24,7 +45,7 @@ entries:
     version: 0.17.0
   - apiVersion: v1
     appVersion: "1.0"
-    created: "2023-02-24T14:25:02.241685714Z"
+    created: "2023-02-24T14:39:24.032977302Z"
     description: inlets-operator for Kubernetes
     digest: a71fda6cb24cda91d770bb2c11e176182d070b74a5478364ef139a47192b933c
     keywords:
@@ -43,7 +64,7 @@ entries:
     version: 0.16.6
   - apiVersion: v1
     appVersion: "1.0"
-    created: "2023-02-24T14:25:02.241342243Z"
+    created: "2023-02-24T14:39:24.032763645Z"
     description: inlets-operator for Kubernetes
     digest: ccd042328cff925f5d8d1d8dc137193e9e2af9b80088a4bd5c2a17b7dc8d5a0e
     keywords:
@@ -62,7 +83,7 @@ entries:
     version: 0.16.5
   - apiVersion: v1
     appVersion: "1.0"
-    created: "2023-02-24T14:25:02.240992911Z"
+    created: "2023-02-24T14:39:24.032549668Z"
     description: inlets-operator for Kubernetes
     digest: 7271fa8ca3f9bb3212a028ed78b3ddb4f24a94382e58a510545b8ac7dedeb805
     keywords:
@@ -81,7 +102,7 @@ entries:
     version: 0.16.4
   - apiVersion: v1
     appVersion: "1.0"
-    created: "2023-02-24T14:25:02.24065053Z"
+    created: "2023-02-24T14:39:24.03232967Z"
     description: inlets-operator for Kubernetes
     digest: 3de60918abb8d77d24a317bd64e3f16a934ebf174a20b596154f030b492f3720
     keywords:
@@ -98,7 +119,7 @@ entries:
     version: 0.16.3
   - apiVersion: v1
     appVersion: "1.0"
-    created: "2023-02-24T14:25:02.240313069Z"
+    created: "2023-02-24T14:39:24.032110763Z"
     description: inlets-operator for Kubernetes
     digest: 6a45a87f4737239fe05139e56c4e7c9ad0eff41b479f6fdea6cd44969be34d06
     keywords:
@@ -115,7 +136,7 @@ entries:
     version: 0.16.2
   - apiVersion: v1
     appVersion: "1.0"
-    created: "2023-02-24T14:25:02.239961997Z"
+    created: "2023-02-24T14:39:24.031897286Z"
     description: inlets-operator for Kubernetes
     digest: c32e84a694d64aa6b3d61e6dd83309a6e42efead1db7d3b5d6961bbfbdb305ea
     keywords:
@@ -132,7 +153,7 @@ entries:
     version: 0.16.1
   - apiVersion: v1
     appVersion: "1.0"
-    created: "2023-02-24T14:25:02.239588915Z"
+    created: "2023-02-24T14:39:24.031662828Z"
     description: inlets-operator for Kubernetes
     digest: a63355acdc185e7a319f785283589d5573e3ae1c64c6484f42a30282621562c9
     keywords:
@@ -149,7 +170,7 @@ entries:
     version: 0.16.0
   - apiVersion: v1
     appVersion: "1.0"
-    created: "2023-02-24T14:25:02.239242953Z"
+    created: "2023-02-24T14:39:24.031452141Z"
     description: inlets-operator for Kubernetes
     digest: 7a25c8006c5752f751787c0d94a6fbe54aeaee66fec53031f6f025ef09964d92
     keywords:
@@ -166,7 +187,7 @@ entries:
     version: 0.15.5
   - apiVersion: v1
     appVersion: "1.0"
-    created: "2023-02-24T14:25:02.238918502Z"
+    created: "2023-02-24T14:39:24.031266304Z"
     description: inlets-operator for Kubernetes
     digest: 7cad574062178cd384511bcbd92cc7ee43085c98390e9d45b97f26122c8f176a
     keywords:
@@ -183,7 +204,7 @@ entries:
     version: 0.15.4
   - apiVersion: v1
     appVersion: "1.0"
-    created: "2023-02-24T14:25:02.238582951Z"
+    created: "2023-02-24T14:39:24.031077128Z"
     description: inlets-operator for Kubernetes
     digest: 145fba915839a7689d93c9a1c465a98dc7a1b541554a611e2fabc52f1901a8b4
     keywords:
@@ -200,7 +221,7 @@ entries:
     version: 0.15.3
   - apiVersion: v1
     appVersion: "1.0"
-    created: "2023-02-24T14:25:02.238267471Z"
+    created: "2023-02-24T14:39:24.030875601Z"
     description: inlets-operator for Kubernetes
     digest: b351ae68ad7779e0f962fe8d050ee2a7141c14a473eaf1c9a4fcbf096d73fa49
     keywords:
@@ -217,7 +238,7 @@ entries:
     version: 0.15.2
   - apiVersion: v1
     appVersion: "1.0"
-    created: "2023-02-24T14:25:02.237913369Z"
+    created: "2023-02-24T14:39:24.030676825Z"
     description: inlets-operator for Kubernetes
     digest: 6c3fa7c56be57ae403c101f46023611e34dde6f4555a3a4e6a8b80d5d5086f77
     keywords:
@@ -234,7 +255,7 @@ entries:
     version: 0.15.1
   - apiVersion: v1
     appVersion: "1.0"
-    created: "2023-02-24T14:25:02.237608229Z"
+    created: "2023-02-24T14:39:24.030344633Z"
     description: inlets-operator for Kubernetes
     digest: c3259697782286e902f8f7754df75ddfb488e7ca1eb09f31726383a2d5655310
     keywords:
@@ -251,7 +272,7 @@ entries:
     version: 0.15.0
   - apiVersion: v1
     appVersion: "1.0"
-    created: "2023-02-24T14:25:02.237308609Z"
+    created: "2023-02-24T14:39:24.029995122Z"
     description: inlets-operator for Kubernetes
     digest: 78394df65111873bcc3f474f70df9293ef6d7bed7cbb023079bc01e4daa15391
     keywords:
@@ -268,7 +289,7 @@ entries:
     version: 0.14.6
   - apiVersion: v1
     appVersion: "1.0"
-    created: "2023-02-24T14:25:02.23704522Z"
+    created: "2023-02-24T14:39:24.029662151Z"
     description: inlets-operator for Kubernetes
     digest: 48129bcfa4601b1d25d2a1f36879d4eeee13521cb41585e0bf1044ee7dc85416
     keywords:
@@ -285,7 +306,7 @@ entries:
     version: 0.14.5
   - apiVersion: v1
     appVersion: "1.0"
-    created: "2023-02-24T14:25:02.236812733Z"
+    created: "2023-02-24T14:39:24.029299118Z"
     description: inlets-operator for Kubernetes
     digest: 2a884a81d3af113f28a4d21de12422ec6c1647c220cf639124fbeee30adc96f1
     keywords:
@@ -302,7 +323,7 @@ entries:
     version: 0.14.4
   - apiVersion: v1
     appVersion: "1.0"
-    created: "2023-02-24T14:25:02.236581555Z"
+    created: "2023-02-24T14:39:24.028902835Z"
     description: inlets-operator for Kubernetes
     digest: 6d2367b2e7728a6da38c964c78f1188d2f191fab0f3bfab6d3883e7a01a497aa
     keywords:
@@ -319,7 +340,7 @@ entries:
     version: 0.14.3
   - apiVersion: v1
     appVersion: "1.0"
-    created: "2023-02-24T14:25:02.236341467Z"
+    created: "2023-02-24T14:39:24.028483201Z"
     description: inlets-operator for Kubernetes
     digest: 3d5d981efc5e01c7ce77060e67c1a60cd93449900e8a06761ff97f9526bc6486
     keywords:
@@ -336,7 +357,7 @@ entries:
     version: 0.14.2
   - apiVersion: v1
     appVersion: "1.0"
-    created: "2023-02-24T14:25:02.236097949Z"
+    created: "2023-02-24T14:39:24.028075727Z"
     description: inlets-operator for Kubernetes
     digest: b97960003a4c4410f87d002eee17b6b3fa7a7044b7df3bd89b824e96c4cbb23d
     keywords:
@@ -353,7 +374,7 @@ entries:
     version: 0.14.1
   - apiVersion: v1
     appVersion: "1.0"
-    created: "2023-02-24T14:25:02.23583631Z"
+    created: "2023-02-24T14:39:24.027640273Z"
     description: inlets-operator for Kubernetes
     digest: c244ff2fce4f1ba8a7cfcc07a3a8cb810c3686f7d2eec43ec235f94883024b3f
     keywords:
@@ -370,7 +391,7 @@ entries:
     version: 0.13.0
   - apiVersion: v1
     appVersion: "1.0"
-    created: "2023-02-24T14:25:02.235589582Z"
+    created: "2023-02-24T14:39:24.027213098Z"
     description: inlets-operator for Kubernetes
     digest: 6447ac992fc35b16fd8635358fc2c632d4c4d783cfe5353d399eec0fb900bb6b
     keywords:
@@ -387,7 +408,7 @@ entries:
     version: 0.12.0
   - apiVersion: v1
     appVersion: "1.0"
-    created: "2023-02-24T14:25:02.235341094Z"
+    created: "2023-02-24T14:39:24.026747073Z"
     description: inlets-operator for Kubernetes
     digest: 1584720469050df7ca092b25d294c8bacbc0271f5cec85cefc914c2b2c511485
     keywords:
@@ -403,7 +424,7 @@ entries:
     version: 0.11.0
   - apiVersion: v1
     appVersion: "1.0"
-    created: "2023-02-24T14:25:02.235081825Z"
+    created: "2023-02-24T14:39:24.02636264Z"
     description: inlets-operator for Kubernetes
     digest: 21c47471c8a13896cd7f04d3b13c11e14b372861218048db484008112dae1d19
     keywords:
@@ -419,7 +440,7 @@ entries:
     version: 0.10.3
   - apiVersion: v1
     appVersion: "1.0"
-    created: "2023-02-24T14:25:02.234780905Z"
+    created: "2023-02-24T14:39:24.025954736Z"
     description: inlets-operator for Kubernetes
     digest: 2d1f90e87ee84e2c07f3960488e2333f80c013490bf18fa81273f0cebd5a106d
     keywords:
@@ -435,7 +456,7 @@ entries:
     version: 0.10.2
   - apiVersion: v1
     appVersion: "1.0"
-    created: "2023-02-24T14:25:02.233896136Z"
+    created: "2023-02-24T14:39:24.025494741Z"
     description: inlets-operator for Kubernetes
     digest: 5f6c6f8faad94057bc444b8dc2fdcdf38973dece18a1d74acf55e641d5fd3a9b
     keywords:
@@ -451,7 +472,7 @@ entries:
     version: 0.10.1
   - apiVersion: v1
     appVersion: "1.0"
-    created: "2023-02-24T14:25:02.233349228Z"
+    created: "2023-02-24T14:39:24.024316421Z"
     description: inlets-operator for Kubernetes
     digest: 09d819338e88c36fb931b42ae7ca1e811ea05d1ba239c3c302cfe4b18c71e9dd
     keywords:
@@ -467,7 +488,7 @@ entries:
     version: 0.10.0
   - apiVersion: v1
     appVersion: "1.0"
-    created: "2023-02-24T14:25:02.253292339Z"
+    created: "2023-02-24T14:39:24.043372222Z"
     description: inlets-operator for Kubernetes
     digest: 16b24260d70fef2346ddbd1b8f39228f67db4b1710048ae3f4bd4d83bc7b95e4
     keywords:
@@ -483,7 +504,7 @@ entries:
     version: 0.9.2
   - apiVersion: v1
     appVersion: "1.0"
-    created: "2023-02-24T14:25:02.252909467Z"
+    created: "2023-02-24T14:39:24.043140984Z"
     description: inlets-operator for Kubernetes
     digest: c2fa9866662f9c7ac9f0f638fafc18ae3755ff1b525b8c39c9e49be795fd2670
     keywords:
@@ -499,7 +520,7 @@ entries:
     version: 0.9.0
   - apiVersion: v1
     appVersion: "1.0"
-    created: "2023-02-24T14:25:02.252518224Z"
+    created: "2023-02-24T14:39:24.042912346Z"
     description: inlets-operator for Kubernetes
     digest: 8c3a1fd5a361b113ef8f5274fb815336f79dff785d5162070a10af2493486a2e
     keywords:
@@ -515,7 +536,7 @@ entries:
     version: 0.8.8
   - apiVersion: v1
     appVersion: "1.0"
-    created: "2023-02-24T14:25:02.25210819Z"
+    created: "2023-02-24T14:39:24.042679488Z"
     description: inlets-operator for Kubernetes
     digest: 134a1b8783f6b7676ba72cea67234c1dc1e5e94fcb81e324f047c9b4078be50d
     keywords:
@@ -531,7 +552,7 @@ entries:
     version: 0.8.7
   - apiVersion: v1
     appVersion: "1.0"
-    created: "2023-02-24T14:25:02.251682296Z"
+    created: "2023-02-24T14:39:24.04243395Z"
     description: inlets-operator for Kubernetes
     digest: 0aace0e8f0890704be927735d9f2dcafc35d1b1e28aca669183edb3f7ef2fc60
     keywords:
@@ -547,7 +568,7 @@ entries:
     version: 0.8.6
   - apiVersion: v1
     appVersion: "1.0"
-    created: "2023-02-24T14:25:02.251224631Z"
+    created: "2023-02-24T14:39:24.042182282Z"
     description: inlets-operator for Kubernetes
     digest: 395cc871ca320c78609024eeda3a6067a69f9650c06812b4c28e699fcb2a017c
     keywords:
@@ -563,7 +584,7 @@ entries:
     version: 0.8.5
   - apiVersion: v1
     appVersion: "1.0"
-    created: "2023-02-24T14:25:02.250094563Z"
+    created: "2023-02-24T14:39:24.041925073Z"
     description: inlets-operator for Kubernetes
     digest: 45f3a40d17cc7db3e082c3a4c1f633f300293d69b1519145b65d31898b77f8a4
     keywords:
@@ -579,7 +600,7 @@ entries:
     version: 0.8.4
   - apiVersion: v1
     appVersion: "1.0"
-    created: "2023-02-24T14:25:02.249800523Z"
+    created: "2023-02-24T14:39:24.041659824Z"
     description: inlets-operator for Kubernetes
     digest: b366c46a9ed045a8d234de673730e5be0d5b8c8c6e5839f9e2156f8f4fae02a8
     keywords:
@@ -595,7 +616,7 @@ entries:
     version: 0.8.3
   - apiVersion: v1
     appVersion: "1.0"
-    created: "2023-02-24T14:25:02.249509654Z"
+    created: "2023-02-24T14:39:24.041150707Z"
     description: inlets-operator for Kubernetes
     digest: 5c72ec8c577f7cb7845ca67c0313c1b15c43bc2fd94adfc55fef283d0a7c3402
     keywords:
@@ -611,7 +632,7 @@ entries:
     version: 0.8.2
   - apiVersion: v1
     appVersion: "1.0"
-    created: "2023-02-24T14:25:02.249193233Z"
+    created: "2023-02-24T14:39:24.040525486Z"
     description: inlets-operator for Kubernetes
     digest: a4e6011c1bbcf67ffc2882dea1fb90ed60239cbb13fee7c0ee0d77e6650f658f
     keywords:
@@ -627,7 +648,7 @@ entries:
     version: 0.8.1
   - apiVersion: v1
     appVersion: "1.0"
-    created: "2023-02-24T14:25:02.248887253Z"
+    created: "2023-02-24T14:39:24.04034381Z"
     description: inlets-operator for Kubernetes
     digest: be347c9293d8bf396e8170b471fc46a3c849625e079d7241c4bfea0ac88739ee
     keywords:
@@ -643,7 +664,7 @@ entries:
     version: 0.8.0
   - apiVersion: v1
     appVersion: "1.0"
-    created: "2023-02-24T14:25:02.248597154Z"
+    created: "2023-02-24T14:39:24.040154033Z"
     description: inlets-operator for Kubernetes
     digest: 37fefab755b1da45209f3678fe348a06e621ff97eb56d9bb858b5365bc8c97d0
     keywords:
@@ -659,7 +680,7 @@ entries:
     version: 0.7.6
   - apiVersion: v1
     appVersion: "1.0"
-    created: "2023-02-24T14:25:02.248307564Z"
+    created: "2023-02-24T14:39:24.039965767Z"
     description: inlets-operator for Kubernetes
     digest: 2200a1b44d1df598a3d21522ef7aecf82470ed1d7dbf9cd9ec62354487cbe6ad
     keywords:
@@ -675,7 +696,7 @@ entries:
     version: 0.7.4
   - apiVersion: v1
     appVersion: "1.0"
-    created: "2023-02-24T14:25:02.248026615Z"
+    created: "2023-02-24T14:39:24.039784121Z"
     description: inlets-operator for Kubernetes
     digest: e52c06898f87199c67af02cf4596b170222d2a2dddbf7e7e1dc664d63cfa12df
     keywords:
@@ -691,7 +712,7 @@ entries:
     version: 0.7.1
   - apiVersion: v1
     appVersion: "1.0"
-    created: "2023-02-24T14:25:02.247746025Z"
+    created: "2023-02-24T14:39:24.039602125Z"
     description: inlets-operator for Kubernetes
     digest: 89a98cab058487f455c3fc10f6975fb9eed189e9cb199404261e028fabd2388d
     keywords:
@@ -707,7 +728,7 @@ entries:
     version: 0.7.0
   - apiVersion: v1
     appVersion: "1.0"
-    created: "2023-02-24T14:25:02.247451085Z"
+    created: "2023-02-24T14:39:24.039415418Z"
     description: inlets-operator for Kubernetes
     digest: c50566511c381f3b129fcf92c0bafe146a7faf7cd6e6836997081a2d73c15980
     keywords:
@@ -723,7 +744,7 @@ entries:
     version: 0.6.7
   - apiVersion: v1
     appVersion: "1.0"
-    created: "2023-02-24T14:25:02.247171326Z"
+    created: "2023-02-24T14:39:24.039221912Z"
     description: inlets-operator for Kubernetes
     digest: 7c272d31e0ff1ce472f186b79d001f0d7625df0c6f2ea66f542ddab1a020e944
     keywords:
@@ -739,7 +760,7 @@ entries:
     version: 0.6.6
   - apiVersion: v1
     appVersion: "1.0"
-    created: "2023-02-24T14:25:02.246874116Z"
+    created: "2023-02-24T14:39:24.039021145Z"
     description: inlets-operator for Kubernetes
     digest: b42ec9e4a6cd06c8c457dbe7ab66d776d14a900ad5a6b2f5e60db11c3dc27515
     keywords:
@@ -755,7 +776,7 @@ entries:
     version: 0.6.5
   - apiVersion: v1
     appVersion: "1.0"
-    created: "2023-02-24T14:25:02.246584237Z"
+    created: "2023-02-24T14:39:24.038821478Z"
     description: inlets-operator for Kubernetes
     digest: 85f95640a50c027c5d2c23eeefd08456b67909cf9f8bd6bc6297f1cc87f4055f
     keywords:
@@ -771,7 +792,7 @@ entries:
     version: 0.6.4
   - apiVersion: v1
     appVersion: "1.0"
-    created: "2023-02-24T14:25:02.246296797Z"
+    created: "2023-02-24T14:39:24.03858132Z"
     description: inlets-operator for Kubernetes
     digest: b7597e9b0aef0cd318d7dc98f2a389071f9a30f4ac997294f052f244f0d62a86
     keywords:
@@ -787,7 +808,7 @@ entries:
     version: 0.6.3
   - apiVersion: v1
     appVersion: "1.0"
-    created: "2023-02-24T14:25:02.246008778Z"
+    created: "2023-02-24T14:39:24.03828376Z"
     description: inlets-operator for Kubernetes
     digest: beca6669c64f8fd213bd1abae2b4466ff9abf08ce5ea51bf83dd63edc90890c5
     keywords:
@@ -803,7 +824,7 @@ entries:
     version: 0.6.2
   - apiVersion: v1
     appVersion: "1.0"
-    created: "2023-02-24T14:25:02.245735169Z"
+    created: "2023-02-24T14:39:24.037954479Z"
     description: inlets-operator for Kubernetes
     digest: 50164386d93a130b0929e6991c7dbccfe54af245231456448f49b95c05b2769f
     keywords:
@@ -818,7 +839,7 @@ entries:
     version: 0.6.0
   - apiVersion: v1
     appVersion: "1.0"
-    created: "2023-02-24T14:25:02.24546546Z"
+    created: "2023-02-24T14:39:24.037662949Z"
     description: inlets-operator for Kubernetes
     digest: d0b72c6cc7cdb8b640aaaec3cd9ae3fe96bf272a2b89a9cd66cd16ea765389e5
     keywords:
@@ -833,7 +854,7 @@ entries:
     version: 0.5.6
   - apiVersion: v1
     appVersion: "1.0"
-    created: "2023-02-24T14:25:02.245198891Z"
+    created: "2023-02-24T14:39:24.03737612Z"
     description: inlets-operator for Kubernetes
     digest: 8bd54e7392e0322609f875d4c4966bfc07b2e9b5d96453d3a8a8be59d2b5f49c
     keywords:
@@ -848,7 +869,7 @@ entries:
     version: 0.5.5
   - apiVersion: v1
     appVersion: "1.0"
-    created: "2023-02-24T14:25:02.244976343Z"
+    created: "2023-02-24T14:39:24.037072779Z"
     description: inlets-operator for Kubernetes
     digest: adb5826dd120b413931769357145aaec9b3347407d709619842aa8430485da2c
     keywords:
@@ -863,7 +884,7 @@ entries:
     version: 0.5.4
   - apiVersion: v1
     appVersion: "1.0"
-    created: "2023-02-24T14:25:02.244765906Z"
+    created: "2023-02-24T14:39:24.036768089Z"
     description: inlets-operator for Kubernetes
     digest: e8b5a800affe9e11370f406a0eb1bbed3ae61b15638462430188753d1f28ca72
     keywords:
@@ -878,7 +899,7 @@ entries:
     version: 0.4.3
   - apiVersion: v1
     appVersion: "1.0"
-    created: "2023-02-24T14:25:02.244556209Z"
+    created: "2023-02-24T14:39:24.036479779Z"
     description: inlets-operator for Kubernetes
     digest: 28e65ba2d79881202b5e1b0dacfb171d0a253f0eacc3b8d6ca0c3bcb67b0bc0b
     keywords:
@@ -893,7 +914,7 @@ entries:
     version: 0.4.2
   - apiVersion: v1
     appVersion: "1.0"
-    created: "2023-02-24T14:25:02.244352433Z"
+    created: "2023-02-24T14:39:24.036176509Z"
     description: inlets-operator for Kubernetes
     digest: 8befa5dc701b64e99c984682ba05dbfffbd63970a2d4be6037360b038f65236d
     keywords:
@@ -908,7 +929,7 @@ entries:
     version: 0.4.1
   - apiVersion: v1
     appVersion: "1.0"
-    created: "2023-02-24T14:25:02.244139166Z"
+    created: "2023-02-24T14:39:24.03589272Z"
     description: inlets-operator for Kubernetes
     digest: 273cfd4c9693b2fd3afd996fffe28ce692d8dedee79945c41fec6c80e305b3f8
     keywords:
@@ -923,7 +944,7 @@ entries:
     version: 0.4.0
   - apiVersion: v1
     appVersion: "1.0"
-    created: "2023-02-24T14:25:02.243910448Z"
+    created: "2023-02-24T14:39:24.03560007Z"
     description: inlets-operator for Kubernetes
     digest: 8a310596376bc28d5a8db6266a3e81c472d38f48098bcdcbc8767148172da865
     keywords:
@@ -938,7 +959,7 @@ entries:
     version: 0.3.0
   - apiVersion: v1
     appVersion: "1.0"
-    created: "2023-02-24T14:25:02.24367147Z"
+    created: "2023-02-24T14:39:24.03529722Z"
     description: inlets-operator for Kubernetes
     digest: d791fb91ad798db18b0599667a3aeed12cfc447f6ea8927d9f615fb3cd0aaba7
     keywords:
@@ -953,7 +974,7 @@ entries:
     version: 0.2.2
   - apiVersion: v1
     appVersion: "1.0"
-    created: "2023-02-24T14:25:02.242676877Z"
+    created: "2023-02-24T14:39:24.034980479Z"
     description: inlets-operator for Kubernetes
     digest: 9efb95b737e557511d94ee2f3c51c4b5a5d814e4319c535604a71f9b0c8bbb7a
     keywords:
@@ -968,7 +989,7 @@ entries:
     version: 0.2.1
   - apiVersion: v1
     appVersion: "1.0"
-    created: "2023-02-24T14:25:02.242384837Z"
+    created: "2023-02-24T14:39:24.034553115Z"
     description: inlets-operator for Kubernetes
     digest: 852394fd543e0b079910cbf1ed57e950cb33ed966b974e3a218c1d702eb3e79f
     keywords:
@@ -983,7 +1004,7 @@ entries:
     version: 0.2.0
   - apiVersion: v1
     appVersion: "1.0"
-    created: "2023-02-24T14:25:02.232983826Z"
+    created: "2023-02-24T14:39:24.023931078Z"
     description: inlets-operator for Kubernetes
     digest: 1775dffd2c699b1028eaaf6082274f8c402ca5ecece2f87eb440623ede5a5433
     keywords:
@@ -996,4 +1017,4 @@ entries:
     urls:
     - https://inlets.github.io/inlets-operator/inlets-operator-0.1.0.tgz
     version: 0.1.0
-generated: "2023-02-24T14:25:02.2325208Z"
+generated: "2023-02-24T14:39:24.023480073Z"
