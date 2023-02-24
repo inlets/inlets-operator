@@ -13,7 +13,7 @@ If you would like to use Helm instead, read on.
 * Add the chart repo
 
   ```sh
-  helm repo add inlets https://inlets.github.io/inlets-operator/
+  helm repo add inlets https://inlets.github.io/inlets-operator/ && \
   helm repo update
   ```
 

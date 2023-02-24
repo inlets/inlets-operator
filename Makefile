@@ -3,6 +3,7 @@ TAG?=latest
 OWNER?=openfaas
 SERVER?=ghcr.io
 IMG_NAME?=inlets-operator
+VERBOSE?=false
 
 LDFLAGS := "-s -w -X github.com/inlets/inlets-operator/pkg/version.Release=$(Version) -X github.com/inlets/inlets-operator/pkg/version.SHA=$(GitCommit)"
 PLATFORM?= "linux/amd64,linux/arm/v7,linux/arm64"
@@ -79,3 +80,8 @@ charts:
 	cd chart && helm package inlets-operator/
 	mv chart/*.tgz docs/
 	helm repo index docs --url https://inlets.github.io/inlets-operator/ --merge ./docs/index.yaml
+
+.PHONY: verify-charts
+verify-charts:
+	@echo Verifying helm charts images in remote registries && \
+	arkade chart verify --verbose=$(VERBOSE) -f ./chart/inlets-operator/values.yaml
