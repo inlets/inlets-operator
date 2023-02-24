@@ -40,15 +40,11 @@ If you would like to use Helm instead, read on.
     --from-file inlets-access-key=$HOME/Downloads/do-access-token
     ```
 
-* Install the CRD:
-
-    ```sh
-    kubectl apply -f https://raw.githubusercontent.com/inlets/inlets-operator/master/artifacts/crds/operator.inlets.dev_tunnels.yaml
-    ```
-
 ## Deploy an example configuration
 
-### DigitalOcean
+Examples for each cloud are found in the [reference documentation](https://docs.inlets.dev/reference/inlets-operator/)
+
+### Deploy with DigitalOcean in London
 
 ```sh
 helm upgrade inlets-operator --install inlets/inlets-operator \
@@ -73,10 +69,6 @@ helm upgrade inlets-operator --install ./chart/inlets-operator \
   --set region=lon1 \
   -f ./chart/inlets-operator/values-ae.yaml
 ```
-
-### Other clouds
-
-See the [reference documentation](https://docs.inlets.dev/#/tools/inlets-operator?id=inlets-operator-reference-documentation)
 
 ## Chart parameters
 
