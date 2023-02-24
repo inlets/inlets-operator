@@ -18,8 +18,9 @@ spec:
         - jsonPath: .spec.serviceRef.name
           name: Service
           type: string
-        - jsonPath: .spec.clientDeployment.name
-          name: Tunnel
+        - jsonPath: .status.clientDeploymentRef.name
+          name: Client
+          priority: 1
           type: string
         - jsonPath: .status.hostStatus
           name: HostStatus
@@ -32,6 +33,11 @@ spec:
           type: string
         - jsonPath: .spec.updateServiceIP
           name: UpdateServiceIP
+          priority: 1
+          type: boolean
+        - jsonPath: .status.generated
+          name: Generated
+          priority: 1
           type: boolean
       name: v1alpha1
       schema:

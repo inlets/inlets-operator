@@ -25,11 +25,12 @@ import (
 
 // Tunnel is a specification for a Tunnel resource
 // +kubebuilder:printcolumn:name="Service",type=string,JSONPath=`.spec.serviceRef.name`
-// +kubebuilder:printcolumn:name="Tunnel",type=string,JSONPath=`.spec.clientDeployment.name`
+// +kubebuilder:printcolumn:name="Client",priority=1,type=string,JSONPath=`.status.clientDeploymentRef.name`
 // +kubebuilder:printcolumn:name="HostStatus",type=string,JSONPath=`.status.hostStatus`
 // +kubebuilder:printcolumn:name="HostIP",type=string,JSONPath=`.status.hostIP`
-// +kubebuilder:printcolumn:name="HostID",type=string,JSONPath=`.status.hostId`
-// +kubebuilder:printcolumn:name="UpdateServiceIP",type=boolean,JSONPath=`.spec.updateServiceIP`
+// +kubebuilder:printcolumn:name="HostID",priority=1,type=string,JSONPath=`.status.hostId`
+// +kubebuilder:printcolumn:name="UpdateServiceIP",priority=1,type=boolean,JSONPath=`.spec.updateServiceIP`
+// +kubebuilder:printcolumn:name="Generated",priority=1,type=boolean,JSONPath=`.status.generated`
 // +kubebuilder:subresource:status
 type Tunnel struct {
 	metav1.TypeMeta   `json:",inline"`

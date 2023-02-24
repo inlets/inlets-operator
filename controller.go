@@ -586,9 +586,6 @@ func createTunnelResource(service *corev1.Service, c *Controller) error {
 				},
 				UpdateServiceIP: true,
 			},
-			Status: inletsv1alpha1.TunnelStatus{
-				Generated: true,
-			},
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      name,
 				Namespace: service.ObjectMeta.Namespace,
@@ -603,8 +600,15 @@ func createTunnelResource(service *corev1.Service, c *Controller) error {
 		}
 
 		ops := metav1.CreateOptions{}
-		if _, err := tunnels.Create(context.Background(), tunnel, ops); err != nil {
+		created, err := tunnels.Create(context.Background(), tunnel, ops)
+		if err != nil {
 			klog.Infof("Error creating Tunnel: %s.%s", err.Error(), tunnel.Namespace)
+		}
+
+		copy := created.DeepCopy()
+		copy.Status.Generated = true
+		if _, err := tunnels.UpdateStatus(context.Background(), copy, metav1.UpdateOptions{}); err != nil {
+			klog.Infof("Error updating Tunnel status: %s.%s", err.Error(), copy.Namespace)
 		}
 
 		return nil
