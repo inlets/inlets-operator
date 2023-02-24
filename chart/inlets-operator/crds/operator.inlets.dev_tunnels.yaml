@@ -1,0 +1,122 @@
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.11.1
+  creationTimestamp: null
+  name: tunnels.operator.inlets.dev
+spec:
+  group: operator.inlets.dev
+  names:
+    kind: Tunnel
+    listKind: TunnelList
+    plural: tunnels
+    singular: tunnel
+  scope: Namespaced
+  versions:
+    - additionalPrinterColumns:
+        - jsonPath: .spec.serviceRef.name
+          name: Service
+          type: string
+        - jsonPath: .status.clientDeploymentRef.name
+          name: Client
+          priority: 1
+          type: string
+        - jsonPath: .status.hostStatus
+          name: HostStatus
+          type: string
+        - jsonPath: .status.hostIP
+          name: HostIP
+          type: string
+        - jsonPath: .status.hostId
+          name: HostID
+          type: string
+        - jsonPath: .spec.updateServiceIP
+          name: UpdateServiceIP
+          priority: 1
+          type: boolean
+        - jsonPath: .status.generated
+          name: Generated
+          priority: 1
+          type: boolean
+      name: v1alpha1
+      schema:
+        openAPIV3Schema:
+          description: Tunnel is a specification for a Tunnel resource
+          type: object
+          properties:
+            apiVersion:
+              description: 'APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+              type: string
+            kind:
+              description: 'Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+              type: string
+            metadata:
+              type: object
+            spec:
+              description: TunnelSpec is the spec for a Tunnel resource
+              type: object
+              properties:
+                authTokenRef:
+                  description: AuthToken is the secret used to authenticate the tunnel client with the remote tunnel server VM
+                  type: object
+                  properties:
+                    name:
+                      type: string
+                    namespace:
+                      type: string
+                  nullable: true
+                licenseRef:
+                  description: LicenseRef is the secret used to load the inlets-client license, and is the same for each tunnel within the cluster
+                  type: object
+                  properties:
+                    name:
+                      type: string
+                    namespace:
+                      type: string
+                  nullable: true
+                serviceRef:
+                  description: ServiceRef is the internal service to tunnel to the remote host
+                  type: object
+                  properties:
+                    name:
+                      type: string
+                    namespace:
+                      type: string
+                updateServiceIP:
+                  type: boolean
+                  nullable: true
+            status:
+              description: TunnelStatus is the status for a Tunnel resource
+              type: object
+              properties:
+                authTokenRef:
+                  description: ResourceRef references resources across namespaces
+                  type: object
+                  properties:
+                    name:
+                      type: string
+                    namespace:
+                      type: string
+                clientDeploymentRef:
+                  description: ResourceRef references resources across namespaces
+                  type: object
+                  properties:
+                    name:
+                      type: string
+                    namespace:
+                      type: string
+                  nullable: true
+                generated:
+                  description: Generated is set to true when the tunnel is created by the operator and false when a user creates the Tunnel via YAML
+                  type: boolean
+                hostIP:
+                  type: string
+                hostId:
+                  type: string
+                hostStatus:
+                  type: string
+      served: true
+      storage: true
+      subresources:
+        status: {}
