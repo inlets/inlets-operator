@@ -2,21 +2,91 @@
 
 [![Build Status](https://github.com/inlets/inlets-operator/actions/workflows/ci-only.yaml/badge.svg)](https://github.com/inlets/inlets-operator/actions/workflows/ci-only.yaml) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) [![Go Report Card](https://goreportcard.com/badge/github.com/inlets/inlets-operator)](https://goreportcard.com/report/github.com/inlets/inlets-operator) [![Documentation](https://godoc.org/github.com/inlets/inlets-operator?status.svg)](http://godoc.org/github.com/inlets/inlets-operator)
 
-Get public LoadBalancers on your local Kubernetes clusters.
+Get public TCP LoadBalancers for local Kubernetes clusters.
 
-When using a managed [Kubernetes](https://kubernetes.io/) engine, you can expose a Service as a "LoadBalancer" and your cloud provider will provision a cloud load-balancer for you, and start routing traffic to the selected service inside your cluster. In other words, you get network ingress to an internal service.
+When using a managed [Kubernetes](https://kubernetes.io/) engine, you can expose a Service as a "LoadBalancer" and your cloud provider will provision a TCP cloud load balancer for you, and start routing traffic to the selected service inside your cluster. In other words, you get ingress to an otherwise internal service.
 
-The inlets-operator brings that same experience to your local Kubernetes cluster by provisioning an exit-server on the public cloud and running an inlets server process there.
+The inlets-operator brings that same experience to your local Kubernetes cluster by provisioning a VM on the public cloud and running an [inlets server](https://inlets.dev/) process there.
+
+Within the cluster, it runs the [inlets client](https://inlets.dev/) as a Deployment, and once the two are connected, it updates the original service with the IP, just like a managed Kubernetes engine.
+
+Deleting the service or annotating it will cause the cloud VM to be deleted.
+
+See also:
+
+* [Installation](#installation)
+* [Expose an Ingress Controller or Istio](#expose-an-ingress-controller-or-istio-ingress-gateway)
+* [Helm chart](/chart/inlets-operator/)
+* [Conceptual overview](#conceptual-overview)
+
+## Change any LoadBalancer from `<pending>` to a real IP
 
 Once the inlets-operator is installed, any Service of type LoadBalancer will get an IP address, unless you exclude it with an annotation.
 
 ```bash
-kubectl expose deployment nginx-1 --port=80 --type=LoadBalancer
+kubectl run nginx-1 --image=nginx --port=80 --restart=Always
+kubectl expose pod/nginx-1 --port=80 --type=LoadBalancer
 
 $ kubectl get services -w
 NAME               TYPE        CLUSTER-IP        EXTERNAL-IP       PORT(S)   AGE
 service/nginx-1    ClusterIP   192.168.226.216   <pending>         80/TCP    78s
 service/nginx-1    ClusterIP   192.168.226.216   104.248.163.242   80/TCP    78s
+```
+
+You'll also find a Tunnel Custom Resource created for you:
+
+```bash
+$ kubectl get tunnels
+
+NAMESPACE   NAME             SERVICE   HOSTSTATUS     HOSTIP         HOSTID
+default     nginx-1-tunnel   nginx-1   provisioning                  342453649
+default     nginx-1-tunnel   nginx-1   active         178.62.64.13   342453649
+```
+
+We recommend exposing an Ingress Controller or Istio Ingress Gateway, see also: [Expose an Ingress Controller](#expose-an-ingress-controller-or-istio-ingress-gateway)
+
+## Plays well with other LoadBalancers
+
+Want to create tunnels for all LoadBalancer services, but ignore one or two?
+
+Want to disable the inlets-operator for a particular Service? Add the annotation `operator.inlets.dev/manage` with a value of `0`.
+
+```bash
+kubectl annotate service nginx-1 operator.inlets.dev/manage=0
+```
+
+Want to ignore all services, then only create Tunnels for annotated ones?
+
+Install the chart with `annotatedOnly: true`, then run:
+
+```bash
+kubectl annotate service nginx-1 operator.inlets.dev/manage=1
+```
+
+## Using IPVS for your Kubernetes networking?
+
+For IPVS, you need to declare a Tunnel Custom Resource instead of using the LoadBalancer field.
+
+```yaml
+apiVersion: operator.inlets.dev/v1alpha1
+kind: Tunnel
+metadata:
+  name: nginx-1-tunnel
+  namespace: default
+spec:
+  serviceRef:
+    name: nginx-1
+    namespace: default
+status: {}
+```
+
+You can pre-define the auth token for the tunnel if you need to:
+
+```yaml
+spec:
+  authTokenRef:
+    name: nginx-1-tunnel-token
+    namespace: default
 ```
 
 ## Who is this for?
@@ -31,74 +101,34 @@ Your cluster could be running anywhere: on your laptop, in an on-premises datace
 
 There is no need to open a firewall port, set-up port-forwarding rules, configure dynamic DNS or any of the usual hacks. You will get a public IP and it will "just work" for any TCP traffic you may have.
 
-## How is it better than other solutions?
+## How does it compare to other solutions?
 
-* There are no rate limits for your services when exposed through a self-hosted inlets tunnel
+* There are no rate limits on connections or bandwidth limits
 * You can use your own DNS
-* You can use your own IngressController
+* You can use any IngressController or an Istio Ingress Gateway
 * You can take your IP address with you - wherever you go
 
 Any Service of type `LoadBalancer` can be exposed within a few seconds.
 
 Since exit-servers are created in your preferred cloud (around a dozen are supported already), you'll only have to pay for the cost of the VM, and where possible, the cheapest plan has already been selected for you. For example with Hetzner ([coming soon](https://github.com/inlets/inlets-operator/issues/115)) that's about 3 EUR / mo, and with DigitalOcean it comes in at around 5 USD - both of these VPSes come with generous bandwidth allowances, global regions and fast network access.
 
-## Animation
+## Conceptual overview
 
-Watch an animation created by [Ivan Velichko](https://iximiuz.com/en/posts/kubernetes-operator-pattern)
+In this animation by [Ivan Velichko](https://iximiuz.com/en/posts/kubernetes-operator-pattern), you see the operator in action.
 
-![Demo GIF](https://iximiuz.com/kubernetes-operator-pattern/kube-operator-example-opt.gif)
+It detects a new Service of type LoadBalancer, provisions a VM in the cloud, and then updates the Service with the IP address of the VM.
 
-## Video walk-through
+[![Demo GIF](https://iximiuz.com/kubernetes-operator-pattern/kube-operator-example-opt.gif)](https://iximiuz.com/en/posts/kubernetes-operator-pattern)
 
-In this video walk-through Alex will guide you through creating a Kubernetes cluster on your laptop with KinD, then he'll install ingress-nginx (an IngressController), followed by cert-manager and then after the inlets-operator creates a LoadBalancer on the cloud, you'll see a TLS certificate obtained by LetsEncrypt.
+There's also a [video walk-through of exposing an Ingress Controller](https://www.youtube.com/watch?v=4wFSdNW-p4Q)
 
-[![Video demo](https://img.youtube.com/vi/4wFSdNW-p4Q/hqdefault.jpg)](https://www.youtube.com/watch?v=4wFSdNW-p4Q)
-
-[Try the step-by-step tutorial in the docs](https://docs.inlets.dev/#/get-started/quickstart-ingresscontroller-cert-manager?id=quick-start-expose-your-ingresscontroller-and-get-tls-from-letsencrypt-and-cert-manager)
-
-## inlets tunnel capabilities
-
-The operator detects Services of type LoadBalancer, and then creates a `Tunnel` Custom Resource. Its next step is to provision a small VM with a public IP on the public cloud, where it will run the inlets tunnel server. Then an inlets client is deployed as a Pod within your local cluster, which connects to the server and acts like a gateway to your chosen local service.
-
-### Powered by [inlets Pro](https://github.com/inlets/inlets-pro)
-
-* Automatic end-to-end encryption of the control-plane using PKI and TLS
-* Punch out multiple ports such as 80 and 443 over the same tunnel
-* Tunnel any TCP traffic at L4 i.e. Mongo, Postgres, MariaDB, Redis, NATS, SSH and TLS itself.
-* Tunnel an IngressController including TLS termination and LetsEncrypt certs from cert-manager
-* Commercially licensed and supported. For cloud native operators and developers.
-
-Heavily discounted [pricing available](https://inlets.dev/) for personal use.
-
-## Status and backlog
-
-Operator cloud host provisioning:
-
-- [x] Provision VMs/exit-nodes on public cloud: [Equinix-Metal](https://metal.equinix.com/), DigitalOcean, Scaleway, GCP, AWS EC2, Linode and Azure
-
-With [`inlets-pro`](https://github.com/inlets/inlets-pro) configured, you get the following additional benefits:
-
-- [x] Automatic configuration of TLS and encryption using secured websocket `wss://` for control-port
-- [x] Tunnel pure TCP traffic
-- [x] Separate data-plane (ports given by Kubernetes) and control-plane (port `8132`)
-
-Other features:
-
-- [x] Automatically update Service type LoadBalancer with a public IP
-- [x] Tunnel L4 `tcp` traffic
-- [x] In-cluster Role, Dockerfile and YAML files
-- [x] Raspberry Pi / armhf build and YAML file
-- [x] ARM64 (Graviton/Odroid/Equinix-Metal) Dockerfile/build and K8s YAML files
-- [x] Control which services get a LoadBalancer using annotations
-- [x] Garbage collect hosts when Service or CRD is deleted
-- [x] CI with Travis and automated release artifacts
-- [x] One-line installer [arkade](https://arkade.dev/) - `arkade install inlets-operator --help`
-
-## inlets-operator reference documentation for different cloud providers
+## Installation
 
 Check out the reference documentation for inlets-operator to get exit-nodes provisioned on different cloud providers [here](https://docs.inlets.dev/#/tools/inlets-operator?id=inlets-operator-reference-documentation).
 
-## Get an IP address for your IngressController and LetsEncrypt certificates
+See also: [Helm chart](/chart/inlets-operator/)
+
+### Expose an Ingress Controller or Istio Ingress Gateway
 
 Unlike other solutions, this:
 
@@ -107,123 +137,17 @@ Unlike other solutions, this:
 * Allows you to use any custom DNS you want
 * Works with LetsEncrypt
 
-Example tutorials:
+Configuring ingress:
 
-* [Setup Ingress, LetsEncrypt and a generic Node.js microservice](https://docs.inlets.dev/#/get-started/quickstart-ingresscontroller-cert-manager?id=expose-your-ingresscontroller-and-get-tls-from-letsencrypt)
-* [Setup Ingress, LetsEncrypt and OpenFaaS](https://inlets.dev/blog/2020/10/15/openfaas-public-endpoints.html)
-* [Setup Ingress, LetsEncrypt and a Docker Registry](https://blog.alexellis.io/get-a-tls-enabled-docker-registry-in-5-minutes/)
+* [Expose Ingress Nginx or another IngressController](https://docs.inlets.dev/tutorial/kubernetes-ingress/)
+* [Expose an Istio Ingress Gateway](https://docs.inlets.dev/tutorial/istio-gateway/)
+* [Expose Traefik with K3s to the Internet](https://inlets.dev/blog/2021/12/06/expose-traefik.html)
 
-## Expose a service with a LoadBalancer
+### Other use-cases
 
-The LoadBalancer type is usually provided by a cloud controller, but when that is not available, then you can use the inlets-operator to get a public IP and ingress.
-
-First create a deployment for Nginx.
-
-For Kubernetes 1.17 and lower:
-
-```bash
-kubectl run nginx-1 --image=nginx --port=80 --restart=Always
-```
-
-For 1.18 and higher:
-
-```bash
-kubectl apply -f https://raw.githubusercontent.com/inlets/inlets-operator/master/contrib/nginx-sample-deployment.yaml
-```
-
-Now create a service of type LoadBalancer via `kubectl expose`:
-
-```bash
-kubectl expose deployment nginx-1 --port=80 --type=LoadBalancer
-kubectl get svc
-
-kubectl get tunnel/nginx-1-tunnel -o yaml
-
-kubectl logs deploy/nginx-1-tunnel-client
-```
-
-Check the IP of the LoadBalancer and then access it via the Internet.
-
-## Annotations, ignoring services and running with other LoadBalancers controllers
-
-By default the operator will create a tunnel for every LoadBalancer service.
-
-There are three ways to override the behaviour:
-
-### 1) Create LoadBalancers for every service, unless annotated
-
-To ignore a service such as `traefik` type in: `kubectl annotate svc/traefik -n kube-system operator.inlets.dev/manage=false`
-
-### 2) Create LoadBalancers for only annotated services
-
-You can also set the operator to ignore the services by default and only manage them when the annotation is true with the flag `-annotated-only`
-To create a service such as `traefik` type in: `kubectl annotate svc/traefik -n kube-system operator.inlets.dev/manage=true`
-
-### 3) Create a Tunnel resource for ClusterIP services
-
-Running multiple LoadBalancers controllers together, e.g. inlets-operator and MetalLB, can have some issue as both will compete against each other when processing the service.
-
-Although the inlets-operator has the flag `-annotated-only` to filter the services, not all other LoadBalancer controller have a similar feature.
-
-In this case, the inlets-operator is still able to expose services by using a ClusterIP service with a Tunnel resource instead of a LoadBalancer service.
-
-Example:
-
-```yaml
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: nginx
-spec:
-  type: ClusterIP
-  ports:
-  - name: http
-    port: 80
-    targetPort: 80
-  selector:
-    app: nginx
----
-apiVersion: operator.inlets.dev/v1alpha1
-kind: Tunnel
-metadata:
-  name: nginx
-spec:
-  serviceName: nginx
-  auth_token: <token>
-```
-
-The public IP address of the tunnel is available in the service resource:
-
-```bash
-$ kubectl get services,tunnel
-NAME            TYPE        CLUSTER-IP        EXTERNAL-IP       PORT(S)   AGE
-service/nginx   ClusterIP   192.168.226.216   104.248.163.242   80/TCP    78s
-
-NAME                             SERVICE   TUNNEL         HOSTSTATUS   HOSTIP            HOSTID
-tunnel.operator.inlets.dev/nginx   nginx     nginx-client   active       104.248.163.242   214795742
-```
-
-or use a jsonpath to get the value:
-
-```bash
-kubectl get service nginx --output jsonpath='{.status.loadBalancer.ingress[0].ip}'
-```
-
-## Monitor/view logs
-
-The operator deployment is in the `kube-system` namespace.
-
-```sh
-kubectl logs deploy/inlets-operator -n kube-system -f
-```
-
-## Running on a Raspberry Pi
-
-Use the same commands as described in the section above.
-
-> There used to be separate deployment files in `artifacts` folder called `operator-amd64.yaml` and `operator-armhf.yaml`.
-> Since version `0.2.7` Docker images get built for multiple architectures with the same tag which means that there is now just one deployment file called `operator.yaml` that can be used on all supported architecures.
+* [Node.js microservice with Let's Encrypt](https://docs.inlets.dev/#/get-started/quickstart-ingresscontroller-cert-manager?id=expose-your-ingresscontroller-and-get-tls-from-letsencrypt)
+* [OpenFaaS with Let's Encrypt](https://inlets.dev/blog/2020/10/15/openfaas-public-endpoints.html)
+* [Docker Registry with Let's Encrypt](https://blog.alexellis.io/get-a-tls-enabled-docker-registry-in-5-minutes/)
 
 # Provider Pricing
 
@@ -244,17 +168,28 @@ These costs need to be treated as an estimate and will depend on your bandwidth 
 
 * The first f1-micro instance in a GCP Project (the default instance type for inlets-operator) is free for 720hrs(30 days) a month
 
+## Video walk-through
+
+In this video walk-through Alex will guide you through creating a Kubernetes cluster on your laptop with KinD, then he'll install ingress-nginx (an IngressController), followed by cert-manager and then after the inlets-operator creates a LoadBalancer on the cloud, you'll see a TLS certificate obtained by LetsEncrypt.
+
+[![Video demo](https://img.youtube.com/vi/4wFSdNW-p4Q/hqdefault.jpg)](https://www.youtube.com/watch?v=4wFSdNW-p4Q)
+
+Tutorial: [Tutorial: Expose a local IngressController with the inlets-operator](https://docs.inlets.dev/tutorial/kubernetes-ingress/)
+
 ## Contributing
 
 Contributions are welcome, see the [CONTRIBUTING.md](CONTRIBUTING.md) guide.
 
-## Similar projects / products and alternatives
+## Also in this space
 
-- [inlets-pro](https://github.com/inlets/inlets-pro) - L7 HTTP / L4 TCP tunnel which can tunnel any TCP traffic. Secure by default with built-in TLS encryption. Kubernetes-ready with Operator, helm chart, container images and YAML manifests.
-- [metallb](https://github.com/danderson/metallb) - open source LoadBalancer for private Kubernetes clusters, no tunnelling.
-- [Cloudflare Argo](https://www.cloudflare.com/en-gb/products/argo-tunnel/) - paid SaaS product from Cloudflare for Cloudflare customers and domains - K8s integration available through Cloudflare DNS and ingress controller
-- [ngrok](https://ngrok.com) - a free SasS tunnel service tool, restarts every 7 hours, limits connections per minute, SaaS-only, no K8s integration available, TCP tunnels can only use high/unconventional ports
+- [inlets](https://inlets.dev) - L7 HTTP / L4 TCP tunnel which can tunnel any TCP traffic. Secure by default with built-in TLS encryption. Kubernetes-ready with Operator, helm chart, container images and YAML manifests
+- [MetalLB](https://github.com/metallb/metallb) - a LoadBalancer for private Kubernetes clusters, cannot expose services publicly
+- [kube-vip](https://kube-vip.io/) - a more modern Kubernetes LoadBalancer than MetalLB, cannot expose services publicly
+- [Cloudflare Argo](https://www.cloudflare.com/en-gb/products/argo-tunnel/) - product from Cloudflare for Cloudflare customers and domains - K8s integration available through Cloudflare DNS and ingress controller. Not for use with custom Ingress Controllers
+- [ngrok](https://ngrok.com) - a SasS tunnel service tool, restarts every 7 hours, limits connections per minute, SaaS-only, no K8s integration available, TCP tunnels can only use high/unconventional ports, can't be used with Ingress Controllers
+- [Wireguard](https://www.wireguard.com/) - a modern VPN, not for exposing services publicly
+- [Tailscale](https://tailscale.com/) - a mesh VPN that automates Wireguard, not for exposing services publicly
 
 ## Author / vendor
 
-inlets and the inlets-operator are brought to you by [OpenFaaS Ltd](https://www.openfaas.com) and [Alex Ellis](https://www.alexellis.io/).
+inlets and the inlets-operator are brought to you by [OpenFaaS Ltd](https://www.openfaas.com).

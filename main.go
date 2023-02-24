@@ -66,7 +66,7 @@ func main() {
 
 	flag.StringVar(&infra.Plan, "plan", "", "Plan code for cloud host")
 
-	flag.BoolVar(&infra.AnnotatedOnly, "annotated-only", false, "Only create a tunnel for annotated services. Annotate with operator.inlets.dev/manage=true.")
+	flag.BoolVar(&infra.AnnotatedOnly, "annotated-only", false, "Only create a tunnel for annotated services. Annotate with operator.inlets.dev/manage=1.")
 
 	flag.Parse()
 	log.Printf("Inlets Operator version: %s SHA: %s\n", version.Release, version.SHA)
