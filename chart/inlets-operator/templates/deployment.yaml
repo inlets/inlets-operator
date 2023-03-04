@@ -33,7 +33,7 @@ spec:
         - "-zone={{.Values.zone}}"
         - "-region={{.Values.region}}"
         - "-access-key-file={{.Values.accessKeyFile}}"
-        - "-license-file=/var/secrets/inlets/license/license"
+        - "-license-file=/var/secrets/inlets-license/license"
         - "-project-id={{.Values.projectID}}"
         {{- if .Values.vpcId }}
         - "-vpc-id={{.Values.vpcId}}"
@@ -65,7 +65,7 @@ spec:
         - name: client_image
           value: "{{.Values.clientImage}}"
         volumeMounts:
-        - mountPath: /var/secrets/inlets/license/
+        - mountPath: /var/secrets/inlets-license/
           name: inlets-license
           readOnly: true
         - mountPath: /var/secrets/inlets/
