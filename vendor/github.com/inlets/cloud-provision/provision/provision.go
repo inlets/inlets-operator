@@ -33,6 +33,7 @@ type HostDeleteRequest struct {
 	IP        string
 	ProjectID string
 	Zone      string
+	Region    string
 }
 
 // ListFilter is used to filter results to return only exit nodes
@@ -40,4 +41,5 @@ type ListFilter struct {
 	Filter    string
 	ProjectID string
 	Zone      string
+	Region    string
 }

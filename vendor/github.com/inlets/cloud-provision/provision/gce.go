@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"strings"
+	"time"
 
 	"google.golang.org/api/compute/v1"
 	"google.golang.org/api/option"
@@ -29,9 +30,42 @@ func NewGCEProvisioner(accessKey string) (*GCEProvisioner, error) {
 // Provision provisions a new GCE instance as an exit node
 func (p *GCEProvisioner) Provision(host BasicHost) (*ProvisionedHost, error) {
 
-	err := p.createInletsFirewallRule(host.Additional["projectid"], host.Additional["firewall-name"], host.Additional["firewall-port"], host.Additional["pro"])
-	if err != nil {
-		return nil, err
+	if host.Region == "" {
+		return nil, fmt.Errorf("region is required")
+	}
+
+	projectID := host.Additional["projectid"]
+
+	if err := p.createInletsFirewallRule(host.Additional["projectid"], host.Additional["firewall-name"], host.Additional["firewall-port"], host.Additional["pro"]); err != nil {
+		return nil, fmt.Errorf("unable to create firewall rule in project: %s error: %w",
+			host.Additional["projectid"], err)
+	}
+
+	addr := compute.Address{
+		AddressType: "EXTERNAL",
+		Description: "Static IP for inlets tunnel server",
+		NetworkTier: "PREMIUM",
+		Name:        host.Name,
+	}
+
+	if _, err := p.gceProvisioner.Addresses.Insert(projectID, host.Region, &addr).Do(); err != nil {
+		return nil, fmt.Errorf("unable to insert new IP external address %w", err)
+	}
+
+	var ipAddress string
+	for i := 0; i < 20; i++ {
+		log.Printf("GCE checking if IP is ready %d/10", i+1)
+		ip, err := p.gceProvisioner.Addresses.Get(projectID, host.Region, host.Name).Do()
+		if err != nil {
+			return nil, fmt.Errorf("unable to get named IP address %s, error: %w", host.Name, err)
+		}
+
+		if ip.Address != "" {
+			ipAddress = ip.Address
+			log.Printf("GCE reserved static IP address: %s", ipAddress)
+			break
+		}
+		time.Sleep(100 * time.Millisecond)
 	}
 
 	// instance auto restart on failure
@@ -50,10 +84,11 @@ func (p *GCEProvisioner) Provision(host BasicHost) (*ProvisionedHost, error) {
 
 	instance := &compute.Instance{
 		Name:         host.Name,
-		Description:  "Exit node created by inlets-operator",
+		Description:  "Tunnel server for inlets",
 		MachineType:  fmt.Sprintf("zones/%s/machineTypes/%s", host.Additional["zone"], host.Plan),
 		CanIpForward: true,
-		Zone:         fmt.Sprintf("projects/%s/zones/%s", host.Additional["projectid"], host.Additional["zone"]),
+
+		Zone: fmt.Sprintf("projects/%s/zones/%s", host.Additional["projectid"], host.Additional["zone"]),
 		Disks: []*compute.AttachedDisk{
 			{
 				AutoDelete: true,
@@ -95,8 +130,9 @@ func (p *GCEProvisioner) Provision(host BasicHost) (*ProvisionedHost, error) {
 			{
 				AccessConfigs: []*compute.AccessConfig{
 					{
-						Type: "ONE_TO_ONE_NAT",
-						Name: "External NAT",
+						Type:  "ONE_TO_ONE_NAT",
+						Name:  "External NAT",
+						NatIP: ipAddress,
 					},
 				},
 				Network: "global/networks/default",
@@ -119,7 +155,10 @@ func (p *GCEProvisioner) Provision(host BasicHost) (*ProvisionedHost, error) {
 	}
 
 	return &ProvisionedHost{
-		ID:     toGCEID(host.Name, host.Additional["zone"], host.Additional["projectid"]),
+		ID: toGCEID(host.Name,
+			host.Additional["zone"],
+			host.Additional["projectid"],
+			host.Region),
 		Status: "provisioning",
 	}, nil
 }
@@ -191,10 +230,10 @@ func (p *GCEProvisioner) createInletsFirewallRule(projectID string, firewallRule
 
 // Delete deletes the GCE exit node
 func (p *GCEProvisioner) Delete(request HostDeleteRequest) error {
-	var instanceName, projectID, zone string
+	var instanceName, region, projectID, zone string
 	var err error
 	if len(request.ID) > 0 {
-		instanceName, zone, projectID, err = getGCEFieldsFromID(request.ID)
+		instanceName, zone, projectID, region, err = getGCEFieldsFromID(request.ID)
 		if err != nil {
 			return err
 		}
@@ -203,7 +242,7 @@ func (p *GCEProvisioner) Delete(request HostDeleteRequest) error {
 		if err != nil {
 			return err
 		}
-		instanceName, zone, projectID, err = getGCEFieldsFromID(inletsID)
+		instanceName, zone, projectID, region, err = getGCEFieldsFromID(inletsID)
 		if err != nil {
 			return err
 		}
@@ -217,7 +256,14 @@ func (p *GCEProvisioner) Delete(request HostDeleteRequest) error {
 		zone = request.Zone
 	}
 
-	log.Printf("Deleting GCE host: %s, %s, %s\n", projectID, zone, instanceName)
+	if ip, err := p.gceProvisioner.Addresses.Get(projectID, region, instanceName).Do(); err == nil && ip.Address != "" {
+		log.Printf("GCE Deleting reserved IP address for: %s project: %s in: %s\n", instanceName, projectID, region)
+		if _, err = p.gceProvisioner.Addresses.Delete(projectID, region, instanceName).Do(); err != nil {
+			log.Printf("Unable to delete reserved IP address: %v", err)
+		}
+	}
+
+	log.Printf("GCE Deleting host: %s in project: %s, zone: %s\n", instanceName, projectID, zone)
 
 	_, err = p.gceProvisioner.Instances.Delete(projectID, zone, instanceName).Do()
 	if err != nil {
@@ -228,7 +274,7 @@ func (p *GCEProvisioner) Delete(request HostDeleteRequest) error {
 
 // Status checks the status of the provisioning GCE exit node
 func (p *GCEProvisioner) Status(id string) (*ProvisionedHost, error) {
-	instanceName, zone, projectID, err := getGCEFieldsFromID(id)
+	instanceName, zone, projectID, region, err := getGCEFieldsFromID(id)
 	if err != nil {
 		return nil, fmt.Errorf("could not get custom GCE fields: %v", err)
 	}
@@ -247,7 +293,7 @@ func (p *GCEProvisioner) Status(id string) (*ProvisionedHost, error) {
 
 	return &ProvisionedHost{
 		IP:     ip,
-		ID:     toGCEID(instanceName, zone, projectID),
+		ID:     toGCEID(instanceName, zone, projectID, region),
 		Status: status,
 	}, nil
 }
@@ -262,23 +308,24 @@ func gceToInletsStatus(gce string) string {
 
 // toGCEID creates an ID for GCE based upon the instance ID,
 // zone, and projectID fields
-func toGCEID(instanceName, zone, projectID string) (id string) {
-	return fmt.Sprintf("%s|%s|%s", instanceName, zone, projectID)
+func toGCEID(instanceName, zone, projectID, region string) (id string) {
+	return fmt.Sprintf("%s|%s|%s|%s", instanceName, zone, projectID, region)
 }
 
 // get some required fields from the custom GCE instance ID
-func getGCEFieldsFromID(id string) (instanceName, zone, projectID string, err error) {
+func getGCEFieldsFromID(id string) (instanceName, zone, projectID, region string, err error) {
 	fields := strings.Split(id, "|")
 	err = nil
-	if len(fields) == 3 {
+	if len(fields) == 4 {
 		instanceName = fields[0]
 		zone = fields[1]
 		projectID = fields[2]
+		region = fields[3]
 	} else {
 		err = fmt.Errorf("could not get fields from custom ID: fields: %v", fields)
-		return "", "", "", err
+		return "", "", "", "", err
 	}
-	return instanceName, zone, projectID, nil
+	return instanceName, zone, projectID, region, nil
 }
 
 // List returns a list of exit nodes
@@ -302,7 +349,7 @@ func (p *GCEProvisioner) List(filter ListFilter) ([]*ProvisionedHost, error) {
 			}
 			host := &ProvisionedHost{
 				IP:     instance.NetworkInterfaces[0].AccessConfigs[0].NatIP,
-				ID:     toGCEID(instance.Name, filter.Zone, filter.ProjectID),
+				ID:     toGCEID(instance.Name, filter.Zone, filter.ProjectID, filter.Region),
 				Status: status,
 			}
 			inlets = append(inlets, host)
@@ -319,6 +366,7 @@ func (p *GCEProvisioner) lookupID(request HostDeleteRequest) (string, error) {
 		Filter:    "labels.inlets=exit-node",
 		ProjectID: request.ProjectID,
 		Zone:      request.Zone,
+		Region:    request.Region,
 	})
 	if err != nil {
 		return "", err

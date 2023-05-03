@@ -4,7 +4,7 @@ go 1.19
 
 require (
 	github.com/google/go-cmp v0.5.9
-	github.com/inlets/cloud-provision v0.6.4
+	github.com/inlets/cloud-provision v0.6.5
 	github.com/sethvargo/go-password v0.2.0
 	k8s.io/api v0.26.1
 	k8s.io/apimachinery v0.26.1

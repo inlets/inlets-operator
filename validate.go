@@ -23,6 +23,9 @@ func validateFlags(c InfraConfig) error {
 		if len(c.Zone) == 0 {
 			return fmt.Errorf("zone required for provider: %s", c.Provider)
 		}
+		if len(c.Region) == 0 {
+			return fmt.Errorf("region required for provider: %s", c.Provider)
+		}
 	}
 	if c.Provider == "azure" {
 		if len(c.SubscriptionID) == 0 {

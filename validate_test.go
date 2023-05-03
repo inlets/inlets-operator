@@ -66,6 +66,20 @@ func Test_validateFlags_GCE_Zone(t *testing.T) {
 	}
 }
 
+func Test_validateFlags_GCE_Region(t *testing.T) {
+	c := InfraConfig{
+		Provider:  "gce",
+		Zone:      "Zone",
+		ProjectID: "my-project",
+		Region:    "",
+	}
+	err := validateFlags(c)
+	want := "region required for provider: gce"
+	if err.Error() != want {
+		t.Errorf("expected error: %s, got: %s", want, err)
+	}
+}
+
 func Test_validateFlags_GCE_ProjectID(t *testing.T) {
 	c := InfraConfig{
 		Provider:  "gce",

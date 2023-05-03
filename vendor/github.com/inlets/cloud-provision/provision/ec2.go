@@ -39,14 +39,22 @@ func (p *EC2Provisioner) Provision(host BasicHost) (*ProvisionedHost, error) {
 	if err != nil {
 		return nil, err
 	}
-	pro := host.Additional["pro"]
+
+	proV := host.Additional["pro"]
+
+	proPorts, _ := strconv.ParseBool(proV)
 
 	ports := host.Additional["ports"]
+
+	extraPorts, err := parsePorts(ports)
+	if err != nil {
+		return nil, err
+	}
 
 	var vpcID = host.Additional["vpc-id"]
 	var subnetID = host.Additional["subnet-id"]
 
-	groupID, name, err := p.createEC2SecurityGroup(vpcID, port, pro, ports)
+	groupID, name, err := p.createEC2SecurityGroup(vpcID, port, proPorts, extraPorts)
 	if err != nil {
 		return nil, err
 	}
@@ -251,19 +259,14 @@ func (p *EC2Provisioner) lookupID(request HostDeleteRequest) (string, error) {
 }
 
 // createEC2SecurityGroup creates a security group for the exit-node
-func (p *EC2Provisioner) createEC2SecurityGroup(vpcID string, controlPort int, pro, extraPorts string) (*string, *string, error) {
+func (p *EC2Provisioner) createEC2SecurityGroup(vpcID string, controlPort int, openHighPorts bool, extraPorts []int) (*string, *string, error) {
 	ports := []int{controlPort}
 
-	proPortRange := []int{1024, 65535}
+	highPortRange := []int{1024, 65535}
 
 	if len(extraPorts) > 0 {
-		extraPorts, err := parsePorts(extraPorts)
-		if err != nil {
-			return nil, nil, err
-		}
-		ports = append(ports, extraPorts...)
-
-		proPortRange = []int{}
+		// disable high port range if extra ports are specified
+		highPortRange = []int{}
 	}
 
 	groupName := "inlets-" + uuid.New().String()
@@ -282,14 +285,14 @@ func (p *EC2Provisioner) createEC2SecurityGroup(vpcID string, controlPort int, p
 	}
 
 	for _, port := range ports {
-		err = p.createEC2SecurityGroupRule(*group.GroupId, port, port)
-		if err != nil {
-			return group.GroupId, &groupName, err
+		if err = p.createEC2SecurityGroupRule(*group.GroupId, port, port); err != nil {
+			return group.GroupId, &groupName,
+				fmt.Errorf("failed to create security group on %s with port %d: %w", *group.GroupId, port, err)
 		}
 	}
 
-	if pro == "true" && len(proPortRange) == 2 {
-		err = p.createEC2SecurityGroupRule(*group.GroupId, proPortRange[0], proPortRange[1])
+	if openHighPorts && len(highPortRange) == 2 {
+		err = p.createEC2SecurityGroupRule(*group.GroupId, highPortRange[0], highPortRange[1])
 		if err != nil {
 			return group.GroupId, &groupName, err
 		}
@@ -300,6 +303,7 @@ func (p *EC2Provisioner) createEC2SecurityGroup(vpcID string, controlPort int, p
 
 func parsePorts(extraPorts string) ([]int, error) {
 	var ports []int
+
 	parts := strings.Split(extraPorts, ",")
 	for _, part := range parts {
 		if trimmed := strings.TrimSpace(part); len(trimmed) > 0 {

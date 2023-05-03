@@ -222,6 +222,8 @@ github.com/inlets/cloud-provision v0.6.3 h1:Ldr+80yuLqthgGbGgLBEtq0Vl3EfTLBipTFu
 github.com/inlets/cloud-provision v0.6.3/go.mod h1:zK0cG+FIZuKHyxx0PwBim5qM1AApAxmZfCExZa3VVqc=
 github.com/inlets/cloud-provision v0.6.4 h1:mL87c9CUBFapLd+zBxV7WOfqgDvjZUY1Egfn9p14xqc=
 github.com/inlets/cloud-provision v0.6.4/go.mod h1:zK0cG+FIZuKHyxx0PwBim5qM1AApAxmZfCExZa3VVqc=
+github.com/inlets/cloud-provision v0.6.5 h1:IOzdBguO+QkqO3uEwyv1bNBHyI7EhyEJr5B3br7Q4eA=
+github.com/inlets/cloud-provision v0.6.5/go.mod h1:zK0cG+FIZuKHyxx0PwBim5qM1AApAxmZfCExZa3VVqc=
 github.com/jmespath/go-jmespath v0.4.0 h1:BEgLn5cpjn8UN1mAw4NjwDrS35OdebyEtFe+9YPoQUg=
 github.com/jmespath/go-jmespath v0.4.0/go.mod h1:T8mJZnbsbmF+m6zOOFylbeCJqk5+pHWvzYPziyZiYoo=
 github.com/jmespath/go-jmespath/internal/testify v1.5.1 h1:shLQSRRSCCPj3f2gpwzGwWFoC7ycTf1rcQZHOlsJ6N8=
