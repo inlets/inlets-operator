@@ -397,6 +397,18 @@ func (c *Controller) syncHandler(key string) error {
 			return err
 		}
 
+		if tunnel.Spec.ServiceRef == nil {
+			return fmt.Errorf("tunnel %s.%s has no service reference", tunnel.Name, tunnel.Namespace)
+		}
+
+		if service == nil {
+			svc, err := c.serviceLister.Services(tunnel.Namespace).Get(tunnel.Spec.ServiceRef.Name)
+			if err != nil {
+				return fmt.Errorf("error getting service: %s", err)
+			}
+			service = svc
+		}
+
 		start := time.Now()
 		hostConfig, err := getHostConfig(c,
 			tunnel,
@@ -645,6 +657,7 @@ func createClientDeployment(tunnel *inletsv1alpha1.Tunnel, c *Controller) error 
 	licenseKey, _ := c.infraConfig.ProConfig.GetLicenseKey()
 
 	ports := getPortsString(service)
+
 	client := makeClientDeployment(tunnel,
 		c.infraConfig.GetInletsClientImage(),
 		ports,
@@ -789,17 +802,11 @@ func getHostConfig(c *Controller, tunnel *inletsv1alpha1.Tunnel, service *corev1
 
 	case "ec2":
 
-		ports := []string{}
-
-		if service != nil {
-			for _, port := range service.Spec.Ports {
-				ports = append(ports, fmt.Sprintf("%d", port.Port))
-			}
-		}
+		ports := getPortsString(service)
 
 		var additional = map[string]string{
 			"inlets-port": strconv.Itoa(inletsPort),
-			"ports":       strings.Join(ports, ","),
+			"ports":       ports,
 		}
 
 		if len(c.infraConfig.VpcID) > 0 {
@@ -1217,9 +1224,14 @@ func manageService(controller Controller, service corev1.Service) bool {
 }
 
 func getPortsString(service *corev1.Service) string {
+	if service == nil {
+		return ""
+	}
+
 	ports := ""
 	for _, p := range service.Spec.Ports {
 		ports = ports + fmt.Sprintf("%d,", p.Port)
 	}
+
 	return strings.TrimRight(ports, ",")
 }
