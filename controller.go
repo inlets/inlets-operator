@@ -400,6 +400,7 @@ func (c *Controller) syncHandler(key string) error {
 		start := time.Now()
 		hostConfig, err := getHostConfig(c,
 			tunnel,
+			service,
 			c.infraConfig.Plan,
 			c.infraConfig.GetInletsRelease())
 		if err != nil {
@@ -723,7 +724,7 @@ func updateClientDeploymentRef(tunnel *inletsv1alpha1.Tunnel, c *Controller) err
 	return nil
 }
 
-func getHostConfig(c *Controller, tunnel *inletsv1alpha1.Tunnel, planOverride, inletsVersion string) (provision.BasicHost, error) {
+func getHostConfig(c *Controller, tunnel *inletsv1alpha1.Tunnel, service *corev1.Service, planOverride, inletsVersion string) (provision.BasicHost, error) {
 
 	tokenValue, err := getSecretValue(c, tunnel)
 	if err != nil {
@@ -787,8 +788,18 @@ func getHostConfig(c *Controller, tunnel *inletsv1alpha1.Tunnel, planOverride, i
 		}
 
 	case "ec2":
+
+		ports := []string{}
+
+		if service != nil {
+			for _, port := range service.Spec.Ports {
+				ports = append(ports, fmt.Sprintf("%d", port.Port))
+			}
+		}
+
 		var additional = map[string]string{
 			"inlets-port": strconv.Itoa(inletsPort),
+			"ports":       strings.Join(ports, ","),
 		}
 
 		if len(c.infraConfig.VpcID) > 0 {
