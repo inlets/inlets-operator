@@ -153,8 +153,12 @@ func NewController(
 				klog.Infof("Deleting tunnel server for: %s.%s, HostID: %s, IP: %s",
 					r.Name, r.Namespace, r.Status.HostID, r.Status.HostIP)
 
-				delReq := provision.HostDeleteRequest{ID: r.Status.HostID, IP: r.Status.HostIP}
-				if err := provisioner.Delete(delReq); err != nil {
+				if err := provisioner.Delete(provision.HostDeleteRequest{
+					ID:     r.Status.HostID,
+					IP:     r.Status.HostIP,
+					Region: infra.Region,
+					Zone:   infra.Zone,
+				}); err != nil {
 					klog.Infof("Error deleting tunnel server %s", err)
 					return
 				}
