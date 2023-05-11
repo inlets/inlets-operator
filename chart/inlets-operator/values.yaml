@@ -45,8 +45,8 @@ image: "ghcr.io/inlets/inlets-operator:0.17.2"
 pullPolicy: "IfNotPresent"
 
 # These should match
-inletsClientImage: "ghcr.io/inlets/inlets-pro:0.9.14"
-inletsRelease: "0.9.14"
+inletsClientImage: "ghcr.io/inlets/inlets-pro:0.9.19"
+inletsRelease: "0.9.19"
 
 nameOverride: ""
 fullnameOverride: ""
@@ -55,6 +55,9 @@ resources:
   requests:
     cpu: 100m
     memory: 128Mi
+
+# Set a maximum memory limit for the inlets client Deployments
+maxClientMemory: 128Mi
 
 nodeSelector: {}
 tolerations: []

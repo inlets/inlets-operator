@@ -59,6 +59,9 @@ spec:
         {{- if .Values.plan }}
         - "-plan={{.Values.plan}}"
         {{- end }}
+        {{- if .Values.maxClientMemory }}
+        - "-max-client-memory={{.Values.maxClientMemory}}"
+        {{- end }}
         resources:
           {{- toYaml .Values.resources | nindent 12 }}
         env:
