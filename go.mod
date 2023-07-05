@@ -14,7 +14,7 @@ require (
 )
 
 require (
-	cloud.google.com/go/compute v1.14.0 // indirect
+	cloud.google.com/go/compute v1.15.1 // indirect
 	cloud.google.com/go/compute/metadata v0.2.3 // indirect
 	github.com/Azure/azure-sdk-for-go/sdk/azcore v1.1.3 // indirect
 	github.com/Azure/azure-sdk-for-go/sdk/azidentity v1.1.0 // indirect
@@ -25,7 +25,7 @@ require (
 	github.com/AzureAD/microsoft-authentication-library-for-go v0.5.1 // indirect
 	github.com/aws/aws-sdk-go v1.44.191 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
-	github.com/cespare/xxhash/v2 v2.1.2 // indirect
+	github.com/cespare/xxhash/v2 v2.2.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/digitalocean/godo v1.95.0 // indirect
 	github.com/dimchansky/utfbom v1.1.1 // indirect
@@ -85,8 +85,8 @@ require (
 	golang.org/x/tools v0.8.0 // indirect
 	google.golang.org/api v0.109.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
-	google.golang.org/genproto v0.0.0-20221227171554-f9683d7f8bef // indirect
-	google.golang.org/grpc v1.51.0 // indirect
+	google.golang.org/genproto v0.0.0-20230110181048-76db0878b65f // indirect
+	google.golang.org/grpc v1.53.0 // indirect
 	google.golang.org/protobuf v1.28.1 // indirect
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	gopkg.in/ini.v1 v1.66.6 // indirect
