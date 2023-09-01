@@ -14,7 +14,7 @@ jobs:
       group: ${{ github.ref }}
       cancel-in-progress: true
 
-    runs-on: ubuntu-latest
+    runs-on: actuated
     steps:
       - uses: actions/checkout@master
         with:
