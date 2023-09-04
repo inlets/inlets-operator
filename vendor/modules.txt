@@ -218,7 +218,7 @@ github.com/hetznercloud/hcloud-go/hcloud/schema
 # github.com/imdario/mergo v0.3.6
 ## explicit
 github.com/imdario/mergo
-# github.com/inlets/cloud-provision v0.6.5
+# github.com/inlets/cloud-provision v0.6.8
 ## explicit; go 1.18
 github.com/inlets/cloud-provision/provision
 # github.com/jmespath/go-jmespath v0.4.0
