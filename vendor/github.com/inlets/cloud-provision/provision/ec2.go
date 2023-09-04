@@ -34,17 +34,15 @@ func (p *EC2Provisioner) Provision(host BasicHost) (*ProvisionedHost, error) {
 	if err != nil {
 		return nil, err
 	}
+	controlPort := 8123
 
-	port, err := strconv.Atoi(host.Additional["inlets-port"])
-	if err != nil {
-		return nil, err
-	}
+	openHighPortsV := host.Additional["pro"]
 
-	proV := host.Additional["pro"]
-
-	proPorts, _ := strconv.ParseBool(proV)
+	openHighPorts, _ := strconv.ParseBool(openHighPortsV)
 
 	ports := host.Additional["ports"]
+
+	keyName := host.Additional["key-name"]
 
 	extraPorts, err := parsePorts(ports)
 	if err != nil {
@@ -54,7 +52,7 @@ func (p *EC2Provisioner) Provision(host BasicHost) (*ProvisionedHost, error) {
 	var vpcID = host.Additional["vpc-id"]
 	var subnetID = host.Additional["subnet-id"]
 
-	groupID, name, err := p.createEC2SecurityGroup(vpcID, port, proPorts, extraPorts)
+	groupID, name, err := p.createEC2SecurityGroup(vpcID, controlPort, openHighPorts, extraPorts)
 	if err != nil {
 		return nil, err
 	}
@@ -69,8 +67,7 @@ func (p *EC2Provisioner) Provision(host BasicHost) (*ProvisionedHost, error) {
 	if len(subnetID) > 0 {
 		networkSpec.SubnetId = aws.String(subnetID)
 	}
-
-	runResult, err := p.ec2Provisioner.RunInstances(&ec2.RunInstancesInput{
+	runInput := &ec2.RunInstancesInput{
 		ImageId:      image,
 		InstanceType: aws.String(host.Plan),
 		MinCount:     aws.Int64(1),
@@ -79,7 +76,13 @@ func (p *EC2Provisioner) Provision(host BasicHost) (*ProvisionedHost, error) {
 		NetworkInterfaces: []*ec2.InstanceNetworkInterfaceSpecification{
 			&networkSpec,
 		},
-	})
+	}
+
+	if len(keyName) > 0 {
+		runInput.KeyName = aws.String(keyName)
+	}
+
+	runResult, err := p.ec2Provisioner.RunInstances(runInput)
 	if err != nil {
 		// clean up SG if there was an issue provisioning the EC2 instance
 		input := ec2.DeleteSecurityGroupInput{
@@ -267,6 +270,8 @@ func (p *EC2Provisioner) createEC2SecurityGroup(vpcID string, controlPort int, o
 	if len(extraPorts) > 0 {
 		// disable high port range if extra ports are specified
 		highPortRange = []int{}
+
+		ports = append(ports, extraPorts...)
 	}
 
 	groupName := "inlets-" + uuid.New().String()
