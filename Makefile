@@ -76,12 +76,16 @@ verify-codegen: ${CODEGEN_PKG}
 update-codegen: ${CODEGEN_PKG}
 	./hack/update-codegen.sh
 
-charts:
+.PHONY: charts
+charts: verify-chart package-charts
+
+.PHONY: package-charts
+package-charts:
 	cd chart && helm package inlets-operator/
 	mv chart/*.tgz docs/
 	helm repo index docs --url https://inlets.github.io/inlets-operator/ --merge ./docs/index.yaml
 
-.PHONY: verify-charts
-verify-charts:
-	@echo Verifying helm charts images in remote registries && \
+.PHONY: verify-chart
+verify-chart:
+	@echo Verifying helm chart images in remote registries && \
 	arkade chart verify --verbose=$(VERBOSE) -f ./chart/inlets-operator/values.yaml
