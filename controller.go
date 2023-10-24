@@ -770,7 +770,7 @@ func getHostConfig(c *Controller, tunnel *inletsv1alpha1.Tunnel, service *corev1
 	case "digitalocean":
 		host = provision.BasicHost{
 			Name:       tunnel.Name,
-			OS:         "ubuntu-18-04-x64",
+			OS:         "ubuntu-22-04-x64",
 			Plan:       "s-1vcpu-1gb",
 			Region:     c.infraConfig.Region,
 			UserData:   userData,
