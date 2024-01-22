@@ -17,7 +17,7 @@ jobs:
       repository-projects: read
       statuses: read
 
-    runs-on: actuated
+    runs-on: actuated-8cpu-12gb
     steps:
       - uses: actions/checkout@master
         with:
