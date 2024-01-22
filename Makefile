@@ -89,3 +89,8 @@ package-charts:
 verify-chart:
 	@echo Verifying helm chart images in remote registries && \
 	arkade chart verify --verbose=$(VERBOSE) -f ./chart/inlets-operator/values.yaml
+
+.PHONY: upgrade-chart
+upgrade-chart:
+	@echo Upgrading helm chart images && \
+	arkade chart upgrade --verbose=$(VERBOSE) -f ./chart/inlets-operator/values.yaml -w
