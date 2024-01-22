@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"net/url"
 )
 
 type GrantPermissionLevel string
@@ -15,8 +16,8 @@ const (
 
 type GlobalUserGrants struct {
 	AccountAccess        *GrantPermissionLevel `json:"account_access"`
-	AddDomains           bool                  `json:"add_domains"`
 	AddDatabases         bool                  `json:"add_databases"`
+	AddDomains           bool                  `json:"add_domains"`
 	AddFirewalls         bool                  `json:"add_firewalls"`
 	AddImages            bool                  `json:"add_images"`
 	AddLinodes           bool                  `json:"add_linodes"`
@@ -40,6 +41,7 @@ type GrantedEntity struct {
 }
 
 type UserGrants struct {
+	Database     []GrantedEntity `json:"database"`
 	Domain       []GrantedEntity `json:"domain"`
 	Firewall     []GrantedEntity `json:"firewall"`
 	Image        []GrantedEntity `json:"image"`
@@ -53,6 +55,7 @@ type UserGrants struct {
 }
 
 type UserGrantsUpdateOptions struct {
+	Database     []GrantedEntity   `json:"database,omitempty"`
 	Domain       []EntityUserGrant `json:"domain,omitempty"`
 	Firewall     []EntityUserGrant `json:"firewall,omitempty"`
 	Image        []EntityUserGrant `json:"image,omitempty"`
@@ -66,6 +69,7 @@ type UserGrantsUpdateOptions struct {
 }
 
 func (c *Client) GetUserGrants(ctx context.Context, username string) (*UserGrants, error) {
+	username = url.PathEscape(username)
 	e := fmt.Sprintf("account/users/%s/grants", username)
 	req := c.R(ctx).SetResult(&UserGrants{})
 	r, err := coupleAPIErrors(req.Get(e))
@@ -82,6 +86,7 @@ func (c *Client) UpdateUserGrants(ctx context.Context, username string, opts Use
 		return nil, err
 	}
 
+	username = url.PathEscape(username)
 	e := fmt.Sprintf("account/users/%s/grants", username)
 	req := c.R(ctx).SetResult(&UserGrants{}).SetBody(string(body))
 	r, err := coupleAPIErrors(req.Put(e))

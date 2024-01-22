@@ -35,7 +35,7 @@ const (
 	PostgresReplicationSemiSynch PostgresReplicationType = "semi_synch"
 )
 
-// A PostgresDatabase is a instance of Linode Postgres Managed Databases
+// A PostgresDatabase is an instance of Linode Postgres Managed Databases
 type PostgresDatabase struct {
 	ID                    int                       `json:"id"`
 	Status                DatabaseStatus            `json:"status"`

@@ -91,6 +91,7 @@ type FirewallResourceLabelSelector struct {
 // FirewallClient is a client for the Firewalls API.
 type FirewallClient struct {
 	client *Client
+	Action *ResourceActionClient
 }
 
 // GetByID retrieves a Firewall by its ID. If the Firewall does not exist, nil is returned.
@@ -127,7 +128,7 @@ func (c *FirewallClient) GetByName(ctx context.Context, name string) (*Firewall,
 // retrieves a Firewall by its name. If the Firewall does not exist, nil is returned.
 func (c *FirewallClient) Get(ctx context.Context, idOrName string) (*Firewall, *Response, error) {
 	if id, err := strconv.Atoi(idOrName); err == nil {
-		return c.GetByID(ctx, int(id))
+		return c.GetByID(ctx, id)
 	}
 	return c.GetByName(ctx, idOrName)
 }
@@ -140,7 +141,7 @@ type FirewallListOpts struct {
 }
 
 func (l FirewallListOpts) values() url.Values {
-	vals := l.ListOpts.values()
+	vals := l.ListOpts.Values()
 	if l.Name != "" {
 		vals.Add("name", l.Name)
 	}
@@ -175,30 +176,12 @@ func (c *FirewallClient) List(ctx context.Context, opts FirewallListOpts) ([]*Fi
 
 // All returns all Firewalls.
 func (c *FirewallClient) All(ctx context.Context) ([]*Firewall, error) {
-	allFirewalls := []*Firewall{}
-
-	opts := FirewallListOpts{}
-	opts.PerPage = 50
-
-	err := c.client.all(func(page int) (*Response, error) {
-		opts.Page = page
-		firewalls, resp, err := c.List(ctx, opts)
-		if err != nil {
-			return resp, err
-		}
-		allFirewalls = append(allFirewalls, firewalls...)
-		return resp, nil
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	return allFirewalls, nil
+	return c.AllWithOpts(ctx, FirewallListOpts{ListOpts: ListOpts{PerPage: 50}})
 }
 
 // AllWithOpts returns all Firewalls for the given options.
 func (c *FirewallClient) AllWithOpts(ctx context.Context, opts FirewallListOpts) ([]*Firewall, error) {
-	var allFirewalls []*Firewall
+	allFirewalls := []*Firewall{}
 
 	err := c.client.all(func(page int) (*Response, error) {
 		opts.Page = page

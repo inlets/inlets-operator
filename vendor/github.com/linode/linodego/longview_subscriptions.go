@@ -3,6 +3,7 @@ package linodego
 import (
 	"context"
 	"fmt"
+	"net/url"
 
 	"github.com/go-resty/resty/v2"
 )
@@ -50,6 +51,7 @@ func (c *Client) ListLongviewSubscriptions(ctx context.Context, opts *ListOption
 
 // GetLongviewSubscription gets the template with the provided ID
 func (c *Client) GetLongviewSubscription(ctx context.Context, templateID string) (*LongviewSubscription, error) {
+	templateID = url.PathEscape(templateID)
 	e := fmt.Sprintf("longview/subscriptions/%s", templateID)
 	req := c.R(ctx).SetResult(&LongviewSubscription{})
 	r, err := coupleAPIErrors(req.Get(e))

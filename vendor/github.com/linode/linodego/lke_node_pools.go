@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"net/url"
 
 	"github.com/go-resty/resty/v2"
 )
@@ -170,6 +171,7 @@ func (c *Client) DeleteLKENodePool(ctx context.Context, clusterID, poolID int) e
 
 // DeleteLKENodePoolNode deletes a given node from a node pool
 func (c *Client) DeleteLKENodePoolNode(ctx context.Context, clusterID int, nodeID string) error {
+	nodeID = url.PathEscape(nodeID)
 	e := fmt.Sprintf("lke/clusters/%d/nodes/%s", clusterID, nodeID)
 	_, err := coupleAPIErrors(c.R(ctx).Delete(e))
 	return err

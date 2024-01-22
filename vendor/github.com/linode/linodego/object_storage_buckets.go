@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"net/url"
 	"time"
 
 	"github.com/go-resty/resty/v2"
@@ -17,6 +18,8 @@ type ObjectStorageBucket struct {
 
 	Created  *time.Time `json:"-"`
 	Hostname string     `json:"hostname"`
+	Objects  int        `json:"objects"`
+	Size     int        `json:"size"`
 }
 
 // ObjectStorageBucketAccess holds Object Storage access info
@@ -78,8 +81,12 @@ type ObjectStorageBucketsPagedResponse struct {
 }
 
 // endpoint gets the endpoint URL for ObjectStorageBucket
-func (ObjectStorageBucketsPagedResponse) endpoint(_ ...any) string {
-	return "object-storage/buckets"
+func (ObjectStorageBucketsPagedResponse) endpoint(args ...any) string {
+	endpoint := "object-storage/buckets"
+	if len(args) > 0 {
+		endpoint = fmt.Sprintf(endpoint+"/%s", url.PathEscape(args[0].(string)))
+	}
+	return endpoint
 }
 
 func (resp *ObjectStorageBucketsPagedResponse) castResult(r *resty.Request, e string) (int, int, error) {
@@ -102,8 +109,20 @@ func (c *Client) ListObjectStorageBuckets(ctx context.Context, opts *ListOptions
 	return response.Data, nil
 }
 
+// ListObjectStorageBucketsInCluster lists all ObjectStorageBuckets of a cluster
+func (c *Client) ListObjectStorageBucketsInCluster(ctx context.Context, opts *ListOptions, clusterID string) ([]ObjectStorageBucket, error) {
+	response := ObjectStorageBucketsPagedResponse{}
+	err := c.listHelper(ctx, &response, opts, clusterID)
+	if err != nil {
+		return nil, err
+	}
+	return response.Data, nil
+}
+
 // GetObjectStorageBucket gets the ObjectStorageBucket with the provided label
 func (c *Client) GetObjectStorageBucket(ctx context.Context, clusterID, label string) (*ObjectStorageBucket, error) {
+	label = url.PathEscape(label)
+	clusterID = url.PathEscape(clusterID)
 	e := fmt.Sprintf("object-storage/buckets/%s/%s", clusterID, label)
 	req := c.R(ctx).SetResult(&ObjectStorageBucket{})
 	r, err := coupleAPIErrors(req.Get(e))
@@ -131,6 +150,8 @@ func (c *Client) CreateObjectStorageBucket(ctx context.Context, opts ObjectStora
 
 // GetObjectStorageBucketAccess gets the current access config for a bucket
 func (c *Client) GetObjectStorageBucketAccess(ctx context.Context, clusterID, label string) (*ObjectStorageBucketAccess, error) {
+	label = url.PathEscape(label)
+	clusterID = url.PathEscape(clusterID)
 	e := fmt.Sprintf("object-storage/buckets/%s/%s/access", clusterID, label)
 	req := c.R(ctx).SetResult(&ObjectStorageBucketAccess{})
 	r, err := coupleAPIErrors(req.Get(e))
@@ -148,6 +169,8 @@ func (c *Client) UpdateObjectStorageBucketAccess(ctx context.Context, clusterID,
 		return err
 	}
 
+	label = url.PathEscape(label)
+	clusterID = url.PathEscape(clusterID)
 	e := fmt.Sprintf("object-storage/buckets/%s/%s/access", clusterID, label)
 	_, err = coupleAPIErrors(c.R(ctx).SetBody(string(body)).Post(e))
 	if err != nil {
@@ -159,6 +182,7 @@ func (c *Client) UpdateObjectStorageBucketAccess(ctx context.Context, clusterID,
 
 // DeleteObjectStorageBucket deletes the ObjectStorageBucket with the specified label
 func (c *Client) DeleteObjectStorageBucket(ctx context.Context, clusterID, label string) error {
+	label = url.PathEscape(label)
 	e := fmt.Sprintf("object-storage/buckets/%s/%s", clusterID, label)
 	_, err := coupleAPIErrors(c.R(ctx).Delete(e))
 	return err

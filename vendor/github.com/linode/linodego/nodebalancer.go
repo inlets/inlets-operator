@@ -53,6 +53,7 @@ type NodeBalancerCreateOptions struct {
 	ClientConnThrottle *int                               `json:"client_conn_throttle,omitempty"`
 	Configs            []*NodeBalancerConfigCreateOptions `json:"configs,omitempty"`
 	Tags               []string                           `json:"tags"`
+	FirewallID         int                                `json:"firewall_id,omitempty"`
 }
 
 // NodeBalancerUpdateOptions are the options permitted for UpdateNodeBalancer

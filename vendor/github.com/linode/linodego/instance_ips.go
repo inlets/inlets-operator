@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"net/url"
 )
 
 // InstanceIPAddressResponse contains the IPv4 and IPv6 details for an Instance
@@ -22,15 +23,16 @@ type InstanceIPv4Response struct {
 
 // InstanceIP represents an Instance IP with additional DNS and networking details
 type InstanceIP struct {
-	Address    string         `json:"address"`
-	Gateway    string         `json:"gateway"`
-	SubnetMask string         `json:"subnet_mask"`
-	Prefix     int            `json:"prefix"`
-	Type       InstanceIPType `json:"type"`
-	Public     bool           `json:"public"`
-	RDNS       string         `json:"rdns"`
-	LinodeID   int            `json:"linode_id"`
-	Region     string         `json:"region"`
+	Address    string             `json:"address"`
+	Gateway    string             `json:"gateway"`
+	SubnetMask string             `json:"subnet_mask"`
+	Prefix     int                `json:"prefix"`
+	Type       InstanceIPType     `json:"type"`
+	Public     bool               `json:"public"`
+	RDNS       string             `json:"rdns"`
+	LinodeID   int                `json:"linode_id"`
+	Region     string             `json:"region"`
+	VPCNAT1To1 *InstanceIPNAT1To1 `json:"vpc_nat_1_1"`
 }
 
 // InstanceIPv6Response contains the IPv6 addresses and ranges for an Instance
@@ -38,6 +40,14 @@ type InstanceIPv6Response struct {
 	LinkLocal *InstanceIP `json:"link_local"`
 	SLAAC     *InstanceIP `json:"slaac"`
 	Global    []IPv6Range `json:"global"`
+}
+
+// InstanceIPNAT1To1 contains information about the NAT 1:1 mapping
+// of a public IP address to a VPC subnet.
+type InstanceIPNAT1To1 struct {
+	Address  string `json:"address"`
+	SubnetID int    `json:"subnet_id"`
+	VPCID    int    `json:"vpc_id"`
 }
 
 // IPv6Range represents a range of IPv6 addresses routed to a single Linode in a given Region
@@ -77,6 +87,7 @@ func (c *Client) GetInstanceIPAddresses(ctx context.Context, linodeID int) (*Ins
 
 // GetInstanceIPAddress gets the IPAddress for a Linode instance matching a supplied IP address
 func (c *Client) GetInstanceIPAddress(ctx context.Context, linodeID int, ipaddress string) (*InstanceIP, error) {
+	ipaddress = url.PathEscape(ipaddress)
 	e := fmt.Sprintf("linode/instances/%d/ips/%s", linodeID, ipaddress)
 	req := c.R(ctx).SetResult(&InstanceIP{})
 	r, err := coupleAPIErrors(req.Get(e))
@@ -116,6 +127,8 @@ func (c *Client) UpdateInstanceIPAddress(ctx context.Context, linodeID int, ipAd
 		return nil, err
 	}
 
+	ipAddress = url.PathEscape(ipAddress)
+
 	e := fmt.Sprintf("linode/instances/%d/ips/%s", linodeID, ipAddress)
 	req := c.R(ctx).SetResult(&InstanceIP{}).SetBody(string(body))
 	r, err := coupleAPIErrors(req.Put(e))
@@ -126,6 +139,7 @@ func (c *Client) UpdateInstanceIPAddress(ctx context.Context, linodeID int, ipAd
 }
 
 func (c *Client) DeleteInstanceIPAddress(ctx context.Context, linodeID int, ipAddress string) error {
+	ipAddress = url.PathEscape(ipAddress)
 	e := fmt.Sprintf("linode/instances/%d/ips/%s", linodeID, ipAddress)
 	_, err := coupleAPIErrors(c.R(ctx).Delete(e))
 	return err

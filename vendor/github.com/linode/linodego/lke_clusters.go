@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"net/url"
 	"time"
 
 	"github.com/go-resty/resty/v2"
@@ -73,6 +74,12 @@ type LKEClusterControlPlane struct {
 // LKEVersion fields are those returned by GetLKEVersion
 type LKEVersion struct {
 	ID string `json:"id"`
+}
+
+// LKEClusterRegenerateOptions fields are those accepted by RegenerateLKECluster
+type LKEClusterRegenerateOptions struct {
+	KubeConfig   bool `json:"kubeconfig"`
+	ServiceToken bool `json:"servicetoken"`
 }
 
 // UnmarshalJSON implements the json.Unmarshaler interface
@@ -163,6 +170,7 @@ func (c *Client) ListLKEVersions(ctx context.Context, opts *ListOptions) ([]LKEV
 
 // GetLKEVersion gets details about a specific LKE Version. This endpoint is cached by default.
 func (c *Client) GetLKEVersion(ctx context.Context, version string) (*LKEVersion, error) {
+	version = url.PathEscape(version)
 	e := fmt.Sprintf("lke/versions/%s", version)
 
 	if result := c.getCachedResponse(e); result != nil {
@@ -320,5 +328,28 @@ func (c *Client) GetLKEClusterDashboard(ctx context.Context, clusterID int) (*LK
 func (c *Client) RecycleLKEClusterNodes(ctx context.Context, clusterID int) error {
 	e := fmt.Sprintf("lke/clusters/%d/recycle", clusterID)
 	_, err := coupleAPIErrors(c.R(ctx).Post(e))
+	return err
+}
+
+// RegenerateLKECluster regenerates the Kubeconfig file and/or the service account token for the specified LKE Cluster.
+func (c *Client) RegenerateLKECluster(ctx context.Context, clusterID int, opts LKEClusterRegenerateOptions) (*LKECluster, error) {
+	body, err := json.Marshal(opts)
+	if err != nil {
+		return nil, err
+	}
+
+	e := fmt.Sprintf("lke/clusters/%d/regenerate", clusterID)
+	req := c.R(ctx).SetResult(&LKECluster{}).SetBody(string(body))
+	r, err := coupleAPIErrors(req.Post(e))
+	if err != nil {
+		return nil, err
+	}
+	return r.Result().(*LKECluster), nil
+}
+
+// DeleteLKEClusterServiceToken deletes and regenerate the service account token for a Cluster.
+func (c *Client) DeleteLKEClusterServiceToken(ctx context.Context, clusterID int) error {
+	e := fmt.Sprintf("lke/clusters/%d/servicetoken", clusterID)
+	_, err := coupleAPIErrors(c.R(ctx).Delete(e))
 	return err
 }

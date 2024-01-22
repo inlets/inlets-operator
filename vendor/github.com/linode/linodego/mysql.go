@@ -19,7 +19,7 @@ const (
 	MySQLDatabaseTargetSecondary MySQLDatabaseTarget = "secondary"
 )
 
-// A MySQLDatabase is a instance of Linode MySQL Managed Databases
+// A MySQLDatabase is an instance of Linode MySQL Managed Databases
 type MySQLDatabase struct {
 	ID              int                       `json:"id"`
 	Status          DatabaseStatus            `json:"status"`

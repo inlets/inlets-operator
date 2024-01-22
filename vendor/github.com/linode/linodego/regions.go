@@ -3,6 +3,7 @@ package linodego
 import (
 	"context"
 	"fmt"
+	"net/url"
 	"time"
 
 	"github.com/go-resty/resty/v2"
@@ -19,6 +20,7 @@ type Region struct {
 	Capabilities []string        `json:"capabilities"`
 	Status       string          `json:"status"`
 	Resolvers    RegionResolvers `json:"resolvers"`
+	Label        string          `json:"label"`
 }
 
 // RegionResolvers contains the DNS resolvers of a region
@@ -73,7 +75,7 @@ func (c *Client) ListRegions(ctx context.Context, opts *ListOptions) ([]Region, 
 
 // GetRegion gets the template with the provided ID. This endpoint is cached by default.
 func (c *Client) GetRegion(ctx context.Context, regionID string) (*Region, error) {
-	e := fmt.Sprintf("regions/%s", regionID)
+	e := fmt.Sprintf("regions/%s", url.PathEscape(regionID))
 
 	if result := c.getCachedResponse(e); result != nil {
 		result := result.(Region)

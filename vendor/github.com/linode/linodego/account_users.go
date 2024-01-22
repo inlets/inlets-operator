@@ -4,17 +4,22 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"net/url"
+	"time"
 
 	"github.com/go-resty/resty/v2"
+	"github.com/linode/linodego/internal/parseabletime"
 )
 
 // User represents a User object
 type User struct {
-	Username   string   `json:"username"`
-	Email      string   `json:"email"`
-	Restricted bool     `json:"restricted"`
-	TFAEnabled bool     `json:"tfa_enabled"`
-	SSHKeys    []string `json:"ssh_keys"`
+	Username            string     `json:"username"`
+	Email               string     `json:"email"`
+	Restricted          bool       `json:"restricted"`
+	TFAEnabled          bool       `json:"tfa_enabled"`
+	SSHKeys             []string   `json:"ssh_keys"`
+	PasswordCreated     *time.Time `json:"-"`
+	VerifiedPhoneNumber *string    `json:"verified_phone_number"`
 }
 
 // UserCreateOptions fields are those accepted by CreateUser
@@ -28,6 +33,26 @@ type UserCreateOptions struct {
 type UserUpdateOptions struct {
 	Username   string `json:"username,omitempty"`
 	Restricted *bool  `json:"restricted,omitempty"`
+}
+
+// UnmarshalJSON implements the json.Unmarshaler interface
+func (i *User) UnmarshalJSON(b []byte) error {
+	type Mask User
+
+	p := struct {
+		*Mask
+		PasswordCreated *parseabletime.ParseableTime `json:"password_created"`
+	}{
+		Mask: (*Mask)(i),
+	}
+
+	if err := json.Unmarshal(b, &p); err != nil {
+		return err
+	}
+
+	i.PasswordCreated = (*time.Time)(p.PasswordCreated)
+
+	return nil
 }
 
 // GetCreateOptions converts a User to UserCreateOptions for use in CreateUser
@@ -81,6 +106,7 @@ func (c *Client) ListUsers(ctx context.Context, opts *ListOptions) ([]User, erro
 
 // GetUser gets the user with the provided ID
 func (c *Client) GetUser(ctx context.Context, userID string) (*User, error) {
+	userID = url.PathEscape(userID)
 	e := fmt.Sprintf("account/users/%s", userID)
 	req := c.R(ctx).SetResult(&User{})
 	r, err := coupleAPIErrors(req.Get(e))
@@ -116,6 +142,7 @@ func (c *Client) UpdateUser(ctx context.Context, userID string, opts UserUpdateO
 		return nil, err
 	}
 
+	userID = url.PathEscape(userID)
 	e := fmt.Sprintf("account/users/%s", userID)
 	req := c.R(ctx).SetResult(&User{}).SetBody(string(body))
 	r, err := coupleAPIErrors(req.Put(e))
@@ -128,6 +155,7 @@ func (c *Client) UpdateUser(ctx context.Context, userID string, opts UserUpdateO
 
 // DeleteUser deletes the User with the specified id
 func (c *Client) DeleteUser(ctx context.Context, userID string) error {
+	userID = url.PathEscape(userID)
 	e := fmt.Sprintf("account/users/%s", userID)
 	_, err := coupleAPIErrors(c.R(ctx).Delete(e))
 	return err

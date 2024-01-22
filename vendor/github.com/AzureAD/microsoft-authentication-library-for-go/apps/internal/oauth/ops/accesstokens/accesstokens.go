@@ -19,17 +19,18 @@ import (
 	"crypto/sha1"
 	"crypto/x509"
 	"encoding/base64"
+	"encoding/json"
 	"fmt"
 	"net/url"
 	"strconv"
 	"strings"
-	"sync"
 	"time"
 
+	"github.com/AzureAD/microsoft-authentication-library-for-go/apps/internal/exported"
 	"github.com/AzureAD/microsoft-authentication-library-for-go/apps/internal/oauth/ops/authority"
 	"github.com/AzureAD/microsoft-authentication-library-for-go/apps/internal/oauth/ops/internal/grant"
 	"github.com/AzureAD/microsoft-authentication-library-for-go/apps/internal/oauth/ops/wstrust"
-	"github.com/golang-jwt/jwt"
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 )
 
@@ -42,9 +43,6 @@ const (
 	username      = "username"
 	password      = "password"
 )
-
-// assertionLifetime allows tests to control the expiration time of JWT assertions created by Credential.
-var assertionLifetime = 10 * time.Minute
 
 //go:generate stringer -type=AppType
 
@@ -90,44 +88,37 @@ type Credential struct {
 	// Secret contains the credential secret if we are doing auth by secret.
 	Secret string
 
-	// Cert is the public x509 certificate if we are doing any auth other than secret.
+	// Cert is the public certificate, if we're authenticating by certificate.
 	Cert *x509.Certificate
-	// Key is the private key for signing if we are doing any auth other than secret.
+	// Key is the private key for signing, if we're authenticating by certificate.
 	Key crypto.PrivateKey
+	// X5c is the JWT assertion's x5c header value, required for SN/I authentication.
+	X5c []string
 
-	// mu protects everything below.
-	mu sync.Mutex
-	// Assertion is the signed JWT assertion if we have retrieved it or if it was passed.
-	Assertion string
-	// Expires is when the Assertion expires. Public to allow faking in tests.
-	// Any use outside msal is not supported by a compatibility promise.
-	Expires time.Time
+	// AssertionCallback is a function provided by the application, if we're authenticating by assertion.
+	AssertionCallback func(context.Context, exported.AssertionRequestOptions) (string, error)
+
+	// TokenProvider is a function provided by the application that implements custom authentication
+	// logic for a confidential client
+	TokenProvider func(context.Context, exported.TokenProviderParameters) (exported.TokenProviderResult, error)
 }
 
 // JWT gets the jwt assertion when the credential is not using a secret.
-func (c *Credential) JWT(authParams authority.AuthParams) (string, error) {
-	c.mu.Lock()
-	defer c.mu.Unlock()
-
-	if c.Expires.After(time.Now()) {
-		return c.Assertion, nil
-	} else if c.Cert == nil || c.Key == nil {
-		// The assertion has expired and this Credential can't generate a new one. The assertion
-		// was presumably provided by the application via confidential.NewCredFromAssertion(). We
-		// return it despite its expiration to maintain the behavior of previous versions, and
-		// because there's no API enabling the application to replace the assertion
-		// (see https://github.com/AzureAD/microsoft-authentication-library-for-go/issues/292).
-		return c.Assertion, nil
+func (c *Credential) JWT(ctx context.Context, authParams authority.AuthParams) (string, error) {
+	if c.AssertionCallback != nil {
+		options := exported.AssertionRequestOptions{
+			ClientID:      authParams.ClientID,
+			TokenEndpoint: authParams.Endpoints.TokenEndpoint,
+		}
+		return c.AssertionCallback(ctx, options)
 	}
-
-	expires := time.Now().Add(assertionLifetime)
 
 	token := jwt.NewWithClaims(jwt.SigningMethodRS256, jwt.MapClaims{
 		"aud": authParams.Endpoints.TokenEndpoint,
-		"exp": strconv.FormatInt(expires.Unix(), 10),
+		"exp": json.Number(strconv.FormatInt(time.Now().Add(10*time.Minute).Unix(), 10)),
 		"iss": authParams.ClientID,
 		"jti": uuid.New().String(),
-		"nbf": strconv.FormatInt(time.Now().Unix(), 10),
+		"nbf": json.Number(strconv.FormatInt(time.Now().Unix(), 10)),
 		"sub": authParams.ClientID,
 	})
 	token.Header = map[string]interface{}{
@@ -137,16 +128,14 @@ func (c *Credential) JWT(authParams authority.AuthParams) (string, error) {
 	}
 
 	if authParams.SendX5C {
-		token.Header["x5c"] = []string{base64.StdEncoding.EncodeToString(c.Cert.Raw)}
+		token.Header["x5c"] = c.X5c
 	}
-	var err error
-	c.Assertion, err = token.SignedString(c.Key)
+
+	assertion, err := token.SignedString(c.Key)
 	if err != nil {
 		return "", fmt.Errorf("unable to sign a JWT token using private key: %w", err)
 	}
-
-	c.Expires = expires
-	return c.Assertion, nil
+	return assertion, nil
 }
 
 // thumbprint runs the asn1.Der bytes through sha1 for use in the x5t parameter of JWT.
@@ -168,6 +157,9 @@ type Client struct {
 // FromUsernamePassword uses a username and password to get an access token.
 func (c Client) FromUsernamePassword(ctx context.Context, authParameters authority.AuthParams) (TokenResponse, error) {
 	qv := url.Values{}
+	if err := addClaims(qv, authParameters); err != nil {
+		return TokenResponse{}, err
+	}
 	qv.Set(grantType, grant.Password)
 	qv.Set(username, authParameters.Username)
 	qv.Set(password, authParameters.Password)
@@ -213,7 +205,7 @@ func (c Client) FromAuthCode(ctx context.Context, req AuthCodeRequest) (TokenRes
 		if req.Credential == nil {
 			return TokenResponse{}, fmt.Errorf("AuthCodeRequest had nil Credential for Confidential app")
 		}
-		qv, err = prepURLVals(req.Credential, req.AuthParams)
+		qv, err = prepURLVals(ctx, req.Credential, req.AuthParams)
 		if err != nil {
 			return TokenResponse{}, err
 		}
@@ -230,6 +222,9 @@ func (c Client) FromAuthCode(ctx context.Context, req AuthCodeRequest) (TokenRes
 	qv.Set(clientID, req.AuthParams.ClientID)
 	qv.Set(clientInfo, clientInfoVal)
 	addScopeQueryParam(qv, req.AuthParams)
+	if err := addClaims(qv, req.AuthParams); err != nil {
+		return TokenResponse{}, err
+	}
 
 	return c.doTokenResp(ctx, req.AuthParams, qv)
 }
@@ -239,10 +234,13 @@ func (c Client) FromRefreshToken(ctx context.Context, appType AppType, authParam
 	qv := url.Values{}
 	if appType == ATConfidential {
 		var err error
-		qv, err = prepURLVals(cc, authParams)
+		qv, err = prepURLVals(ctx, cc, authParams)
 		if err != nil {
 			return TokenResponse{}, err
 		}
+	}
+	if err := addClaims(qv, authParams); err != nil {
+		return TokenResponse{}, err
 	}
 	qv.Set(grantType, grant.RefreshToken)
 	qv.Set(clientID, authParams.ClientID)
@@ -256,6 +254,9 @@ func (c Client) FromRefreshToken(ctx context.Context, appType AppType, authParam
 // FromClientSecret uses a client's secret (aka password) to get a new token.
 func (c Client) FromClientSecret(ctx context.Context, authParameters authority.AuthParams, clientSecret string) (TokenResponse, error) {
 	qv := url.Values{}
+	if err := addClaims(qv, authParameters); err != nil {
+		return TokenResponse{}, err
+	}
 	qv.Set(grantType, grant.ClientCredential)
 	qv.Set("client_secret", clientSecret)
 	qv.Set(clientID, authParameters.ClientID)
@@ -270,6 +271,9 @@ func (c Client) FromClientSecret(ctx context.Context, authParameters authority.A
 
 func (c Client) FromAssertion(ctx context.Context, authParameters authority.AuthParams, assertion string) (TokenResponse, error) {
 	qv := url.Values{}
+	if err := addClaims(qv, authParameters); err != nil {
+		return TokenResponse{}, err
+	}
 	qv.Set(grantType, grant.ClientCredential)
 	qv.Set("client_assertion_type", grant.ClientAssertion)
 	qv.Set("client_assertion", assertion)
@@ -286,6 +290,9 @@ func (c Client) FromAssertion(ctx context.Context, authParameters authority.Auth
 
 func (c Client) FromUserAssertionClientSecret(ctx context.Context, authParameters authority.AuthParams, userAssertion string, clientSecret string) (TokenResponse, error) {
 	qv := url.Values{}
+	if err := addClaims(qv, authParameters); err != nil {
+		return TokenResponse{}, err
+	}
 	qv.Set(grantType, grant.JWT)
 	qv.Set(clientID, authParameters.ClientID)
 	qv.Set("client_secret", clientSecret)
@@ -299,6 +306,9 @@ func (c Client) FromUserAssertionClientSecret(ctx context.Context, authParameter
 
 func (c Client) FromUserAssertionClientCertificate(ctx context.Context, authParameters authority.AuthParams, userAssertion string, assertion string) (TokenResponse, error) {
 	qv := url.Values{}
+	if err := addClaims(qv, authParameters); err != nil {
+		return TokenResponse{}, err
+	}
 	qv.Set(grantType, grant.JWT)
 	qv.Set("client_assertion_type", grant.ClientAssertion)
 	qv.Set("client_assertion", assertion)
@@ -313,6 +323,9 @@ func (c Client) FromUserAssertionClientCertificate(ctx context.Context, authPara
 
 func (c Client) DeviceCodeResult(ctx context.Context, authParameters authority.AuthParams) (DeviceCodeResult, error) {
 	qv := url.Values{}
+	if err := addClaims(qv, authParameters); err != nil {
+		return DeviceCodeResult{}, err
+	}
 	qv.Set(clientID, authParameters.ClientID)
 	addScopeQueryParam(qv, authParameters)
 
@@ -329,6 +342,9 @@ func (c Client) DeviceCodeResult(ctx context.Context, authParameters authority.A
 
 func (c Client) FromDeviceCodeResult(ctx context.Context, authParameters authority.AuthParams, deviceCodeResult DeviceCodeResult) (TokenResponse, error) {
 	qv := url.Values{}
+	if err := addClaims(qv, authParameters); err != nil {
+		return TokenResponse{}, err
+	}
 	qv.Set(grantType, grant.DeviceCode)
 	qv.Set(deviceCode, deviceCodeResult.DeviceCode)
 	qv.Set(clientID, authParameters.ClientID)
@@ -340,6 +356,9 @@ func (c Client) FromDeviceCodeResult(ctx context.Context, authParameters authori
 
 func (c Client) FromSamlGrant(ctx context.Context, authParameters authority.AuthParams, samlGrant wstrust.SamlTokenInfo) (TokenResponse, error) {
 	qv := url.Values{}
+	if err := addClaims(qv, authParameters); err != nil {
+		return TokenResponse{}, err
+	}
 	qv.Set(username, authParameters.Username)
 	qv.Set(password, authParameters.Password)
 	qv.Set(clientID, authParameters.ClientID)
@@ -361,6 +380,12 @@ func (c Client) FromSamlGrant(ctx context.Context, authParameters authority.Auth
 
 func (c Client) doTokenResp(ctx context.Context, authParams authority.AuthParams, qv url.Values) (TokenResponse, error) {
 	resp := TokenResponse{}
+	if authParams.AuthnScheme != nil {
+		trParams := authParams.AuthnScheme.TokenRequestParams()
+		for k, v := range trParams {
+			qv.Set(k, v)
+		}
+	}
 	err := c.Comm.URLFormCall(ctx, authParams.Endpoints.TokenEndpoint, qv, &resp)
 	if err != nil {
 		return resp, err
@@ -374,14 +399,14 @@ func (c Client) doTokenResp(ctx context.Context, authParams authority.AuthParams
 
 // prepURLVals returns an url.Values that sets various key/values if we are doing secrets
 // or JWT assertions.
-func prepURLVals(cc *Credential, authParams authority.AuthParams) (url.Values, error) {
+func prepURLVals(ctx context.Context, cc *Credential, authParams authority.AuthParams) (url.Values, error) {
 	params := url.Values{}
 	if cc.Secret != "" {
 		params.Set("client_secret", cc.Secret)
 		return params, nil
 	}
 
-	jwt, err := cc.JWT(authParams)
+	jwt, err := cc.JWT(ctx, authParams)
 	if err != nil {
 		return nil, err
 	}
@@ -415,6 +440,15 @@ func AppendDefaultScopes(authParameters authority.AuthParams) []string {
 	}
 	scopes = append(scopes, defaultScopes...)
 	return scopes
+}
+
+// addClaims adds client capabilities and claims from AuthParams to the given url.Values
+func addClaims(v url.Values, ap authority.AuthParams) error {
+	claims, err := ap.MergeCapabilitiesAndClaims()
+	if err == nil && claims != "" {
+		v.Set("claims", claims)
+	}
+	return err
 }
 
 func addScopeQueryParam(queryParams url.Values, authParameters authority.AuthParams) {

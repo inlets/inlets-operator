@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"net/url"
 	"time"
 
 	"github.com/go-resty/resty/v2"
@@ -23,18 +24,19 @@ const (
 
 // Image represents a deployable Image object for use with Linode Instances
 type Image struct {
-	ID          string      `json:"id"`
-	CreatedBy   string      `json:"created_by"`
-	Label       string      `json:"label"`
-	Description string      `json:"description"`
-	Type        string      `json:"type"`
-	Vendor      string      `json:"vendor"`
-	Status      ImageStatus `json:"status"`
-	Size        int         `json:"size"`
-	IsPublic    bool        `json:"is_public"`
-	Deprecated  bool        `json:"deprecated"`
-	Created     *time.Time  `json:"-"`
-	Expiry      *time.Time  `json:"-"`
+	ID           string      `json:"id"`
+	CreatedBy    string      `json:"created_by"`
+	Capabilities []string    `json:"capabilities"`
+	Label        string      `json:"label"`
+	Description  string      `json:"description"`
+	Type         string      `json:"type"`
+	Vendor       string      `json:"vendor"`
+	Status       ImageStatus `json:"status"`
+	Size         int         `json:"size"`
+	IsPublic     bool        `json:"is_public"`
+	Deprecated   bool        `json:"deprecated"`
+	Created      *time.Time  `json:"-"`
+	Expiry       *time.Time  `json:"-"`
 }
 
 // ImageCreateOptions fields are those accepted by CreateImage
@@ -42,6 +44,7 @@ type ImageCreateOptions struct {
 	DiskID      int    `json:"disk_id"`
 	Label       string `json:"label"`
 	Description string `json:"description,omitempty"`
+	CloudInit   bool   `json:"cloud_init,omitempty"`
 }
 
 // ImageUpdateOptions fields are those accepted by UpdateImage
@@ -61,6 +64,7 @@ type ImageCreateUploadOptions struct {
 	Region      string `json:"region"`
 	Label       string `json:"label"`
 	Description string `json:"description,omitempty"`
+	CloudInit   bool   `json:"cloud_init,omitempty"`
 }
 
 // ImageUploadOptions fields are those accepted by UploadImage
@@ -68,6 +72,7 @@ type ImageUploadOptions struct {
 	Region      string `json:"region"`
 	Label       string `json:"label"`
 	Description string `json:"description,omitempty"`
+	CloudInit   bool   `json:"cloud_init"`
 	Image       io.Reader
 }
 
@@ -132,6 +137,8 @@ func (c *Client) ListImages(ctx context.Context, opts *ListOptions) ([]Image, er
 
 // GetImage gets the Image with the provided ID
 func (c *Client) GetImage(ctx context.Context, imageID string) (*Image, error) {
+	imageID = url.PathEscape(imageID)
+
 	e := fmt.Sprintf("images/%s", imageID)
 	req := c.R(ctx).SetResult(&Image{})
 	r, err := coupleAPIErrors(req.Get(e))
@@ -141,7 +148,7 @@ func (c *Client) GetImage(ctx context.Context, imageID string) (*Image, error) {
 	return r.Result().(*Image), nil
 }
 
-// CreateImage creates a Image
+// CreateImage creates an Image
 func (c *Client) CreateImage(ctx context.Context, opts ImageCreateOptions) (*Image, error) {
 	body, err := json.Marshal(opts)
 	if err != nil {
@@ -164,6 +171,8 @@ func (c *Client) UpdateImage(ctx context.Context, imageID string, opts ImageUpda
 		return nil, err
 	}
 
+	imageID = url.PathEscape(imageID)
+
 	e := fmt.Sprintf("images/%s", imageID)
 	req := c.R(ctx).SetResult(&Image{}).SetBody(string(body))
 	r, err := coupleAPIErrors(req.Put(e))
@@ -175,6 +184,7 @@ func (c *Client) UpdateImage(ctx context.Context, imageID string, opts ImageUpda
 
 // DeleteImage deletes the Image with the specified id
 func (c *Client) DeleteImage(ctx context.Context, imageID string) error {
+	imageID = url.PathEscape(imageID)
 	e := fmt.Sprintf("images/%s", imageID)
 	_, err := coupleAPIErrors(c.R(ctx).Delete(e))
 	return err
@@ -223,6 +233,7 @@ func (c *Client) UploadImage(ctx context.Context, opts ImageUploadOptions) (*Ima
 		Label:       opts.Label,
 		Region:      opts.Region,
 		Description: opts.Description,
+		CloudInit:   opts.CloudInit,
 	})
 	if err != nil {
 		return nil, err

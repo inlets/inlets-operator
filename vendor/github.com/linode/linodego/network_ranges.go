@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"net/url"
 
 	"github.com/go-resty/resty/v2"
 )
@@ -48,6 +49,7 @@ func (c *Client) ListIPv6Ranges(ctx context.Context, opts *ListOptions) ([]IPv6R
 
 // GetIPv6Range gets details about an IPv6 range
 func (c *Client) GetIPv6Range(ctx context.Context, ipRange string) (*IPv6Range, error) {
+	ipRange = url.PathEscape(ipRange)
 	e := fmt.Sprintf("networking/ipv6/ranges/%s", ipRange)
 	req := c.R(ctx).SetResult(&IPv6Range{})
 	r, err := coupleAPIErrors(req.Get(e))
@@ -75,6 +77,7 @@ func (c *Client) CreateIPv6Range(ctx context.Context, opts IPv6RangeCreateOption
 
 // DeleteIPv6Range deletes an IPv6 Range.
 func (c *Client) DeleteIPv6Range(ctx context.Context, ipRange string) error {
+	ipRange = url.PathEscape(ipRange)
 	e := fmt.Sprintf("networking/ipv6/ranges/%s", ipRange)
 	_, err := coupleAPIErrors(c.R(ctx).Delete(e))
 	return err

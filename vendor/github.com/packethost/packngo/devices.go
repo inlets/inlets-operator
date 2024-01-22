@@ -28,6 +28,7 @@ type DeviceService interface {
 	Reinstall(string, *DeviceReinstallFields) (*Response, error)
 	PowerOff(string) (*Response, error)
 	PowerOn(string) (*Response, error)
+	Rescue(string) (*Response, error)
 	Lock(string) (*Response, error)
 	Unlock(string) (*Response, error)
 	ListBGPSessions(deviceID string, opts *ListOptions) ([]BGPSession, *Response, error)
@@ -78,6 +79,7 @@ type Device struct {
 	SSHKeys             []SSHKey               `json:"ssh_keys,omitempty"`
 	ShortID             string                 `json:"short_id,omitempty"`
 	SwitchUUID          string                 `json:"switch_uuid,omitempty"`
+	SOS                 string                 `json:"sos,omitempty"`
 }
 
 type NetworkInfo struct {
@@ -443,9 +445,9 @@ type DeviceDeleteRequest struct {
 	Force bool `json:"force_delete"`
 }
 type DeviceReinstallFields struct {
-	OperatingSystem  string `json:"operating_system,omitempty"`
-	PreserveData     bool   `json:"preserve_data,omitempty"`
-	DeprovisionFast  bool   `json:"deprovision_fast,omitempty"`
+	OperatingSystem string `json:"operating_system,omitempty"`
+	PreserveData    bool   `json:"preserve_data,omitempty"`
+	DeprovisionFast bool   `json:"deprovision_fast,omitempty"`
 }
 
 type DeviceReinstallRequest struct {
@@ -596,6 +598,17 @@ func (s *DeviceServiceOp) PowerOn(deviceID string) (*Response, error) {
 	}
 	apiPath := path.Join(deviceBasePath, deviceID, "actions")
 	action := &DeviceActionRequest{Type: "power_on"}
+
+	return s.client.DoRequest("POST", apiPath, action, nil)
+}
+
+// Rescue boots a device into Rescue OS
+func (s *DeviceServiceOp) Rescue(deviceID string) (*Response, error) {
+	if validateErr := ValidateUUID(deviceID); validateErr != nil {
+		return nil, validateErr
+	}
+	apiPath := path.Join(deviceBasePath, deviceID, "actions")
+	action := &DeviceActionRequest{Type: "rescue"}
 
 	return s.client.DoRequest("POST", apiPath, action, nil)
 }

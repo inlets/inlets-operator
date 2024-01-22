@@ -18,6 +18,9 @@ type AccountSettings struct {
 
 	// A plan name like "longview-3"..."longview-100", or a nil value for to cancel any existing subscription plan.
 	LongviewSubscription *string `json:"longview_subscription"`
+
+	// A string like "disabled", "suspended", or "active" describing the status of this account’s Object Storage service enrollment.
+	ObjectStorage *string `json:"object_storage"`
 }
 
 // AccountSettingsUpdateOptions are the updateable account wide flags or plans that effect new resources.
@@ -26,6 +29,7 @@ type AccountSettingsUpdateOptions struct {
 	BackupsEnabled *bool `json:"backups_enabled,omitempty"`
 
 	// A plan name like "longview-3"..."longview-100", or a nil value for to cancel any existing subscription plan.
+	// Deprecated: Use PUT /longview/plan instead to update the LongviewSubscription
 	LongviewSubscription *string `json:"longview_subscription,omitempty"`
 
 	// The default network helper setting for all new Linodes and Linode Configs for all users on the account.

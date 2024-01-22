@@ -3,6 +3,7 @@ package linodego
 import (
 	"context"
 	"fmt"
+	"net/url"
 
 	"github.com/go-resty/resty/v2"
 )
@@ -49,6 +50,7 @@ func (c *Client) ListObjectStorageClusters(ctx context.Context, opts *ListOption
 
 // GetObjectStorageCluster gets the template with the provided ID
 func (c *Client) GetObjectStorageCluster(ctx context.Context, clusterID string) (*ObjectStorageCluster, error) {
+	clusterID = url.PathEscape(clusterID)
 	e := fmt.Sprintf("object-storage/clusters/%s", clusterID)
 	req := c.R(ctx).SetResult(&ObjectStorageCluster{})
 	r, err := coupleAPIErrors(req.Get(e))

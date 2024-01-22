@@ -1,10 +1,9 @@
 # linodego
 
-![Build](https://img.shields.io/github/workflow/status/linode/linodego/Testing/main?label=tests)
+![Tests](https://img.shields.io/github/actions/workflow/status/linode/linodego/test.yml?branch=main)
 [![Release](https://img.shields.io/github/v/release/linode/linodego)](https://github.com/linode/linodego/releases/latest)
 [![GoDoc](https://godoc.org/github.com/linode/linodego?status.svg)](https://godoc.org/github.com/linode/linodego)
 [![Go Report Card](https://goreportcard.com/badge/github.com/linode/linodego)](https://goreportcard.com/report/github.com/linode/linodego)
-[![codecov](https://codecov.io/gh/linode/linodego/branch/main/graph/badge.svg)](https://codecov.io/gh/linode/linodego)
 
 Go client for [Linode REST v4 API](https://developers.linode.com/api/v4)
 

@@ -3,7 +3,6 @@ package linodego
 import (
 	"context"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"net/url"
@@ -52,7 +51,7 @@ type Client struct {
 	debug             bool
 	retryConditionals []RetryConditional
 
-	millisecondsPerPoll time.Duration
+	pollInterval time.Duration
 
 	baseURL         string
 	apiVersion      string
@@ -82,7 +81,10 @@ type clientCacheEntry struct {
 	ExpiryOverride *time.Duration
 }
 
-type Request = resty.Request
+type (
+	Request = resty.Request
+	Logger  = resty.Logger
+)
 
 func init() {
 	// Wether or not we will enable Resty debugging output
@@ -117,6 +119,14 @@ func (c *Client) R(ctx context.Context) *resty.Request {
 func (c *Client) SetDebug(debug bool) *Client {
 	c.debug = debug
 	c.resty.SetDebug(debug)
+
+	return c
+}
+
+// SetLogger allows the user to override the output
+// logger for debug logs.
+func (c *Client) SetLogger(logger Logger) *Client {
+	c.resty.SetLogger(logger)
 
 	return c
 }
@@ -166,7 +176,14 @@ func (c *Client) updateHostURL() {
 		apiProto = c.apiProto
 	}
 
-	c.resty.SetHostURL(fmt.Sprintf("%s://%s/%s", apiProto, baseURL, apiVersion))
+	c.resty.SetBaseURL(
+		fmt.Sprintf(
+			"%s://%s/%s",
+			apiProto,
+			baseURL,
+			url.PathEscape(apiVersion),
+		),
+	)
 }
 
 // SetRootCertificate adds a root certificate to the underlying TLS client config
@@ -176,7 +193,7 @@ func (c *Client) SetRootCertificate(path string) *Client {
 }
 
 // SetToken sets the API token for all requests from this client
-// Only necessary if you haven't already provided an http client to NewClient() configured with the token.
+// Only necessary if you haven't already provided the http client to NewClient() configured with the token.
 func (c *Client) SetToken(token string) *Client {
 	c.resty.SetHeader("Authorization", fmt.Sprintf("Bearer %s", token))
 	return c
@@ -294,7 +311,7 @@ func (c *Client) InvalidateCache() {
 func (c *Client) InvalidateCacheEndpoint(endpoint string) error {
 	u, err := url.Parse(endpoint)
 	if err != nil {
-		return fmt.Errorf("failed to parse URL for caching: %s", err)
+		return fmt.Errorf("failed to parse URL for caching: %w", err)
 	}
 
 	c.cachedEntryLock.Lock()
@@ -344,14 +361,21 @@ func (c *Client) SetRetryCount(count int) *Client {
 // SetPollDelay sets the number of milliseconds to wait between events or status polls.
 // Affects all WaitFor* functions and retries.
 func (c *Client) SetPollDelay(delay time.Duration) *Client {
-	c.millisecondsPerPoll = delay
+	c.pollInterval = delay
 	return c
 }
 
 // GetPollDelay gets the number of milliseconds to wait between events or status polls.
 // Affects all WaitFor* functions and retries.
 func (c *Client) GetPollDelay() time.Duration {
-	return c.millisecondsPerPoll
+	return c.pollInterval
+}
+
+// SetHeader sets a custom header to be used in all API requests made with the current
+// client.
+// NOTE: Some headers may be overridden by the individual request functions.
+func (c *Client) SetHeader(name, value string) {
+	c.resty.SetHeader(name, value)
 }
 
 // NewClient factory to create new Client struct
@@ -384,7 +408,7 @@ func NewClient(hc *http.Client) (client Client) {
 	certPath, certPathExists := os.LookupEnv(APIHostCert)
 
 	if certPathExists {
-		cert, err := ioutil.ReadFile(filepath.Clean(certPath))
+		cert, err := os.ReadFile(filepath.Clean(certPath))
 		if err != nil {
 			log.Fatalf("[ERROR] Error when reading cert at %s: %s\n", certPath, err.Error())
 		}
@@ -398,7 +422,7 @@ func NewClient(hc *http.Client) (client Client) {
 
 	client.
 		SetRetryWaitTime((1000 * APISecondsPerPoll) * time.Millisecond).
-		SetPollDelay(1000 * APISecondsPerPoll).
+		SetPollDelay(APISecondsPerPoll * time.Second).
 		SetRetries().
 		SetDebug(envDebug)
 
@@ -439,7 +463,7 @@ func NewClientFromEnv(hc *http.Client) (*Client, error) {
 
 	// We should only load the config if the config file exists
 	if _, err := os.Stat(configPath); err != nil {
-		return nil, fmt.Errorf("error loading config file %s: %s", configPath, err)
+		return nil, fmt.Errorf("error loading config file %s: %w", configPath, err)
 	}
 
 	err = client.preLoadConfig(configPath)
@@ -514,12 +538,12 @@ func copyTime(tPtr *time.Time) *time.Time {
 
 func generateListCacheURL(endpoint string, opts *ListOptions) (string, error) {
 	if opts == nil {
-		return "", nil
+		return endpoint, nil
 	}
 
 	hashedOpts, err := opts.Hash()
 	if err != nil {
-		return "", err
+		return endpoint, err
 	}
 
 	return fmt.Sprintf("%s:%s", endpoint, hashedOpts), nil

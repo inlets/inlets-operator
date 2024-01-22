@@ -2,27 +2,52 @@ package linodego
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"net/url"
+	"time"
 
 	"github.com/go-resty/resty/v2"
+	"github.com/linode/linodego/internal/parseabletime"
 )
 
 // LinodeKernel represents a Linode Instance kernel object
 type LinodeKernel struct {
-	ID           string `json:"id"`
-	Label        string `json:"label"`
-	Version      string `json:"version"`
-	Architecture string `json:"architecture"`
-	Deprecated   bool   `json:"deprecated"`
-	KVM          bool   `json:"kvm"`
-	XEN          bool   `json:"xen"`
-	PVOPS        bool   `json:"pvops"`
+	ID           string     `json:"id"`
+	Label        string     `json:"label"`
+	Version      string     `json:"version"`
+	Architecture string     `json:"architecture"`
+	Deprecated   bool       `json:"deprecated"`
+	KVM          bool       `json:"kvm"`
+	XEN          bool       `json:"xen"`
+	PVOPS        bool       `json:"pvops"`
+	Built        *time.Time `json:"-"`
 }
 
 // LinodeKernelsPagedResponse represents a Linode kernels API response for listing
 type LinodeKernelsPagedResponse struct {
 	*PageOptions
 	Data []LinodeKernel `json:"data"`
+}
+
+// UnmarshalJSON implements the json.Unmarshaler interface
+func (i *LinodeKernel) UnmarshalJSON(b []byte) error {
+	type Mask LinodeKernel
+
+	p := struct {
+		*Mask
+		Built *parseabletime.ParseableTime `json:"built"`
+	}{
+		Mask: (*Mask)(i),
+	}
+
+	if err := json.Unmarshal(b, &p); err != nil {
+		return err
+	}
+
+	i.Built = (*time.Time)(p.Built)
+
+	return nil
 }
 
 func (LinodeKernelsPagedResponse) endpoint(_ ...any) string {
@@ -64,6 +89,7 @@ func (c *Client) ListKernels(ctx context.Context, opts *ListOptions) ([]LinodeKe
 
 // GetKernel gets the kernel with the provided ID. This endpoint is cached by default.
 func (c *Client) GetKernel(ctx context.Context, kernelID string) (*LinodeKernel, error) {
+	kernelID = url.PathEscape(kernelID)
 	e := fmt.Sprintf("linode/kernels/%s", kernelID)
 
 	if result := c.getCachedResponse(e); result != nil {

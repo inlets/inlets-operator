@@ -29,6 +29,19 @@ linters-settings:
 linters:
   enable-all: true
   disable:
+    # deprecated linters
+    - deadcode
+    - ifshort
+    - varcheck
+    - nosnakecase
+    ####################
+
+    # conflicted with go fmt
+    - nolintlint
+
+    # workaround to avoid linter failures of getting malformed json
+    - musttag
+
     - bodyclose
     - contextcheck
     - nilerr
@@ -71,4 +84,7 @@ linters:
     - cyclop
     - godot
     - exhaustive
+    - depguard
+    - tagalign
+    - inamedparam
   fast: false

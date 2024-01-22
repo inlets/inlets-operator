@@ -1,11 +1,13 @@
 # packngo
 
-[![Maintained](https://img.shields.io/badge/stability-maintained-green.svg)](https://github.com/equinix-labs/equinix-labs/blob/main/maintained-statement.md)
+[![Deprecated](https://img.shields.io/badge/Stability-Deprecated-red.svg)](https://github.com/equinix-labs/equinix-labs/blob/main/uniform-standards.md)
 [![Release](https://img.shields.io/github/v/release/packethost/packngo)](https://github.com/packethost/packngo/releases/latest)
 [![GoDoc](https://godoc.org/github.com/packethost/packngo?status.svg)](https://godoc.org/github.com/packethost/packngo)
 [![Go Report Card](https://goreportcard.com/badge/github.com/packethost/packngo)](https://goreportcard.com/report/github.com/packethost/packngo)
 [![Slack](https://slack.equinixmetal.com/badge.svg)](https://slack.equinixmetal.com/)
 [![Twitter Follow](https://img.shields.io/twitter/follow/equinixmetal.svg?style=social&label=Follow)](https://twitter.com/intent/follow?screen_name=equinixmetal)
+
+> **[Deprecated](https://github.com/equinix-labs/equinix-labs/blob/main/deprecated-statement.md)** This repository is Deprecated, meaning that this software is only supported or maintained by Equinix Metal and its community in a case-by-case basis.  It has been replaced by [`equinix-sdk-go`](https://github.com/equinix/equinix-sdk-go), which is generated from Equinix OpenAPI specs and is intended to support Equinix services beyond only Metal.
 
 A Golang client for the Equinix Metal API. ([Packet is now Equinix Metal](https://blog.equinix.com/blog/2020/10/06/equinix-metal-metal-and-more/))
 

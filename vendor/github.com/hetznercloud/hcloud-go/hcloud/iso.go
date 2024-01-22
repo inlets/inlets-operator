@@ -12,16 +12,14 @@ import (
 
 // ISO represents an ISO image in the Hetzner Cloud.
 type ISO struct {
-	ID          int
-	Name        string
-	Description string
-	Type        ISOType
-	Deprecated  time.Time
-}
-
-// IsDeprecated returns true if the ISO is deprecated
-func (iso *ISO) IsDeprecated() bool {
-	return !iso.Deprecated.IsZero()
+	ID           int
+	Name         string
+	Description  string
+	Type         ISOType
+	Architecture *Architecture
+	// Deprecated: Use [ISO.Deprecation] instead.
+	Deprecated time.Time
+	DeprecatableResource
 }
 
 // ISOType specifies the type of an ISO image.
@@ -83,15 +81,31 @@ type ISOListOpts struct {
 	ListOpts
 	Name string
 	Sort []string
+	// Architecture filters the ISOs by Architecture. Note that custom ISOs do not have any architecture set, and you
+	// must use IncludeWildcardArchitecture to include them.
+	Architecture []Architecture
+	// IncludeWildcardArchitecture must be set to also return custom ISOs that have no architecture set, if you are
+	// also setting the Architecture field.
+	// Deprecated: Use [ISOListOpts.IncludeArchitectureWildcard] instead.
+	IncludeWildcardArchitecture bool
+	// IncludeWildcardArchitecture must be set to also return custom ISOs that have no architecture set, if you are
+	// also setting the Architecture field.
+	IncludeArchitectureWildcard bool
 }
 
 func (l ISOListOpts) values() url.Values {
-	vals := l.ListOpts.values()
+	vals := l.ListOpts.Values()
 	if l.Name != "" {
 		vals.Add("name", l.Name)
 	}
 	for _, sort := range l.Sort {
 		vals.Add("sort", sort)
+	}
+	for _, arch := range l.Architecture {
+		vals.Add("architecture", string(arch))
+	}
+	if l.IncludeArchitectureWildcard || l.IncludeWildcardArchitecture {
+		vals.Add("include_architecture_wildcard", "true")
 	}
 	return vals
 }
@@ -121,10 +135,12 @@ func (c *ISOClient) List(ctx context.Context, opts ISOListOpts) ([]*ISO, *Respon
 
 // All returns all ISOs.
 func (c *ISOClient) All(ctx context.Context) ([]*ISO, error) {
-	allISOs := []*ISO{}
+	return c.AllWithOpts(ctx, ISOListOpts{ListOpts: ListOpts{PerPage: 50}})
+}
 
-	opts := ISOListOpts{}
-	opts.PerPage = 50
+// AllWithOpts returns all ISOs for the given options.
+func (c *ISOClient) AllWithOpts(ctx context.Context, opts ISOListOpts) ([]*ISO, error) {
+	allISOs := []*ISO{}
 
 	err := c.client.all(func(page int) (*Response, error) {
 		opts.Page = page
