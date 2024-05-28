@@ -1,6 +1,6 @@
 # inlets-operator
 
-[![Build Status](https://github.com/inlets/inlets-operator/actions/workflows/ci-only.yaml/badge.svg)](https://github.com/inlets/inlets-operator/actions/workflows/ci-only.yaml) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) [![Go Report Card](https://goreportcard.com/badge/github.com/inlets/inlets-operator)](https://goreportcard.com/report/github.com/inlets/inlets-operator) [![Documentation](https://godoc.org/github.com/inlets/inlets-operator?status.svg)](http://godoc.org/github.com/inlets/inlets-operator)
+[![build](https://github.com/inlets/inlets-operator/actions/workflows/build.yaml/badge.svg)](https://github.com/inlets/inlets-operator/actions/workflows/build.yaml) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) [![Go Report Card](https://goreportcard.com/badge/github.com/inlets/inlets-operator)](https://goreportcard.com/report/github.com/inlets/inlets-operator) [![Documentation](https://godoc.org/github.com/inlets/inlets-operator?status.svg)](http://godoc.org/github.com/inlets/inlets-operator)
 
 Get public TCP LoadBalancers for local Kubernetes clusters
 
