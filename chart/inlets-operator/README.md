@@ -14,7 +14,6 @@ If you would like to use Helm instead, read on.
 
   ```sh
   helm repo add inlets https://inlets.github.io/inlets-operator/
-  helm repo update
   ```
 
 * Create a namespace for the inlets-operator
@@ -47,7 +46,8 @@ Examples for each cloud are found in the [reference documentation](https://docs.
 ### Deploy with DigitalOcean in London
 
 ```sh
-helm upgrade inlets-operator --install inlets/inlets-operator \
+helm repo update && \
+  helm upgrade inlets-operator --install inlets/inlets-operator \
   --namespace inlets \
   --set region=lon1
 ```
@@ -64,7 +64,8 @@ image: ttl.sh/openfaas/inlets-operator:0.16.3-13-g9ff7184
 Then run:
 
 ```sh
-helm upgrade inlets-operator --install ./chart/inlets-operator \
+helm repo update && \
+  helm upgrade inlets-operator --install ./chart/inlets-operator \
   --namespace inlets \
   --set region=lon1 \
   -f ./chart/inlets-operator/values-ae.yaml
