@@ -79,15 +79,15 @@ and can be overwritten via the helm `--set` flag.
 Parameter | Description | Default value
 ---                     | ---                                                                     | ---
 `annotatedOnly`         | Only create tunnels for LoadBalancer with a `operator.inlets.dev/manage=1` annotation         | `false`
-`inletsClientImage`     | Docker image for the inlets client                                              | See values.yaml
-`image`                 | Docker image for the inlets-operator                                            | See values.yaml
+`inletsclient.Image`    | Container image for the inlets client when deployed inside K8s                                              | See values.yaml
+`image`                 | Container image for the inlets-operator                                            | See values.yaml
+`inletsRelease`         | Release version of inlets for tunnel server VMs run via systemd                                              | See values.yaml
 `secretKeyFile`         | If we are using a provider that requires a secret key as well as an access key, set to `/var/secrets/inlets/secret/inlets-secret-key` | `""`
 `affinity`              | Node affinity policy                                                            | `{}`
 `nodeSelector`          | Node labels for data pod assignment                                             | `{}`
 `tolerations`           | Node tolerations                                                                | `[]`
 `resources`             | Operator resources requests & limits                                            | `{"requests":{"cpu": "100m", "memory": "128Mi"}}`
 `accessKeyFile`         | Read the access key for your infrastructure provider from a file (recommended)  | `/var/secrets/inlets/inlets-access-key`
-`inletsRelease`           |Release version of inlets for tunnel servers                                              | See values.yaml
 `subnetId`              | The Subnet ID where the exit-server should be placed (EC2) | `""`
 `vpcId`                 | The VPC ID to create the exit-server in (EC2) | `""`
 `plan`                  | The plan or size for your cloud instance                                        | different defaults, depending of the infrastructure provider

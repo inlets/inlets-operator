@@ -47,8 +47,8 @@ spec:
         {{- if .Values.organizationID }}
         - "-organization-id={{.Values.organizationID}}"
         {{- end }}
-        {{- if .Values.inletsClientImage }}
-        - "-client-image={{.Values.inletsClientImage}}"
+        {{- if .Values.inletsClient.image }}
+        - "-client-image={{.Values.inletsClient.image}}"
         {{- end }}
         {{- if .Values.inletsRelease }}
         - "-inlets-release={{.Values.inletsRelease}}"

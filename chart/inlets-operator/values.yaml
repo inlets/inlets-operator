@@ -12,6 +12,14 @@ region: "lon1"
 # Required when using a network driver that uses IPVS instead of iptables
 annotatedOnly: false
 
+# These two versions should match for the client and server
+# For the client which will run as a Deployment in Kubernetes
+inletsClient:
+  image: "ghcr.io/inlets/inlets-pro:0.9.31"
+
+# For the server which will run a binary via systemd
+inletsRelease: "0.9.31"
+
 #plan: <The plan or size for your cloud instance>
 
 # provider: "gce"
@@ -43,10 +51,6 @@ subnetId: ""
 
 image: "ghcr.io/inlets/inlets-operator:0.17.7"
 pullPolicy: "IfNotPresent"
-
-# These should match
-inletsClientImage: "ghcr.io/inlets/inlets-pro:0.9.23"
-inletsRelease: "0.9.23"
 
 nameOverride: ""
 fullnameOverride: ""

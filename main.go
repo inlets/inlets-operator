@@ -38,7 +38,7 @@ func init() {
 	flag.StringVar(&masterURL, "master", "", "The address of the Kubernetes API server. Overrides any value in kubeconfig. Only required if out-of-cluster.")
 }
 
-const defaultRelease = "0.9.14"
+const defaultRelease = "0.9.31"
 
 func main() {
 	infra := &InfraConfig{
