@@ -49,7 +49,7 @@ vpcId: ""
 # The Subnet ID where the exit-server should be placed (EC2)
 subnetId: ""
 
-image: "ghcr.io/inlets/inlets-operator:0.17.7"
+image: "ghcr.io/inlets/inlets-operator:0.17.8"
 pullPolicy: "IfNotPresent"
 
 nameOverride: ""
