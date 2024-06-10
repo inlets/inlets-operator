@@ -20,12 +20,12 @@ jobs:
         with:
           fetch-depth: 1
       - name: Set up QEMU
-        uses: docker/setup-qemu-action@v2
+        uses: docker/setup-qemu-action@v3
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@v3
       - name: Local build
         id: local_build
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@v5
         with:
           outputs: "type=docker,push=false"
           platforms: linux/amd64
