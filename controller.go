@@ -864,8 +864,8 @@ func getHostConfig(c *Controller, tunnel *inletsv1alpha1.Tunnel, service *corev1
 	case "hetzner":
 		host = provision.BasicHost{
 			Name:       tunnel.Name,
-			OS:         "ubuntu-20.04", // https://docs.hetzner.cloud/#images-get-all-images
-			Plan:       "cx11",         // https://docs.hetzner.cloud/#server-types-get-a-server-type
+			OS:         "ubuntu-22.04", // https://docs.hetzner.cloud/#images-get-all-images
+			Plan:       "cx22",         // https://docs.hetzner.cloud/#server-types-get-a-server-type
 			Region:     c.infraConfig.Region,
 			UserData:   userData,
 			Additional: map[string]string{},
