@@ -855,8 +855,8 @@ func getHostConfig(c *Controller, tunnel *inletsv1alpha1.Tunnel, service *corev1
 				"inlets-port":    strconv.Itoa(inletsPort),
 				"pro":            fmt.Sprint(pro),
 				"imagePublisher": "Canonical",
-				"imageOffer":     "0001-com-ubuntu-server-focal",
-				"imageSku":       "20_04-lts",
+				"imageOffer":     "0001-com-ubuntu-server-jammy",
+				"imageSku":       "22_04-lts-gen2",
 				"imageVersion":   "latest",
 			},
 		}
