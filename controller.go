@@ -756,17 +756,7 @@ func getHostConfig(c *Controller, tunnel *inletsv1alpha1.Tunnel, service *corev1
 	inletsPort := inletsPROControlPort
 
 	switch c.infraConfig.Provider {
-	case "equinix-metal":
-		host = provision.BasicHost{
-			Name:     tunnel.Name,
-			OS:       "ubuntu_20_04",
-			Plan:     "c3.small.x86",
-			Region:   c.infraConfig.Region,
-			UserData: userData,
-			Additional: map[string]string{
-				"project_id": c.infraConfig.ProjectID,
-			},
-		}
+
 	case "digitalocean":
 		host = provision.BasicHost{
 			Name:       tunnel.Name,
@@ -905,8 +895,6 @@ func getProvisioner(c *Controller) (provision.Provisioner, error) {
 	var provisioner provision.Provisioner
 
 	switch c.infraConfig.Provider {
-	case "equinix-metal":
-		provisioner, err = provision.NewEquinixMetalProvisioner(c.infraConfig.GetAccessKey())
 	case "digitalocean":
 		provisioner, err = provision.NewDigitalOceanProvisioner(c.infraConfig.GetAccessKey())
 	case "scaleway":
