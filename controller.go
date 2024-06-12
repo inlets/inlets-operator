@@ -792,7 +792,7 @@ func getHostConfig(c *Controller, tunnel *inletsv1alpha1.Tunnel, service *corev1
 
 		host = provision.BasicHost{
 			Name:     tunnel.Name,
-			OS:       "projects/ubuntu-os-cloud/global/images/ubuntu-minimal-2004-focal-v20210707",
+			OS:       "projects/ubuntu-os-cloud/global/images/ubuntu-minimal-2204-jammy-v20240606",
 			Plan:     "f1-micro",
 			Region:   c.infraConfig.Region,
 			UserData: userData,
