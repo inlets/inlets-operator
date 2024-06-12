@@ -1,5 +1,3 @@
-# cloud.google.com/go/compute v1.23.3
-## explicit; go 1.19
 # cloud.google.com/go/compute/metadata v0.3.0
 ## explicit; go 1.19
 cloud.google.com/go/compute/metadata
@@ -170,8 +168,6 @@ github.com/go-resty/resty/v2
 ## explicit; go 1.15
 github.com/gogo/protobuf/proto
 github.com/gogo/protobuf/sortkeys
-# github.com/golang-jwt/jwt v3.2.2+incompatible
-## explicit
 # github.com/golang-jwt/jwt/v5 v5.2.0
 ## explicit; go 1.18
 github.com/golang-jwt/jwt/v5
@@ -189,8 +185,6 @@ github.com/golang/protobuf/ptypes
 github.com/golang/protobuf/ptypes/any
 github.com/golang/protobuf/ptypes/duration
 github.com/golang/protobuf/ptypes/timestamp
-# github.com/google/gnostic v0.7.0
-## explicit; go 1.12
 # github.com/google/gnostic-models v0.6.9-0.20230804172637-c7be7c783f49
 ## explicit; go 1.18
 github.com/google/gnostic-models/compiler
@@ -289,8 +283,6 @@ github.com/linode/linodego/internal/parseabletime
 github.com/mailru/easyjson/buffer
 github.com/mailru/easyjson/jlexer
 github.com/mailru/easyjson/jwriter
-# github.com/matttproud/golang_protobuf_extensions v1.0.4
-## explicit; go 1.9
 # github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd
 ## explicit
 github.com/modern-go/concurrent
@@ -483,8 +475,6 @@ google.golang.org/api/option
 google.golang.org/api/option/internaloption
 google.golang.org/api/transport/http
 google.golang.org/api/transport/http/internal/propagation
-# google.golang.org/appengine v1.6.8
-## explicit; go 1.11
 # google.golang.org/genproto v0.0.0-20240116215550-a9fa1716bcac
 ## explicit; go 1.19
 # google.golang.org/genproto/googleapis/rpc v0.0.0-20240116215550-a9fa1716bcac
