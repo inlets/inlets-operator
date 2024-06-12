@@ -832,7 +832,7 @@ func getHostConfig(c *Controller, tunnel *inletsv1alpha1.Tunnel, service *corev1
 	case "linode":
 		host = provision.BasicHost{
 			Name:       tunnel.Name,
-			OS:         "linode/ubuntu20.04", // https://api.linode.com/v4/images
+			OS:         "linode/ubuntu22.04", // https://api.linode.com/v4/images
 			Plan:       "g6-nanode-1",        // https://api.linode.com/v4/linode/types
 			Region:     c.infraConfig.Region,
 			UserData:   userData,
