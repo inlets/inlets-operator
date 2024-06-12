@@ -93,7 +93,7 @@ verify-chart:
 .PHONY: upgrade-chart
 upgrade-chart:
 	@echo Upgrading helm chart images in remote registries && \
-	arkade chart upgrade --verbose=$(VERBOSE) -f ./chart/inlets-operator/values.yaml --write && echo "Note: Update the inletsRelease field manually in values.yaml"
+	arkade chart upgrade --verbose=$(VERBOSE) -f ./chart/inlets-operator/values.yaml --write && echo "Note: Update the \"inletsRelease:\" field manually in values.yaml"
 
 .PHONY: bump-chart
 bump-chart:
