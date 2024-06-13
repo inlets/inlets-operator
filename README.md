@@ -14,7 +14,7 @@ Deleting the service or annotating it will cause the cloud VM to be deleted.
 
 See also:
 
-* [Installation](#installation)
+* [Installation for different cloud providers](https://docs.inlets.dev/reference/inlets-operator/)
 * [Expose an Ingress Controller or Istio](#expose-an-ingress-controller-or-istio-ingress-gateway)
 * [Helm chart](/chart/inlets-operator/)
 * [Conceptual overview](#conceptual-overview)
@@ -124,7 +124,7 @@ There's also a [video walk-through of exposing an Ingress Controller](https://ww
 
 ## Installation
 
-Check out the reference documentation for inlets-operator to get exit-nodes provisioned on different cloud providers [here](https://docs.inlets.dev/#/tools/inlets-operator?id=inlets-operator-reference-documentation).
+Read the [installation instructions for different cloud providers](https://docs.inlets.dev/reference/inlets-operator/)
 
 See also: [Helm chart](/chart/inlets-operator/)
 
@@ -181,13 +181,13 @@ Contributions are welcome, see the [CONTRIBUTING.md](CONTRIBUTING.md) guide.
 
 ## Also in this space
 
-- [inlets](https://inlets.dev) - L7 HTTP / L4 TCP tunnel which can tunnel any TCP traffic. Secure by default with built-in TLS encryption. Kubernetes-ready with Operator, helm chart, container images and YAML manifests
+- [inlets](https://inlets.dev) - L7 HTTP / L4 TCP tunnel which can tunnel any TCP traffic. One of the ways to deploy it is via the inlets-operator.
 - [MetalLB](https://github.com/metallb/metallb) - a LoadBalancer for private Kubernetes clusters, cannot expose services publicly
-- [kube-vip](https://kube-vip.io/) - a more modern Kubernetes LoadBalancer than MetalLB, cannot expose services publicly
-- [Cloudflare Argo](https://www.cloudflare.com/en-gb/products/argo-tunnel/) - product from Cloudflare for Cloudflare customers and domains - K8s integration available through Cloudflare DNS and ingress controller. Not for use with custom Ingress Controllers
+- [kube-vip](https://kube-vip.io/) - a Kubernetes LoadBalancer similar to MetalLB, cannot expose services publicly
+- [Cloudflare Tunnel aka "Argo"](https://www.cloudflare.com/en-gb/products/tunnel/) - product from Cloudflare for Cloudflare customers and domains - K8s integration available through Cloudflare DNS and ingress controller. Not for use with existing Ingress Controllers, unable to provide LoadBalancer
 - [ngrok](https://ngrok.com) - a SasS tunnel service tool, restarts every 7 hours, limits connections per minute, SaaS-only, no K8s integration available, TCP tunnels can only use high/unconventional ports, can't be used with Ingress Controllers
-- [Wireguard](https://www.wireguard.com/) - a modern VPN, not for exposing services publicly
-- [Tailscale](https://tailscale.com/) - a mesh VPN that automates Wireguard, not for exposing services publicly
+- [Wireguard](https://www.wireguard.com/) - a modern VPN for connecting whole hosts and networks. Does not expose HTTP or TCP ports publicly.
+- [Tailscale](https://tailscale.com/) - a managed SaaS VPN that is built upon Wireguard.
 
 ## Author / vendor
 
