@@ -93,6 +93,5 @@ Parameter | Description | Default value
 `plan`                  | The plan or size for your cloud instance                                        | different defaults, depending of the infrastructure provider
 `projectID`             | The project ID if using gce or equinix-metal as the provider    | `""`
 `region`                | The region to provision hosts into                                              | `""`
-`inletsProLicense`      | The value received for the inlets-pro license                                                 | `""`
 `zone`                  | The zone where the exit node is to be provisioned (Used when Google Compute Engine is used as provider) | `us-central1-a`
 `provider`              | Your infrastructure provider - 'digitalocean', 'ec2', 'scaleway', 'equinix-metal', or 'gce'                       | `""`
