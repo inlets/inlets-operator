@@ -126,6 +126,8 @@ There's also a [video walk-through of exposing an Ingress Controller](https://ww
 
 Read the [installation instructions for different cloud providers](https://docs.inlets.dev/reference/inlets-operator/)
 
+The image for this operator is multi-arch and supports both `x86_64` and `arm64`.
+
 See also: [Helm chart](/chart/inlets-operator/)
 
 ### Expose an Ingress Controller or Istio Ingress Gateway

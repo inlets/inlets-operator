@@ -8,6 +8,8 @@ If you would like to use Helm instead, read on.
 
 ## Pre-reqs
 
+A Kubernetes cluster deployed with `x86_64` or `arm64` hosts, or a mixture of both.
+
 * Download Helm, i.e. `arkade get helm` or `brew install helm`
 
 * Add the chart repo
