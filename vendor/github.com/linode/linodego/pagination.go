@@ -5,7 +5,6 @@ package linodego
  */
 
 import (
-	"context"
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
@@ -91,41 +90,6 @@ type PagedResponse interface {
 	castResult(*resty.Request, string) (int, int, error)
 }
 
-// listHelper abstracts fetching and pagination for GET endpoints that
-// do not require any Ids (top level endpoints).
-// When opts (or opts.Page) is nil, all pages will be fetched and
-// returned in a single (endpoint-specific)PagedResponse
-// opts.results and opts.pages will be updated from the API response
-func (c *Client) listHelper(ctx context.Context, pager PagedResponse, opts *ListOptions, ids ...any) error {
-	req := c.R(ctx)
-	if err := applyListOptionsToRequest(opts, req); err != nil {
-		return err
-	}
-
-	pages, results, err := pager.castResult(req, pager.endpoint(ids...))
-	if err != nil {
-		return err
-	}
-	if opts == nil {
-		opts = &ListOptions{PageOptions: &PageOptions{Page: 0}}
-	}
-	if opts.PageOptions == nil {
-		opts.PageOptions = &PageOptions{Page: 0}
-	}
-	if opts.Page == 0 {
-		for page := 2; page <= pages; page++ {
-			opts.Page = page
-			if err := c.listHelper(ctx, pager, opts, ids...); err != nil {
-				return err
-			}
-		}
-	}
-
-	opts.Results = results
-	opts.Pages = pages
-	return nil
-}
-
 // flattenQueryStruct flattens a structure into a Resty-compatible query param map.
 // Fields are mapped using the `query` struct tag.
 func flattenQueryStruct(val any) (map[string]string, error) {
@@ -150,7 +114,7 @@ func flattenQueryStruct(val any) (map[string]string, error) {
 
 	valType := reflectVal.Type()
 
-	for i := 0; i < valType.NumField(); i++ {
+	for i := range valType.NumField() {
 		currentField := valType.Field(i)
 
 		queryTag, ok := currentField.Tag.Lookup("query")
@@ -196,4 +160,9 @@ func queryFieldToString(value reflect.Value) (string, error) {
 	default:
 		return "", fmt.Errorf("unsupported query param type: %s", value.Type().Name())
 	}
+}
+
+type legacyPagedResponse[T any] struct {
+	*PageOptions
+	Data []T `json:"data"`
 }

@@ -14,6 +14,8 @@ import (
 const (
 	retryAfterHeaderName      = "Retry-After"
 	maintenanceModeHeaderName = "X-Maintenance-Mode"
+
+	defaultRetryCount = 1000
 )
 
 // type RetryConditional func(r *resty.Response) (shouldRetry bool)
@@ -27,7 +29,7 @@ type RetryAfter resty.RetryAfterFunc
 // If the Retry-After header is not set, we fall back to value of SetPollDelay.
 func configureRetries(c *Client) {
 	c.resty.
-		SetRetryCount(1000).
+		SetRetryCount(defaultRetryCount).
 		AddRetryCondition(checkRetryConditionals(c)).
 		SetRetryAfter(respectRetryAfter)
 }

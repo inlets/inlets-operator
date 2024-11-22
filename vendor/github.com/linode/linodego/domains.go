@@ -2,10 +2,6 @@ package linodego
 
 import (
 	"context"
-	"encoding/json"
-	"fmt"
-
-	"github.com/go-resty/resty/v2"
 )
 
 // Domain represents a Domain object
@@ -188,99 +184,63 @@ func (d Domain) GetUpdateOptions() (du DomainUpdateOptions) {
 	return
 }
 
-// DomainsPagedResponse represents a paginated Domain API response
-type DomainsPagedResponse struct {
-	*PageOptions
-	Data []Domain `json:"data"`
-}
-
-// endpoint gets the endpoint URL for Domain
-func (DomainsPagedResponse) endpoint(_ ...any) string {
-	return "domains"
-}
-
-func (resp *DomainsPagedResponse) castResult(r *resty.Request, e string) (int, int, error) {
-	res, err := coupleAPIErrors(r.SetResult(DomainsPagedResponse{}).Get(e))
-	if err != nil {
-		return 0, 0, err
-	}
-	castedRes := res.Result().(*DomainsPagedResponse)
-	resp.Data = append(resp.Data, castedRes.Data...)
-	return castedRes.Pages, castedRes.Results, nil
-}
-
 // ListDomains lists Domains
 func (c *Client) ListDomains(ctx context.Context, opts *ListOptions) ([]Domain, error) {
-	response := DomainsPagedResponse{}
-	err := c.listHelper(ctx, &response, opts)
+	response, err := getPaginatedResults[Domain](ctx, c, "domains", opts)
 	if err != nil {
 		return nil, err
 	}
 
-	return response.Data, nil
+	return response, nil
 }
 
 // GetDomain gets the domain with the provided ID
 func (c *Client) GetDomain(ctx context.Context, domainID int) (*Domain, error) {
-	req := c.R(ctx).SetResult(&Domain{})
-	e := fmt.Sprintf("domains/%d", domainID)
-	r, err := coupleAPIErrors(req.Get(e))
+	e := formatAPIPath("domains/%d", domainID)
+	response, err := doGETRequest[Domain](ctx, c, e)
 	if err != nil {
 		return nil, err
 	}
 
-	return r.Result().(*Domain), nil
+	return response, nil
 }
 
 // CreateDomain creates a Domain
 func (c *Client) CreateDomain(ctx context.Context, opts DomainCreateOptions) (*Domain, error) {
-	body, err := json.Marshal(opts)
-	if err != nil {
-		return nil, err
-	}
-
-	req := c.R(ctx).SetResult(&Domain{}).SetBody(string(body))
 	e := "domains"
-	r, err := coupleAPIErrors(req.Post(e))
+	response, err := doPOSTRequest[Domain](ctx, c, e, opts)
 	if err != nil {
 		return nil, err
 	}
 
-	return r.Result().(*Domain), nil
+	return response, nil
 }
 
 // UpdateDomain updates the Domain with the specified id
 func (c *Client) UpdateDomain(ctx context.Context, domainID int, opts DomainUpdateOptions) (*Domain, error) {
-	body, err := json.Marshal(opts)
+	e := formatAPIPath("domains/%d", domainID)
+	response, err := doPUTRequest[Domain](ctx, c, e, opts)
 	if err != nil {
 		return nil, err
 	}
 
-	e := fmt.Sprintf("domains/%d", domainID)
-	req := c.R(ctx).SetResult(&Domain{}).SetBody(string(body))
-	r, err := coupleAPIErrors(req.Put(e))
-	if err != nil {
-		return nil, err
-	}
-
-	return r.Result().(*Domain), nil
+	return response, nil
 }
 
 // DeleteDomain deletes the Domain with the specified id
 func (c *Client) DeleteDomain(ctx context.Context, domainID int) error {
-	e := fmt.Sprintf("domains/%d", domainID)
-	_, err := coupleAPIErrors(c.R(ctx).Delete(e))
+	e := formatAPIPath("domains/%d", domainID)
+	err := doDELETERequest(ctx, c, e)
 	return err
 }
 
 // GetDomainZoneFile gets the zone file for the last rendered zone for the specified domain.
 func (c *Client) GetDomainZoneFile(ctx context.Context, domainID int) (*DomainZoneFile, error) {
-	e := fmt.Sprintf("domains/%d/zone-file", domainID)
-	req := c.R(ctx).SetResult(&DomainZoneFile{})
-	resp, err := coupleAPIErrors(req.Get(e))
+	e := formatAPIPath("domains/%d/zone-file", domainID)
+	response, err := doGETRequest[DomainZoneFile](ctx, c, e)
 	if err != nil {
 		return nil, err
 	}
 
-	return resp.Result().(*DomainZoneFile), nil
+	return response, nil
 }

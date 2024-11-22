@@ -22,9 +22,6 @@ type LKEClusterPoolCreateOptions = LKENodePoolCreateOptions
 // Deprecated: LKEClusterPoolUpdateOptions fields are those accepted by UpdateLKEClusterPool
 type LKEClusterPoolUpdateOptions = LKENodePoolUpdateOptions
 
-// Deprecated: LKEClusterPoolsPagedResponse represents a paginated LKEClusterPool API response
-type LKEClusterPoolsPagedResponse = LKENodePoolsPagedResponse
-
 // Deprecated: ListLKEClusterPools lists LKEClusterPools
 func (c *Client) ListLKEClusterPools(ctx context.Context, clusterID int, opts *ListOptions) ([]LKEClusterPool, error) {
 	return c.ListLKENodePools(ctx, clusterID, opts)

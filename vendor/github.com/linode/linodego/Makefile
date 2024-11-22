@@ -25,9 +25,10 @@ citest: lint test
 
 testunit:
 	go test -v $(PACKAGES) $(ARGS)
+	cd test && make testunit
 
 testint:
-	cd test && make test
+	cd test && make testint
 
 testcov-func:
 	@go test -v -coverprofile="coverage.txt" . > /dev/null 2>&1
@@ -76,7 +77,7 @@ run_fixtures:
 	LINODE_API_VERSION="v4beta" \
 	LINODE_URL="$(LINODE_URL)" \
 	GO111MODULE="on" \
-	go test -timeout=$(TEST_TIMEOUT) -v $(ARGS)
+	go test --tags $(TEST_TAGS) -timeout=$(TEST_TIMEOUT) -v $(ARGS)
 
 sanitize:
 	@echo "* Sanitizing fixtures"

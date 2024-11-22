@@ -3,10 +3,8 @@ package linodego
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"time"
 
-	"github.com/go-resty/resty/v2"
 	"github.com/linode/linodego/internal/parseabletime"
 )
 
@@ -104,82 +102,52 @@ func (i NodeBalancer) GetUpdateOptions() NodeBalancerUpdateOptions {
 	}
 }
 
-// NodeBalancersPagedResponse represents a paginated NodeBalancer API response
-type NodeBalancersPagedResponse struct {
-	*PageOptions
-	Data []NodeBalancer `json:"data"`
-}
-
-func (*NodeBalancersPagedResponse) endpoint(_ ...any) string {
-	return "nodebalancers"
-}
-
-func (resp *NodeBalancersPagedResponse) castResult(r *resty.Request, e string) (int, int, error) {
-	res, err := coupleAPIErrors(r.SetResult(NodeBalancersPagedResponse{}).Get(e))
-	if err != nil {
-		return 0, 0, err
-	}
-	castedRes := res.Result().(*NodeBalancersPagedResponse)
-	resp.Data = append(resp.Data, castedRes.Data...)
-	return castedRes.Pages, castedRes.Results, nil
-}
-
 // ListNodeBalancers lists NodeBalancers
 func (c *Client) ListNodeBalancers(ctx context.Context, opts *ListOptions) ([]NodeBalancer, error) {
-	response := NodeBalancersPagedResponse{}
-	err := c.listHelper(ctx, &response, opts)
+	response, err := getPaginatedResults[NodeBalancer](ctx, c, "nodebalancers", opts)
 	if err != nil {
 		return nil, err
 	}
-	return response.Data, nil
+
+	return response, nil
 }
 
 // GetNodeBalancer gets the NodeBalancer with the provided ID
 func (c *Client) GetNodeBalancer(ctx context.Context, nodebalancerID int) (*NodeBalancer, error) {
-	e := fmt.Sprintf("nodebalancers/%d", nodebalancerID)
-	req := c.R(ctx).SetResult(&NodeBalancer{})
-	r, err := coupleAPIErrors(req.Get(e))
+	e := formatAPIPath("nodebalancers/%d", nodebalancerID)
+	response, err := doGETRequest[NodeBalancer](ctx, c, e)
 	if err != nil {
 		return nil, err
 	}
-	return r.Result().(*NodeBalancer), nil
+
+	return response, nil
 }
 
 // CreateNodeBalancer creates a NodeBalancer
 func (c *Client) CreateNodeBalancer(ctx context.Context, opts NodeBalancerCreateOptions) (*NodeBalancer, error) {
-	body, err := json.Marshal(opts)
+	e := "nodebalancers"
+	response, err := doPOSTRequest[NodeBalancer](ctx, c, e, opts)
 	if err != nil {
 		return nil, err
 	}
 
-	e := "nodebalancers"
-	req := c.R(ctx).SetResult(&NodeBalancer{}).SetBody(string(body))
-	r, err := coupleAPIErrors(req.Post(e))
-	if err != nil {
-		return nil, err
-	}
-	return r.Result().(*NodeBalancer), nil
+	return response, nil
 }
 
 // UpdateNodeBalancer updates the NodeBalancer with the specified id
 func (c *Client) UpdateNodeBalancer(ctx context.Context, nodebalancerID int, opts NodeBalancerUpdateOptions) (*NodeBalancer, error) {
-	body, err := json.Marshal(opts)
+	e := formatAPIPath("nodebalancers/%d", nodebalancerID)
+	response, err := doPUTRequest[NodeBalancer](ctx, c, e, opts)
 	if err != nil {
 		return nil, err
 	}
 
-	e := fmt.Sprintf("nodebalancers/%d", nodebalancerID)
-	req := c.R(ctx).SetResult(&NodeBalancer{}).SetBody(string(body))
-	r, err := coupleAPIErrors(req.Put(e))
-	if err != nil {
-		return nil, err
-	}
-	return r.Result().(*NodeBalancer), nil
+	return response, nil
 }
 
 // DeleteNodeBalancer deletes the NodeBalancer with the specified id
 func (c *Client) DeleteNodeBalancer(ctx context.Context, nodebalancerID int) error {
-	e := fmt.Sprintf("nodebalancers/%d", nodebalancerID)
-	_, err := coupleAPIErrors(c.R(ctx).Delete(e))
+	e := formatAPIPath("nodebalancers/%d", nodebalancerID)
+	err := doDELETERequest(ctx, c, e)
 	return err
 }

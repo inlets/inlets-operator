@@ -14,6 +14,8 @@ import (
 	"strings"
 	"sync/atomic"
 	"time"
+
+	"golang.org/x/oauth2"
 )
 
 // getLocalTime is a function to be overwritten during the tests, it returns the time
@@ -48,10 +50,19 @@ var Endpoints = map[string]string{
 // Errors
 var (
 	ErrAPIDown = errors.New("go-ovh: the OVH API is not reachable: failed to get /auth/time response")
+
+	tokensURLs = map[string]string{
+		OvhEU: "https://www.ovh.com/auth/oauth2/token",
+		OvhCA: "https://ca.ovh.com/auth/oauth2/token",
+		OvhUS: "https://us.ovhcloud.com/auth/oauth2/token",
+	}
 )
 
 // Client represents a client to call the OVH API
 type Client struct {
+	// AccessToken is a short-lived access token that we got from auth/oauth2/token endpoint.
+	AccessToken string
+
 	// Self generated tokens. Create one by visiting
 	// https://eu.api.ovh.com/createApp/
 	// AppKey holds the Application key
@@ -63,8 +74,12 @@ type Client struct {
 	// ConsumerKey holds the user/app specific token. It must have been validated before use.
 	ConsumerKey string
 
+	ClientID     string
+	ClientSecret string
+
 	// API endpoint
-	endpoint string
+	endpoint          string
+	oauth2TokenSource oauth2.TokenSource
 
 	// Client is the underlying HTTP client used to run the requests. It may be overloaded but a default one is instanciated in ``NewClient`` by default.
 	Client *http.Client
@@ -112,6 +127,35 @@ func NewEndpointClient(endpoint string) (*Client, error) {
 // or configuration files
 func NewDefaultClient() (*Client, error) {
 	return NewClient("", "", "", "")
+}
+
+func NewOAuth2Client(endpoint, clientID, clientSecret string) (*Client, error) {
+	client := Client{
+		ClientID:     clientID,
+		ClientSecret: clientSecret,
+		Client:       &http.Client{},
+		Timeout:      DefaultTimeout,
+	}
+
+	// Get and check the configuration
+	if err := client.loadConfig(endpoint); err != nil {
+		return nil, err
+	}
+	return &client, nil
+}
+
+func NewAccessTokenClient(endpoint, accessToken string) (*Client, error) {
+	client := Client{
+		AccessToken: accessToken,
+		Client:      &http.Client{},
+		Timeout:     DefaultTimeout,
+	}
+
+	// Get and check the configuration
+	if err := client.loadConfig(endpoint); err != nil {
+		return nil, err
+	}
+	return &client, nil
 }
 
 func (c *Client) Endpoint() string {
@@ -288,32 +332,45 @@ func (c *Client) NewRequest(method, path string, reqBody interface{}, needAuth b
 	if body != nil {
 		req.Header.Add("Content-Type", "application/json;charset=utf-8")
 	}
-	req.Header.Add("X-Ovh-Application", c.AppKey)
+	if c.AppKey != "" {
+		req.Header.Add("X-Ovh-Application", c.AppKey)
+	}
 	req.Header.Add("Accept", "application/json")
 
 	// Inject signature. Some methods do not need authentication, especially /time,
 	// /auth and some /order methods are actually broken if authenticated.
 	if needAuth {
-		timeDelta, err := c.TimeDelta()
-		if err != nil {
-			return nil, err
+		if c.AppKey != "" {
+			timeDelta, err := c.TimeDelta()
+			if err != nil {
+				return nil, err
+			}
+
+			timestamp := getLocalTime().Add(-timeDelta).Unix()
+
+			req.Header.Add("X-Ovh-Timestamp", strconv.FormatInt(timestamp, 10))
+			req.Header.Add("X-Ovh-Consumer", c.ConsumerKey)
+
+			h := sha1.New()
+			h.Write([]byte(fmt.Sprintf("%s+%s+%s+%s+%s+%d",
+				c.AppSecret,
+				c.ConsumerKey,
+				method,
+				target,
+				body,
+				timestamp,
+			)))
+			req.Header.Add("X-Ovh-Signature", fmt.Sprintf("$1$%x", h.Sum(nil)))
+		} else if c.ClientID != "" {
+			token, err := c.oauth2TokenSource.Token()
+			if err != nil {
+				return nil, fmt.Errorf("failed to retrieve OAuth2 Access Token: %w", err)
+			}
+
+			req.Header.Set("Authorization", "Bearer "+token.AccessToken)
+		} else if c.AccessToken != "" {
+			req.Header.Set("Authorization", "Bearer "+c.AccessToken)
 		}
-
-		timestamp := getLocalTime().Add(-timeDelta).Unix()
-
-		req.Header.Add("X-Ovh-Timestamp", strconv.FormatInt(timestamp, 10))
-		req.Header.Add("X-Ovh-Consumer", c.ConsumerKey)
-
-		h := sha1.New()
-		h.Write([]byte(fmt.Sprintf("%s+%s+%s+%s+%s+%d",
-			c.AppSecret,
-			c.ConsumerKey,
-			method,
-			target,
-			body,
-			timestamp,
-		)))
-		req.Header.Add("X-Ovh-Signature", fmt.Sprintf("$1$%x", h.Sum(nil)))
 	}
 
 	// Send the request with requested timeout

@@ -56,6 +56,15 @@ func (enum Arch) String() string {
 	return string(enum)
 }
 
+func (enum Arch) Values() []Arch {
+	return []Arch{
+		"unknown_arch",
+		"x86_64",
+		"arm",
+		"arm64",
+	}
+}
+
 func (enum Arch) MarshalJSON() ([]byte, error) {
 	return []byte(fmt.Sprintf(`"%s"`, enum)), nil
 }
@@ -88,6 +97,15 @@ func (enum AttachServerVolumeRequestVolumeType) String() string {
 	return string(enum)
 }
 
+func (enum AttachServerVolumeRequestVolumeType) Values() []AttachServerVolumeRequestVolumeType {
+	return []AttachServerVolumeRequestVolumeType{
+		"unknown_volume_type",
+		"l_ssd",
+		"b_ssd",
+		"sbs_volume",
+	}
+}
+
 func (enum AttachServerVolumeRequestVolumeType) MarshalJSON() ([]byte, error) {
 	return []byte(fmt.Sprintf(`"%s"`, enum)), nil
 }
@@ -117,6 +135,14 @@ func (enum BootType) String() string {
 		return "local"
 	}
 	return string(enum)
+}
+
+func (enum BootType) Values() []BootType {
+	return []BootType{
+		"local",
+		"bootscript",
+		"rescue",
+	}
 }
 
 func (enum BootType) MarshalJSON() ([]byte, error) {
@@ -152,6 +178,16 @@ func (enum IPState) String() string {
 	return string(enum)
 }
 
+func (enum IPState) Values() []IPState {
+	return []IPState{
+		"unknown_state",
+		"detached",
+		"attached",
+		"pending",
+		"error",
+	}
+}
+
 func (enum IPState) MarshalJSON() ([]byte, error) {
 	return []byte(fmt.Sprintf(`"%s"`, enum)), nil
 }
@@ -184,6 +220,15 @@ func (enum IPType) String() string {
 	return string(enum)
 }
 
+func (enum IPType) Values() []IPType {
+	return []IPType{
+		"unknown_iptype",
+		"nat",
+		"routed_ipv4",
+		"routed_ipv6",
+	}
+}
+
 func (enum IPType) MarshalJSON() ([]byte, error) {
 	return []byte(fmt.Sprintf(`"%s"`, enum)), nil
 }
@@ -213,6 +258,14 @@ func (enum ImageState) String() string {
 		return "available"
 	}
 	return string(enum)
+}
+
+func (enum ImageState) Values() []ImageState {
+	return []ImageState{
+		"available",
+		"creating",
+		"error",
+	}
 }
 
 func (enum ImageState) MarshalJSON() ([]byte, error) {
@@ -247,6 +300,15 @@ func (enum ListServersRequestOrder) String() string {
 	return string(enum)
 }
 
+func (enum ListServersRequestOrder) Values() []ListServersRequestOrder {
+	return []ListServersRequestOrder{
+		"creation_date_desc",
+		"creation_date_asc",
+		"modification_date_desc",
+		"modification_date_asc",
+	}
+}
+
 func (enum ListServersRequestOrder) MarshalJSON() ([]byte, error) {
 	return []byte(fmt.Sprintf(`"%s"`, enum)), nil
 }
@@ -277,6 +339,13 @@ func (enum PlacementGroupPolicyMode) String() string {
 	return string(enum)
 }
 
+func (enum PlacementGroupPolicyMode) Values() []PlacementGroupPolicyMode {
+	return []PlacementGroupPolicyMode{
+		"optional",
+		"enforced",
+	}
+}
+
 func (enum PlacementGroupPolicyMode) MarshalJSON() ([]byte, error) {
 	return []byte(fmt.Sprintf(`"%s"`, enum)), nil
 }
@@ -305,6 +374,13 @@ func (enum PlacementGroupPolicyType) String() string {
 		return "max_availability"
 	}
 	return string(enum)
+}
+
+func (enum PlacementGroupPolicyType) Values() []PlacementGroupPolicyType {
+	return []PlacementGroupPolicyType{
+		"max_availability",
+		"low_latency",
+	}
 }
 
 func (enum PlacementGroupPolicyType) MarshalJSON() ([]byte, error) {
@@ -338,6 +414,14 @@ func (enum PrivateNICState) String() string {
 	return string(enum)
 }
 
+func (enum PrivateNICState) Values() []PrivateNICState {
+	return []PrivateNICState{
+		"available",
+		"syncing",
+		"syncing_error",
+	}
+}
+
 func (enum PrivateNICState) MarshalJSON() ([]byte, error) {
 	return []byte(fmt.Sprintf(`"%s"`, enum)), nil
 }
@@ -367,6 +451,14 @@ func (enum SecurityGroupPolicy) String() string {
 		return "unknown_policy"
 	}
 	return string(enum)
+}
+
+func (enum SecurityGroupPolicy) Values() []SecurityGroupPolicy {
+	return []SecurityGroupPolicy{
+		"unknown_policy",
+		"accept",
+		"drop",
+	}
 }
 
 func (enum SecurityGroupPolicy) MarshalJSON() ([]byte, error) {
@@ -400,6 +492,14 @@ func (enum SecurityGroupRuleAction) String() string {
 	return string(enum)
 }
 
+func (enum SecurityGroupRuleAction) Values() []SecurityGroupRuleAction {
+	return []SecurityGroupRuleAction{
+		"unknown_action",
+		"accept",
+		"drop",
+	}
+}
+
 func (enum SecurityGroupRuleAction) MarshalJSON() ([]byte, error) {
 	return []byte(fmt.Sprintf(`"%s"`, enum)), nil
 }
@@ -429,6 +529,14 @@ func (enum SecurityGroupRuleDirection) String() string {
 		return "unknown_direction"
 	}
 	return string(enum)
+}
+
+func (enum SecurityGroupRuleDirection) Values() []SecurityGroupRuleDirection {
+	return []SecurityGroupRuleDirection{
+		"unknown_direction",
+		"inbound",
+		"outbound",
+	}
 }
 
 func (enum SecurityGroupRuleDirection) MarshalJSON() ([]byte, error) {
@@ -464,6 +572,16 @@ func (enum SecurityGroupRuleProtocol) String() string {
 	return string(enum)
 }
 
+func (enum SecurityGroupRuleProtocol) Values() []SecurityGroupRuleProtocol {
+	return []SecurityGroupRuleProtocol{
+		"unknown_protocol",
+		"TCP",
+		"UDP",
+		"ICMP",
+		"ANY",
+	}
+}
+
 func (enum SecurityGroupRuleProtocol) MarshalJSON() ([]byte, error) {
 	return []byte(fmt.Sprintf(`"%s"`, enum)), nil
 }
@@ -493,6 +611,14 @@ func (enum SecurityGroupState) String() string {
 		return "available"
 	}
 	return string(enum)
+}
+
+func (enum SecurityGroupState) Values() []SecurityGroupState {
+	return []SecurityGroupState{
+		"available",
+		"syncing",
+		"syncing_error",
+	}
 }
 
 func (enum SecurityGroupState) MarshalJSON() ([]byte, error) {
@@ -530,6 +656,18 @@ func (enum ServerAction) String() string {
 	return string(enum)
 }
 
+func (enum ServerAction) Values() []ServerAction {
+	return []ServerAction{
+		"poweron",
+		"backup",
+		"stop_in_place",
+		"poweroff",
+		"terminate",
+		"reboot",
+		"enable_routed_ip",
+	}
+}
+
 func (enum ServerAction) MarshalJSON() ([]byte, error) {
 	return []byte(fmt.Sprintf(`"%s"`, enum)), nil
 }
@@ -558,6 +696,13 @@ func (enum ServerIPIPFamily) String() string {
 		return "inet"
 	}
 	return string(enum)
+}
+
+func (enum ServerIPIPFamily) Values() []ServerIPIPFamily {
+	return []ServerIPIPFamily{
+		"inet",
+		"inet6",
+	}
 }
 
 func (enum ServerIPIPFamily) MarshalJSON() ([]byte, error) {
@@ -591,6 +736,14 @@ func (enum ServerIPProvisioningMode) String() string {
 	return string(enum)
 }
 
+func (enum ServerIPProvisioningMode) Values() []ServerIPProvisioningMode {
+	return []ServerIPProvisioningMode{
+		"manual",
+		"dhcp",
+		"slaac",
+	}
+}
+
 func (enum ServerIPProvisioningMode) MarshalJSON() ([]byte, error) {
 	return []byte(fmt.Sprintf(`"%s"`, enum)), nil
 }
@@ -622,6 +775,16 @@ func (enum ServerIPState) String() string {
 		return "unknown_state"
 	}
 	return string(enum)
+}
+
+func (enum ServerIPState) Values() []ServerIPState {
+	return []ServerIPState{
+		"unknown_state",
+		"detached",
+		"attached",
+		"pending",
+		"error",
+	}
 }
 
 func (enum ServerIPState) MarshalJSON() ([]byte, error) {
@@ -658,6 +821,17 @@ func (enum ServerState) String() string {
 	return string(enum)
 }
 
+func (enum ServerState) Values() []ServerState {
+	return []ServerState{
+		"running",
+		"stopped",
+		"stopped in place",
+		"starting",
+		"stopping",
+		"locked",
+	}
+}
+
 func (enum ServerState) MarshalJSON() ([]byte, error) {
 	return []byte(fmt.Sprintf(`"%s"`, enum)), nil
 }
@@ -687,6 +861,14 @@ func (enum ServerTypesAvailability) String() string {
 		return "available"
 	}
 	return string(enum)
+}
+
+func (enum ServerTypesAvailability) Values() []ServerTypesAvailability {
+	return []ServerTypesAvailability{
+		"available",
+		"scarce",
+		"shortage",
+	}
 }
 
 func (enum ServerTypesAvailability) MarshalJSON() ([]byte, error) {
@@ -723,6 +905,17 @@ func (enum SnapshotState) String() string {
 	return string(enum)
 }
 
+func (enum SnapshotState) Values() []SnapshotState {
+	return []SnapshotState{
+		"available",
+		"snapshotting",
+		"error",
+		"invalid_data",
+		"importing",
+		"exporting",
+	}
+}
+
 func (enum SnapshotState) MarshalJSON() ([]byte, error) {
 	return []byte(fmt.Sprintf(`"%s"`, enum)), nil
 }
@@ -753,6 +946,15 @@ func (enum SnapshotVolumeType) String() string {
 		return "unknown_volume_type"
 	}
 	return string(enum)
+}
+
+func (enum SnapshotVolumeType) Values() []SnapshotVolumeType {
+	return []SnapshotVolumeType{
+		"unknown_volume_type",
+		"l_ssd",
+		"b_ssd",
+		"unified",
+	}
 }
 
 func (enum SnapshotVolumeType) MarshalJSON() ([]byte, error) {
@@ -786,6 +988,16 @@ func (enum TaskStatus) String() string {
 		return "pending"
 	}
 	return string(enum)
+}
+
+func (enum TaskStatus) Values() []TaskStatus {
+	return []TaskStatus{
+		"pending",
+		"started",
+		"success",
+		"failure",
+		"retry",
+	}
 }
 
 func (enum TaskStatus) MarshalJSON() ([]byte, error) {
@@ -823,6 +1035,18 @@ func (enum VolumeServerState) String() string {
 	return string(enum)
 }
 
+func (enum VolumeServerState) Values() []VolumeServerState {
+	return []VolumeServerState{
+		"available",
+		"snapshotting",
+		"fetching",
+		"resizing",
+		"saving",
+		"hotsyncing",
+		"error",
+	}
+}
+
 func (enum VolumeServerState) MarshalJSON() ([]byte, error) {
 	return []byte(fmt.Sprintf(`"%s"`, enum)), nil
 }
@@ -853,6 +1077,15 @@ func (enum VolumeServerVolumeType) String() string {
 		return "l_ssd"
 	}
 	return string(enum)
+}
+
+func (enum VolumeServerVolumeType) Values() []VolumeServerVolumeType {
+	return []VolumeServerVolumeType{
+		"l_ssd",
+		"b_ssd",
+		"sbs_volume",
+		"scratch",
+	}
 }
 
 func (enum VolumeServerVolumeType) MarshalJSON() ([]byte, error) {
@@ -890,6 +1123,18 @@ func (enum VolumeState) String() string {
 	return string(enum)
 }
 
+func (enum VolumeState) Values() []VolumeState {
+	return []VolumeState{
+		"available",
+		"snapshotting",
+		"fetching",
+		"resizing",
+		"saving",
+		"hotsyncing",
+		"error",
+	}
+}
+
 func (enum VolumeState) MarshalJSON() ([]byte, error) {
 	return []byte(fmt.Sprintf(`"%s"`, enum)), nil
 }
@@ -922,6 +1167,17 @@ func (enum VolumeVolumeType) String() string {
 		return "l_ssd"
 	}
 	return string(enum)
+}
+
+func (enum VolumeVolumeType) Values() []VolumeVolumeType {
+	return []VolumeVolumeType{
+		"l_ssd",
+		"b_ssd",
+		"unified",
+		"scratch",
+		"sbs_volume",
+		"sbs_snapshot",
+	}
 }
 
 func (enum VolumeVolumeType) MarshalJSON() ([]byte, error) {
@@ -978,9 +1234,9 @@ type Bootscript struct {
 	// Title: bootscript title.
 	Title string `json:"title"`
 
-	// Arch: bootscript architecture.
+	// Architecture: bootscript architecture.
 	// Default value: unknown_arch
-	Arch Arch `json:"arch"`
+	Architecture Arch `json:"architecture"`
 
 	// Zone: zone in which the bootscript is located.
 	Zone scw.Zone `json:"zone"`
@@ -1186,7 +1442,11 @@ type ServerIP struct {
 	// Tags: tags associated with the IP.
 	Tags []string `json:"tags"`
 
-	// State: default value: unknown_state
+	// IpamID: the ip_id of an IPAM ip if the ip is created from IPAM, null if not.
+	IpamID string `json:"ipam_id"`
+
+	// State: IP address state.
+	// Default value: unknown_state
 	State ServerIPState `json:"state"`
 }
 
@@ -1218,6 +1478,8 @@ type ServerLocation struct {
 // ServerMaintenance: server maintenance.
 type ServerMaintenance struct {
 	Reason string `json:"reason"`
+
+	StartDate *time.Time `json:"start_date"`
 }
 
 // VolumeServer: volume server.
@@ -1226,7 +1488,8 @@ type VolumeServer struct {
 
 	Name string `json:"name"`
 
-	ExportURI string `json:"export_uri"`
+	// Deprecated
+	ExportURI *string `json:"export_uri"`
 
 	Organization string `json:"organization"`
 
@@ -1335,8 +1598,8 @@ type Server struct {
 	// RoutedIPEnabled: true to configure the instance so it uses the new routed IP mode.
 	RoutedIPEnabled bool `json:"routed_ip_enabled"`
 
-	// EnableIPv6: true if IPv6 is enabled.
-	EnableIPv6 bool `json:"enable_ipv6"`
+	// Deprecated: EnableIPv6: true if IPv6 is enabled (deprecated and always `False` when `routed_ip_enabled` is `True`).
+	EnableIPv6 *bool `json:"enable_ipv6"`
 
 	// Hostname: instance host name.
 	Hostname string `json:"hostname"`
@@ -1347,10 +1610,10 @@ type Server struct {
 	// Protected: defines whether the Instance protection option is activated.
 	Protected bool `json:"protected"`
 
-	// PrivateIP: private IP address of the Instance.
+	// PrivateIP: private IP address of the Instance (deprecated and always `null` when `routed_ip_enabled` is `True`).
 	PrivateIP *string `json:"private_ip"`
 
-	// PublicIP: information about the public IP.
+	// Deprecated: PublicIP: information about the public IP (deprecated in favor of `public_ips`).
 	PublicIP *ServerIP `json:"public_ip"`
 
 	// PublicIPs: information about all the public IPs attached to the server.
@@ -1369,7 +1632,7 @@ type Server struct {
 	// Location: instance location.
 	Location *ServerLocation `json:"location"`
 
-	// IPv6: instance IPv6 address.
+	// Deprecated: IPv6: instance IPv6 address (deprecated when `routed_ip_enabled` is `True`).
 	IPv6 *ServerIPv6 `json:"ipv6"`
 
 	// Deprecated: Bootscript: instance bootscript.
@@ -1403,6 +1666,12 @@ type Server struct {
 
 	// Zone: zone in which the Instance is located.
 	Zone scw.Zone `json:"zone"`
+
+	// AdminPasswordEncryptionSSHKeyID: the public_key value of this key is used to encrypt the admin password. When set to an empty string, reset this value and admin_password_encrypted_value to an empty string so a new password may be generated.
+	AdminPasswordEncryptionSSHKeyID *string `json:"admin_password_encryption_ssh_key_id"`
+
+	// AdminPasswordEncryptedValue: this value is reset when admin_password_encryption_ssh_key_id is set to an empty string.
+	AdminPasswordEncryptedValue *string `json:"admin_password_encrypted_value"`
 }
 
 // IP: ip.
@@ -1428,6 +1697,8 @@ type IP struct {
 	State IPState `json:"state"`
 
 	Prefix scw.IPNet `json:"prefix"`
+
+	IpamID string `json:"ipam_id"`
 
 	// Zone: zone to target. If none is passed will use default zone from the config.
 	Zone scw.Zone `json:"zone"`
@@ -1814,15 +2085,15 @@ type ApplyBlockMigrationRequest struct {
 	// Zone: zone to target. If none is passed will use default zone from the config.
 	Zone scw.Zone `json:"-"`
 
-	// VolumeID: the volume to migrate, along with potentially other resources, according to the migration plan generated with a call to PlanBlockMigration.
+	// VolumeID: the volume to migrate, along with potentially other resources, according to the migration plan generated with a call to the "Plan a migration" endpoint.
 	// Precisely one of VolumeID, SnapshotID must be set.
 	VolumeID *string `json:"volume_id,omitempty"`
 
-	// SnapshotID: the snapshot to migrate, along with potentially other resources, according to the migration plan generated with a call to PlanBlockMigration.
+	// SnapshotID: the snapshot to migrate, along with potentially other resources, according to the migration plan generated with a call to the "Plan a migration" endpoint.
 	// Precisely one of VolumeID, SnapshotID must be set.
 	SnapshotID *string `json:"snapshot_id,omitempty"`
 
-	// ValidationKey: a value to be retrieved from a call to PlanBlockMigration, to confirm that the volume and/or snapshots specified in said plan should be migrated.
+	// ValidationKey: a value to be retrieved from a call to the "Plan a migration" endpoint, to confirm that the volume and/or snapshots specified in said plan should be migrated.
 	ValidationKey string `json:"validation_key,omitempty"`
 }
 
@@ -1963,8 +2234,11 @@ type CreatePrivateNICRequest struct {
 	// Tags: private NIC tags.
 	Tags []string `json:"tags,omitempty"`
 
-	// IPIDs: ip_ids defined from IPAM.
-	IPIDs []string `json:"ip_ids,omitempty"`
+	// Deprecated: IPIDs: ip_ids defined from IPAM.
+	IPIDs *[]string `json:"ip_ids,omitempty"`
+
+	// IpamIPIDs: UUID of IPAM ips, to be attached to the instance in the requested private network.
+	IpamIPIDs []string `json:"ipam_ip_ids,omitempty"`
 }
 
 // CreatePrivateNICResponse: create private nic response.
@@ -2082,10 +2356,10 @@ type CreateServerRequest struct {
 	// Volumes: volumes attached to the server.
 	Volumes map[string]*VolumeServerTemplate `json:"volumes,omitempty"`
 
-	// EnableIPv6: true if IPv6 is enabled on the server.
-	EnableIPv6 bool `json:"enable_ipv6,omitempty"`
+	// Deprecated: EnableIPv6: true if IPv6 is enabled on the server (deprecated and always `False` when `routed_ip_enabled` is `True`).
+	EnableIPv6 *bool `json:"enable_ipv6,omitempty"`
 
-	// PublicIP: ID of the reserved IP to attach to the Instance.
+	// Deprecated: PublicIP: ID of the reserved IP to attach to the Instance.
 	PublicIP *string `json:"public_ip,omitempty"`
 
 	// PublicIPs: a list of reserved IP IDs to attach to the Instance.
@@ -2114,6 +2388,9 @@ type CreateServerRequest struct {
 
 	// PlacementGroup: placement group ID if Instance must be part of a placement group.
 	PlacementGroup *string `json:"placement_group,omitempty"`
+
+	// AdminPasswordEncryptionSSHKeyID: the public_key value of this key is used to encrypt the admin password.
+	AdminPasswordEncryptionSSHKeyID *string `json:"admin_password_encryption_ssh_key_id,omitempty"`
 }
 
 // CreateServerResponse: create server response.
@@ -2948,11 +3225,14 @@ type ListServersRequest struct {
 	// Name: filter Instances by name (eg. "server1" will return "server100" and "server1" but not "foo").
 	Name *string `json:"-"`
 
-	// PrivateIP: list Instances by private_ip.
+	// Deprecated: PrivateIP: list Instances by private_ip.
 	PrivateIP *net.IP `json:"-"`
 
 	// WithoutIP: list Instances that are not attached to a public IP.
 	WithoutIP *bool `json:"-"`
+
+	// WithIP: list Instances by IP (both private_ip and public_ip are supported).
+	WithIP *net.IP `json:"-"`
 
 	// CommercialType: list Instances of this commercial type.
 	CommercialType *string `json:"-"`
@@ -3214,7 +3494,7 @@ type MigrationPlan struct {
 	// Snapshots: a list of snapshots which will be migrated to SBS together and with the volume, if present.
 	Snapshots []*Snapshot `json:"snapshots"`
 
-	// ValidationKey: a value to be passed to ApplyBlockMigrationRequest, to confirm that the execution of the plan is being requested.
+	// ValidationKey: a value to be passed to the call to the "Apply a migration plan" endpoint, to confirm that the execution of the plan is being requested.
 	ValidationKey string `json:"validation_key"`
 }
 
@@ -3588,6 +3868,7 @@ type UpdateServerRequest struct {
 	// PublicIPs: a list of reserved IP IDs to attach to the Instance.
 	PublicIPs *[]string `json:"public_ips,omitempty"`
 
+	// Deprecated
 	EnableIPv6 *bool `json:"enable_ipv6,omitempty"`
 
 	Protected *bool `json:"protected,omitempty"`
@@ -3603,8 +3884,12 @@ type UpdateServerRequest struct {
 	// CommercialType: warning: This field has some restrictions:
 	// - Cannot be changed if the Instance is not in `stopped` state.
 	// - Cannot be changed if the Instance is in a placement group.
+	// - Cannot be changed from/to a Windows offer to/from a Linux offer.
 	// - Local storage requirements of the target commercial_types must be fulfilled (i.e. if an Instance has 80GB of local storage, it can be changed into a GP1-XS, which has a maximum of 150GB, but it cannot be changed into a DEV1-S, which has only 20GB).
 	CommercialType *string `json:"commercial_type,omitempty"`
+
+	// AdminPasswordEncryptionSSHKeyID: the public_key value of this key is used to encrypt the admin password. When set to an empty string, reset this value and admin_password_encrypted_value to an empty string so a new password may be generated.
+	AdminPasswordEncryptionSSHKeyID *string `json:"admin_password_encryption_ssh_key_id,omitempty"`
 }
 
 // UpdateServerResponse: update server response.
@@ -3789,8 +4074,8 @@ type setServerRequest struct {
 	// RoutedIPEnabled: true to configure the instance so it uses the new routed IP mode (once this is set to True you cannot set it back to False).
 	RoutedIPEnabled *bool `json:"routed_ip_enabled,omitempty"`
 
-	// EnableIPv6: true if IPv6 is enabled.
-	EnableIPv6 bool `json:"enable_ipv6"`
+	// Deprecated: EnableIPv6: true if IPv6 is enabled (deprecated and always `False` when `routed_ip_enabled` is `True`).
+	EnableIPv6 *bool `json:"enable_ipv6,omitempty"`
 
 	// Hostname: instance host name.
 	Hostname string `json:"hostname"`
@@ -3801,10 +4086,10 @@ type setServerRequest struct {
 	// Protected: instance protection option is activated.
 	Protected bool `json:"protected"`
 
-	// PrivateIP: instance private IP address.
+	// Deprecated: PrivateIP: instance private IP address (deprecated and always `null` when `routed_ip_enabled` is `True`).
 	PrivateIP *string `json:"private_ip,omitempty"`
 
-	// PublicIP: information about the public IP.
+	// Deprecated: PublicIP: information about the public IP (deprecated in favor of `public_ips`).
 	PublicIP *ServerIP `json:"public_ip,omitempty"`
 
 	// PublicIPs: information about all the public IPs attached to the server.
@@ -3820,7 +4105,7 @@ type setServerRequest struct {
 	// Location: instance location.
 	Location *ServerLocation `json:"location,omitempty"`
 
-	// IPv6: instance IPv6 address.
+	// Deprecated: IPv6: instance IPv6 address (deprecated when `routed_ip_enabled` is `True`).
 	IPv6 *ServerIPv6 `json:"ipv6,omitempty"`
 
 	// Deprecated: Bootscript: instance bootscript.
@@ -3851,6 +4136,9 @@ type setServerRequest struct {
 
 	// PrivateNics: instance private NICs.
 	PrivateNics []*PrivateNIC `json:"private_nics"`
+
+	// AdminPasswordEncryptionSSHKeyID: the public_key value of this key is used to encrypt the admin password. When set to an empty string, reset this value and admin_password_encrypted_value to an empty string so a new password may be generated.
+	AdminPasswordEncryptionSSHKeyID *string `json:"admin_password_encryption_ssh_key_id,omitempty"`
 }
 
 // setServerResponse: set server response.
@@ -3895,7 +4183,7 @@ type setSnapshotResponse struct {
 	Snapshot *Snapshot `json:"snapshot"`
 }
 
-// Instance API.
+// This API allows you to manage your Instances.
 type API struct {
 	client *scw.Client
 }
@@ -4023,6 +4311,7 @@ func (s *API) ListServers(req *ListServersRequest, opts ...scw.RequestOption) (*
 	parameter.AddToQuery(query, "name", req.Name)
 	parameter.AddToQuery(query, "private_ip", req.PrivateIP)
 	parameter.AddToQuery(query, "without_ip", req.WithoutIP)
+	parameter.AddToQuery(query, "with_ip", req.WithIP)
 	parameter.AddToQuery(query, "commercial_type", req.CommercialType)
 	parameter.AddToQuery(query, "state", req.State)
 	if len(req.Tags) != 0 {
@@ -6427,7 +6716,7 @@ func (s *API) GetDashboard(req *GetDashboardRequest, opts ...scw.RequestOption) 
 	return &resp, nil
 }
 
-// PlanBlockMigration: Given a volume or snapshot, returns the migration plan for a call to the RPC ApplyBlockMigration. This plan will include zero or one volume, and zero or more snapshots, which will need to be migrated together. This RPC does not perform the actual migration itself, ApplyBlockMigration must be used. The validation_key value returned by this call must be provided to the ApplyBlockMigration call to confirm that all resources listed in the plan should be migrated.
+// PlanBlockMigration: Given a volume or snapshot, returns the migration plan for a call to the "Apply a migration plan" endpoint. This plan will include zero or one volume, and zero or more snapshots, which will need to be migrated together. This endpoint does not perform the actual migration itself, the "Apply a migration plan" endpoint must be used. The validation_key value returned by this endpoint must be provided to the call to the "Apply a migration plan" endpoint to confirm that all resources listed in the plan should be migrated.
 func (s *API) PlanBlockMigration(req *PlanBlockMigrationRequest, opts ...scw.RequestOption) (*MigrationPlan, error) {
 	var err error
 
@@ -6459,7 +6748,7 @@ func (s *API) PlanBlockMigration(req *PlanBlockMigrationRequest, opts ...scw.Req
 	return &resp, nil
 }
 
-// ApplyBlockMigration: To be used, this RPC must be preceded by a call to PlanBlockMigration. To migrate all resources mentioned in the MigrationPlan, the validation_key returned in the MigrationPlan must be provided.
+// ApplyBlockMigration: To be used, the call to this endpoint must be preceded by a call to the "Plan a migration" endpoint. To migrate all resources mentioned in the migration plan, the validation_key returned in the plan must be provided.
 func (s *API) ApplyBlockMigration(req *ApplyBlockMigrationRequest, opts ...scw.RequestOption) error {
 	var err error
 

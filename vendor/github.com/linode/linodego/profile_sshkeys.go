@@ -3,10 +3,8 @@ package linodego
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"time"
 
-	"github.com/go-resty/resty/v2"
 	"github.com/linode/linodego/internal/parseabletime"
 )
 
@@ -62,83 +60,52 @@ func (i SSHKey) GetUpdateOptions() (o SSHKeyUpdateOptions) {
 	return
 }
 
-// SSHKeysPagedResponse represents a paginated SSHKey API response
-type SSHKeysPagedResponse struct {
-	*PageOptions
-	Data []SSHKey `json:"data"`
-}
-
-// endpoint gets the endpoint URL for SSHKey
-func (SSHKeysPagedResponse) endpoint(_ ...any) string {
-	return "profile/sshkeys"
-}
-
-func (resp *SSHKeysPagedResponse) castResult(r *resty.Request, e string) (int, int, error) {
-	res, err := coupleAPIErrors(r.SetResult(SSHKeysPagedResponse{}).Get(e))
-	if err != nil {
-		return 0, 0, err
-	}
-	castedRes := res.Result().(*SSHKeysPagedResponse)
-	resp.Data = append(resp.Data, castedRes.Data...)
-	return castedRes.Pages, castedRes.Results, nil
-}
-
 // ListSSHKeys lists SSHKeys
 func (c *Client) ListSSHKeys(ctx context.Context, opts *ListOptions) ([]SSHKey, error) {
-	response := SSHKeysPagedResponse{}
-	err := c.listHelper(ctx, &response, opts)
+	response, err := getPaginatedResults[SSHKey](ctx, c, "profile/sshkeys", opts)
 	if err != nil {
 		return nil, err
 	}
-	return response.Data, nil
+
+	return response, nil
 }
 
 // GetSSHKey gets the sshkey with the provided ID
 func (c *Client) GetSSHKey(ctx context.Context, keyID int) (*SSHKey, error) {
-	e := fmt.Sprintf("profile/sshkeys/%d", keyID)
-	req := c.R(ctx).SetResult(&SSHKey{})
-	r, err := coupleAPIErrors(req.Get(e))
+	e := formatAPIPath("profile/sshkeys/%d", keyID)
+	response, err := doGETRequest[SSHKey](ctx, c, e)
 	if err != nil {
 		return nil, err
 	}
-	return r.Result().(*SSHKey), nil
+
+	return response, nil
 }
 
 // CreateSSHKey creates a SSHKey
 func (c *Client) CreateSSHKey(ctx context.Context, opts SSHKeyCreateOptions) (*SSHKey, error) {
-	body, err := json.Marshal(opts)
+	e := "profile/sshkeys"
+	response, err := doPOSTRequest[SSHKey](ctx, c, e, opts)
 	if err != nil {
 		return nil, err
 	}
 
-	e := "profile/sshkeys"
-	req := c.R(ctx).SetResult(&SSHKey{}).SetBody(string(body))
-	r, err := coupleAPIErrors(req.Post(e))
-	if err != nil {
-		return nil, err
-	}
-	return r.Result().(*SSHKey), nil
+	return response, nil
 }
 
 // UpdateSSHKey updates the SSHKey with the specified id
 func (c *Client) UpdateSSHKey(ctx context.Context, keyID int, opts SSHKeyUpdateOptions) (*SSHKey, error) {
-	body, err := json.Marshal(opts)
+	e := formatAPIPath("profile/sshkeys/%d", keyID)
+	response, err := doPUTRequest[SSHKey](ctx, c, e, opts)
 	if err != nil {
 		return nil, err
 	}
 
-	e := fmt.Sprintf("profile/sshkeys/%d", keyID)
-	req := c.R(ctx).SetResult(&SSHKey{}).SetBody(string(body))
-	r, err := coupleAPIErrors(req.Put(e))
-	if err != nil {
-		return nil, err
-	}
-	return r.Result().(*SSHKey), nil
+	return response, nil
 }
 
 // DeleteSSHKey deletes the SSHKey with the specified id
 func (c *Client) DeleteSSHKey(ctx context.Context, keyID int) error {
-	e := fmt.Sprintf("profile/sshkeys/%d", keyID)
-	_, err := coupleAPIErrors(c.R(ctx).Delete(e))
+	e := formatAPIPath("profile/sshkeys/%d", keyID)
+	err := doDELETERequest(ctx, c, e)
 	return err
 }

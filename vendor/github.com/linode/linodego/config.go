@@ -140,7 +140,7 @@ func resolveValidConfigPath() (string, error) {
 			return "", err
 		}
 
-		if _, err := os.Stat(p); err != nil {
+		if _, err = os.Stat(p); err != nil {
 			continue
 		}
 

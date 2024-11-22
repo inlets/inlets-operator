@@ -3,10 +3,8 @@ package linodego
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"time"
 
-	"github.com/go-resty/resty/v2"
 	"github.com/linode/linodego/internal/parseabletime"
 )
 
@@ -16,7 +14,7 @@ type Token struct {
 	ID int `json:"id"`
 
 	// The scopes this token was created with. These define what parts of the Account the token can be used to access. Many command-line tools, such as the Linode CLI, require tokens with access to *. Tokens with more restrictive scopes are generally more secure.
-	// Valid values are "*" or a comma separated list of scopes https://developers.linode.com/api/v4/#o-auth
+	// Valid values are "*" or a comma separated list of scopes https://techdocs.akamai.com/linode-api/reference/get-started#oauth-reference
 	Scopes string `json:"scopes"`
 
 	// This token's label. This is for display purposes only, but can be used to more easily track what you're using each token for. (1-100 Characters)
@@ -86,46 +84,25 @@ func (i Token) GetUpdateOptions() (o TokenUpdateOptions) {
 	return
 }
 
-// TokensPagedResponse represents a paginated Token API response
-type TokensPagedResponse struct {
-	*PageOptions
-	Data []Token `json:"data"`
-}
-
-// endpoint gets the endpoint URL for Token
-func (TokensPagedResponse) endpoint(_ ...any) string {
-	return "profile/tokens"
-}
-
-func (resp *TokensPagedResponse) castResult(r *resty.Request, e string) (int, int, error) {
-	res, err := coupleAPIErrors(r.SetResult(TokensPagedResponse{}).Get(e))
-	if err != nil {
-		return 0, 0, err
-	}
-	castedRes := res.Result().(*TokensPagedResponse)
-	resp.Data = append(resp.Data, castedRes.Data...)
-	return castedRes.Pages, castedRes.Results, nil
-}
-
 // ListTokens lists Tokens
 func (c *Client) ListTokens(ctx context.Context, opts *ListOptions) ([]Token, error) {
-	response := TokensPagedResponse{}
-	err := c.listHelper(ctx, &response, opts)
+	response, err := getPaginatedResults[Token](ctx, c, "profile/tokens", opts)
 	if err != nil {
 		return nil, err
 	}
-	return response.Data, nil
+
+	return response, nil
 }
 
 // GetToken gets the token with the provided ID
 func (c *Client) GetToken(ctx context.Context, tokenID int) (*Token, error) {
-	e := fmt.Sprintf("profile/tokens/%d", tokenID)
-	req := c.R(ctx).SetResult(&Token{})
-	r, err := coupleAPIErrors(req.Get(e))
+	e := formatAPIPath("profile/tokens/%d", tokenID)
+	response, err := doGETRequest[Token](ctx, c, e)
 	if err != nil {
 		return nil, err
 	}
-	return r.Result().(*Token), nil
+
+	return response, nil
 }
 
 // CreateToken creates a Token
@@ -143,39 +120,29 @@ func (c *Client) CreateToken(ctx context.Context, opts TokenCreateOptions) (*Tok
 		createOptsFixed.Expiry = &iso8601Expiry
 	}
 
-	body, err := json.Marshal(createOptsFixed)
+	e := "profile/tokens"
+	response, err := doPOSTRequest[Token](ctx, c, e, createOptsFixed)
 	if err != nil {
 		return nil, err
 	}
 
-	e := "profile/tokens"
-	req := c.R(ctx).SetResult(&Token{}).SetBody(string(body))
-	r, err := coupleAPIErrors(req.Post(e))
-	if err != nil {
-		return nil, err
-	}
-	return r.Result().(*Token), nil
+	return response, nil
 }
 
 // UpdateToken updates the Token with the specified id
 func (c *Client) UpdateToken(ctx context.Context, tokenID int, opts TokenUpdateOptions) (*Token, error) {
-	body, err := json.Marshal(opts)
+	e := formatAPIPath("profile/tokens/%d", tokenID)
+	response, err := doPUTRequest[Token](ctx, c, e, opts)
 	if err != nil {
 		return nil, err
 	}
 
-	e := fmt.Sprintf("profile/tokens/%d", tokenID)
-	req := c.R(ctx).SetResult(&Token{}).SetBody(string(body))
-	r, err := coupleAPIErrors(req.Put(e))
-	if err != nil {
-		return nil, err
-	}
-	return r.Result().(*Token), nil
+	return response, nil
 }
 
 // DeleteToken deletes the Token with the specified id
 func (c *Client) DeleteToken(ctx context.Context, tokenID int) error {
-	e := fmt.Sprintf("profile/tokens/%d", tokenID)
-	_, err := coupleAPIErrors(c.R(ctx).Delete(e))
+	e := formatAPIPath("profile/tokens/%d", tokenID)
+	err := doDELETERequest(ctx, c, e)
 	return err
 }

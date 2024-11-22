@@ -40,7 +40,6 @@ func (s *API) WaitForVolume(req *WaitForVolumeRequest, opts ...scw.RequestOption
 				VolumeID: req.VolumeID,
 				Zone:     req.Zone,
 			}, opts...)
-
 			if err != nil {
 				return nil, false, err
 			}
@@ -76,11 +75,11 @@ func (s *API) getUnknownVolume(req *getUnknownVolumeRequest, opts ...scw.Request
 	}
 
 	// Try instance API
-	if req.IsBlockVolume == nil || *req.IsBlockVolume == false {
+	if req.IsBlockVolume == nil || !*req.IsBlockVolume {
 		getVolumeResponse, err := s.GetVolume(&GetVolumeRequest{
 			Zone:     req.Zone,
 			VolumeID: req.VolumeID,
-		})
+		}, opts...)
 		notFoundErr := &scw.ResourceNotFoundError{}
 		if err != nil && !goerrors.As(err, &notFoundErr) {
 			return nil, err
@@ -93,11 +92,12 @@ func (s *API) getUnknownVolume(req *getUnknownVolumeRequest, opts ...scw.Request
 			volume.Type = getVolumeResponse.Volume.VolumeType
 		}
 	}
-	if volume.Type == "" && (req.IsBlockVolume == nil || *req.IsBlockVolume == true) {
+
+	if volume.Type == "" && (req.IsBlockVolume == nil || *req.IsBlockVolume) {
 		getVolumeResponse, err := block.NewAPI(s.client).GetVolume(&block.GetVolumeRequest{
 			Zone:     req.Zone,
 			VolumeID: req.VolumeID,
-		})
+		}, opts...)
 		if err != nil {
 			return nil, err
 		}

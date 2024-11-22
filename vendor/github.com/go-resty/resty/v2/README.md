@@ -4,16 +4,12 @@
 <p align="center"><a href="#features">Features</a> section describes in detail about Resty capabilities</p>
 </p>
 <p align="center">
-<p align="center"><a href="https://github.com/go-resty/resty/actions/workflows/ci.yml?query=branch%3Amaster"><img src="https://github.com/go-resty/resty/actions/workflows/ci.yml/badge.svg" alt="Build Status"></a> <a href="https://codecov.io/gh/go-resty/resty/branch/master"><img src="https://codecov.io/gh/go-resty/resty/branch/master/graph/badge.svg" alt="Code Coverage"></a> <a href="https://goreportcard.com/report/go-resty/resty"><img src="https://goreportcard.com/badge/go-resty/resty" alt="Go Report Card"></a> <a href="https://github.com/go-resty/resty/releases/latest"><img src="https://img.shields.io/badge/version-2.11.0-blue.svg" alt="Release Version"></a> <a href="https://pkg.go.dev/github.com/go-resty/resty/v2"><img src="https://pkg.go.dev/badge/github.com/go-resty/resty" alt="GoDoc"></a> <a href="LICENSE"><img src="https://img.shields.io/github/license/go-resty/resty.svg" alt="License"></a> <a href="https://github.com/avelino/awesome-go"><img src="https://awesome.re/mentioned-badge.svg" alt="Mentioned in Awesome Go"></a></p>
-</p>
-<p align="center">
-<h4 align="center">Resty Communication Channels</h4>
-<p align="center"><a href="https://gitter.im/go_resty/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge"><img src="https://badges.gitter.im/go_resty/community.svg" alt="Chat on Gitter - Resty Community"></a> <a href="https://twitter.com/go_resty"><img src="https://img.shields.io/badge/twitter-@go__resty-55acee.svg" alt="Twitter @go_resty"></a></p>
+<p align="center"><a href="https://github.com/go-resty/resty/actions/workflows/ci.yml?query=branch%3Av2"><img src="https://github.com/go-resty/resty/actions/workflows/ci.yml/badge.svg?branch=v2" alt="Build Status"></a> <a href="https://app.codecov.io/gh/go-resty/resty/tree/v2"><img src="https://codecov.io/gh/go-resty/resty/branch/v2/graph/badge.svg" alt="Code Coverage"></a> <a href="https://goreportcard.com/report/go-resty/resty"><img src="https://goreportcard.com/badge/go-resty/resty" alt="Go Report Card"></a> <a href="https://github.com/go-resty/resty/releases/latest"><img src="https://img.shields.io/badge/version-2.16.2-blue.svg" alt="Release Version"></a> <a href="https://pkg.go.dev/github.com/go-resty/resty/v2"><img src="https://pkg.go.dev/badge/github.com/go-resty/resty" alt="GoDoc"></a> <a href="LICENSE"><img src="https://img.shields.io/github/license/go-resty/resty.svg" alt="License"></a> <a href="https://github.com/avelino/awesome-go"><img src="https://awesome.re/mentioned-badge.svg" alt="Mentioned in Awesome Go"></a></p>
 </p>
 
 ## News
 
-  * v2.11.0 [released](https://github.com/go-resty/resty/releases/tag/v2.11.0) and tagged on Dec 27, 2023.
+  * v2.16.2 [released](https://github.com/go-resty/resty/releases/tag/v2.16.2) and tagged on Nov 21, 2024.
   * v2.0.0 [released](https://github.com/go-resty/resty/releases/tag/v2.0.0) and tagged on Jul 16, 2019.
   * v1.12.0 [released](https://github.com/go-resty/resty/releases/tag/v1.12.0) and tagged on Feb 27, 2019.
   * v1.0 released and tagged on Sep 25, 2017. - Resty's first version was released on Sep 15, 2015 then it grew gradually as a very handy and helpful library. Its been a two years since first release. I'm very thankful to Resty users and its [contributors](https://github.com/go-resty/resty/graphs/contributors).
@@ -62,9 +58,10 @@
     * goroutine concurrent safe
     * Resty Client trace, see [Client.EnableTrace](https://pkg.go.dev/github.com/go-resty/resty/v2#Client.EnableTrace) and [Request.EnableTrace](https://pkg.go.dev/github.com/go-resty/resty/v2#Request.EnableTrace)
       * Since v2.4.0, trace info contains a `RequestAttempt` value, and the `Request` object contains an `Attempt` attribute
+    * Supports on-demand CURL command generation, see [Client.EnableGenerateCurlOnDebug](https://pkg.go.dev/github.com/go-resty/resty/v2#Client.EnableGenerateCurlOnDebug), [Request.EnableGenerateCurlOnDebug](https://pkg.go.dev/github.com/go-resty/resty/v2#Request.EnableGenerateCurlOnDebug). It requires debug mode to be enabled.
     * Debug mode - clean and informative logging presentation
     * Gzip - Go does it automatically also resty has fallback handling too
-    * Works fine with `HTTP/2` and `HTTP/1.1`
+    * Works fine with `HTTP/2` and `HTTP/1.1`, also `HTTP/3` can be used with Resty, see this [comment](https://github.com/go-resty/resty/issues/846#issuecomment-2329696110)
   * [Bazel support](#bazel-support)
   * Easily mock Resty for testing, [for e.g.](#mocking-http-requests-using-httpmock-library)
   * Well tested client library
@@ -86,7 +83,7 @@
 
 #### Supported Go Versions
 
-Recommended to use `go1.16` and above.
+Recommended to use `go1.20` and above.
 
 Initially Resty started supporting `go modules` since `v1.10.0` release.
 
@@ -101,8 +98,6 @@ Starting Resty v2 and higher versions, it fully embraces [go modules](https://gi
 
 Resty author also published following projects for Go Community.
 
-  * [aah framework](https://aahframework.org) - A secure, flexible, rapid Go web framework.
-  * [THUMBAI](https://thumbai.app) - Go Mod Repository, Go Vanity Service and Simple Proxy Server.
   * [go-model](https://github.com/jeevatkm/go-model) - Robust & Easy to use model mapper and utility methods for Go `struct`.
 
 
@@ -110,7 +105,7 @@ Resty author also published following projects for Go Community.
 
 ```bash
 # Go Modules
-require github.com/go-resty/resty/v2 v2.11.0
+require github.com/go-resty/resty/v2 v2.16.2
 ```
 
 ## Usage
@@ -558,6 +553,30 @@ client.OnError(func(req *resty.Request, err error) {
 })
 ```
 
+#### Generate CURL Command
+>Refer: [curl_cmd_test.go](https://github.com/go-resty/resty/blob/v2/curl_cmd_test.go)
+
+```go
+// Create a Resty Client
+client := resty.New()
+
+resp, err := client.R().
+    SetDebug(true).
+    EnableGenerateCurlOnDebug(). // CURL command generated when debug mode enabled with this option
+    SetBody(map[string]string{"name": "Alex"}).
+    Post("https://httpbin.org/post")
+
+curlCmdExecuted := resp.Request.GenerateCurlCommand()
+
+// Explore curl command
+fmt.Println("Curl Command:\n  ", curlCmdExecuted+"\n")
+
+/* Output
+Curl Command:
+   curl -X POST -H 'Content-Type: application/json' -H 'User-Agent: go-resty/2.14.0 (https://github.com/go-resty/resty)' -d '{"name":"Alex"}' https://httpbin.org/post
+*/
+```
+
 #### Redirect Policy
 
 Resty provides few ready to use redirect policy(s) also it supports multiple policies together.
@@ -702,8 +721,8 @@ client.
     })
 ```
 
-By default, resty will retry requests that return a non-nil error during execution. 
-Therefore, the above setup will result in resty retrying requests with non-nil errors up to 3 times, 
+By default, resty will retry requests that return a non-nil error during execution.
+Therefore, the above setup will result in resty retrying requests with non-nil errors up to 3 times,
 with the delay increasing after each attempt.
 
 You can optionally provide client with [custom retry conditions](https://pkg.go.dev/github.com/go-resty/resty/v2#RetryConditionFunc):
@@ -739,7 +758,7 @@ client.AddRetryCondition(
 )
 ```
 
-Multiple retry conditions can be added. 
+Multiple retry conditions can be added.
 Note that if multiple conditions are specified, a retry will occur if any of the conditions are met.
 
 It is also possible to use `resty.Backoff(...)` to get arbitrary retry scenarios
@@ -797,7 +816,7 @@ client.SetTimeout(1 * time.Minute)
 // You can override all below settings and options at request level if you want to
 //--------------------------------------------------------------------------------
 // Host URL for all request. So you can use relative URL in the request
-client.SetHostURL("http://httpbin.org")
+client.SetBaseURL("http://httpbin.org")
 
 // Headers for all request
 client.SetHeader("Accept", "application/json")
@@ -861,7 +880,7 @@ client := resty.New()
 
 // Set the previous transport that we created, set the scheme of the communication to the
 // socket and set the unixSocket as the HostURL.
-client.SetTransport(&transport).SetScheme("http").SetHostURL(unixSocket)
+client.SetTransport(&transport).SetScheme("http").SetBaseURL(unixSocket)
 
 // No need to write the host's URL on the request, just the path.
 client.R().Get("http://localhost/index.html")

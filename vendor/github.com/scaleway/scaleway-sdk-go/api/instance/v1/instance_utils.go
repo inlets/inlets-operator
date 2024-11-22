@@ -7,14 +7,11 @@ import (
 	"time"
 
 	"github.com/scaleway/scaleway-sdk-go/internal/async"
-
 	"github.com/scaleway/scaleway-sdk-go/internal/errors"
 	"github.com/scaleway/scaleway-sdk-go/scw"
 )
 
-var (
-	resourceLock sync.Map
-)
+var resourceLock sync.Map
 
 // lockResource locks a resource from a specific resourceID
 func lockResource(resourceID string) *sync.Mutex {
@@ -53,7 +50,7 @@ func (s *API) AttachIP(req *AttachIPRequest, opts ...scw.RequestOption) (*Attach
 		Zone:   req.Zone,
 		IP:     req.IP,
 		Server: &NullableStringValue{Value: req.ServerID},
-	})
+	}, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -84,7 +81,7 @@ func (s *API) DetachIP(req *DetachIPRequest, opts ...scw.RequestOption) (*Detach
 		Zone:   req.Zone,
 		IP:     req.IP,
 		Server: &NullableStringValue{Null: true},
-	})
+	}, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -93,6 +90,7 @@ func (s *API) DetachIP(req *DetachIPRequest, opts ...scw.RequestOption) (*Detach
 }
 
 // AttachVolumeRequest contains the parameters to attach a volume to a server
+// Deprecated by AttachServerVolumeRequest
 type AttachVolumeRequest struct {
 	Zone     scw.Zone `json:"-"`
 	ServerID string   `json:"-"`
@@ -100,98 +98,43 @@ type AttachVolumeRequest struct {
 }
 
 // AttachVolumeResponse contains the updated server after attaching a volume
+// Deprecated by AttachServerVolumeResponse
 type AttachVolumeResponse struct {
 	Server *Server `json:"-"`
-}
-
-// volumesToVolumeTemplates converts a map of *Volume to a map of *VolumeTemplate
-// so it can be used in a UpdateServer request
-func volumesToVolumeTemplates(volumes map[string]*VolumeServer) map[string]*VolumeServerTemplate {
-	volumeTemplates := map[string]*VolumeServerTemplate{}
-	for key, volume := range volumes {
-		volumeTemplate := &VolumeServerTemplate{
-			ID: &volume.ID,
-		}
-
-		if volume.Name != "" {
-			volumeTemplate.Name = &volume.Name
-		}
-
-		if volume.VolumeType == VolumeServerVolumeTypeSbsVolume {
-			volumeTemplate.VolumeType = VolumeVolumeTypeSbsVolume
-		}
-
-		volumeTemplates[key] = volumeTemplate
-	}
-	return volumeTemplates
 }
 
 // AttachVolume attaches a volume to a server
 //
 // Note: Implementation is thread-safe.
+// Deprecated by AttachServerVolume provided by instance API
 func (s *API) AttachVolume(req *AttachVolumeRequest, opts ...scw.RequestOption) (*AttachVolumeResponse, error) {
 	defer lockServer(req.Zone, req.ServerID).Unlock()
 	// check where the volume comes from
 	volume, err := s.getUnknownVolume(&getUnknownVolumeRequest{
 		Zone:     req.Zone,
 		VolumeID: req.VolumeID,
-	})
+	}, opts...)
 	if err != nil {
 		return nil, err
 	}
 
-	// get server with volumes
-	getServerResponse, err := s.GetServer(&GetServerRequest{
-		Zone:     req.Zone,
-		ServerID: req.ServerID,
-	})
-	if err != nil {
-		return nil, err
-	}
-	volumes := getServerResponse.Server.Volumes
-
-	newVolumes := volumesToVolumeTemplates(volumes)
-
-	// add volume to volumes list
-	// We loop through all the possible volume keys (0 to len(volumes))
-	// to find a non existing key and assign it to the requested volume.
-	// A key should always be found. However we return an error if no keys were found.
-	found := false
-	for i := 0; i <= len(volumes); i++ {
-		key := fmt.Sprintf("%d", i)
-		if _, ok := newVolumes[key]; !ok {
-			newVolumes[key] = &VolumeServerTemplate{
-				ID: &req.VolumeID,
-			}
-			if volume.Type == VolumeVolumeTypeSbsVolume {
-				newVolumes[key].VolumeType = VolumeVolumeTypeSbsVolume
-			} else {
-				newVolumes[key].Name = &req.VolumeID
-			}
-
-			found = true
-			break
-		}
+	attachServerVolumeReq := &AttachServerVolumeRequest{
+		Zone:       req.Zone,
+		ServerID:   req.ServerID,
+		VolumeID:   req.VolumeID,
+		VolumeType: AttachServerVolumeRequestVolumeType(volume.Type),
 	}
 
-	if !found {
-		return nil, fmt.Errorf("could not find key to attach volume %s", req.VolumeID)
-	}
-
-	// update server
-	updateServerResponse, err := s.updateServer(&UpdateServerRequest{
-		Zone:     req.Zone,
-		ServerID: req.ServerID,
-		Volumes:  &newVolumes,
-	})
+	resp, err := s.AttachServerVolume(attachServerVolumeReq, opts...)
 	if err != nil {
 		return nil, err
 	}
 
-	return &AttachVolumeResponse{Server: updateServerResponse.Server}, nil
+	return &AttachVolumeResponse{Server: resp.Server}, nil
 }
 
 // DetachVolumeRequest contains the parameters to detach a volume from a server
+// Deprecated by DetachServerVolumeRequest
 type DetachVolumeRequest struct {
 	Zone     scw.Zone `json:"-"`
 	VolumeID string   `json:"-"`
@@ -202,6 +145,7 @@ type DetachVolumeRequest struct {
 }
 
 // DetachVolumeResponse contains the updated server after detaching a volume
+// Deprecated by DetachServerVolumeResponse
 type DetachVolumeResponse struct {
 	Server *Server `json:"-"`
 }
@@ -209,11 +153,12 @@ type DetachVolumeResponse struct {
 // DetachVolume detaches a volume from a server
 //
 // Note: Implementation is thread-safe.
+// Deprecated by DetachServerVolume provided by instance API
 func (s *API) DetachVolume(req *DetachVolumeRequest, opts ...scw.RequestOption) (*DetachVolumeResponse, error) {
 	volume, err := s.getUnknownVolume(&getUnknownVolumeRequest{
 		Zone:     req.Zone,
 		VolumeID: req.VolumeID,
-	})
+	}, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -223,35 +168,17 @@ func (s *API) DetachVolume(req *DetachVolumeRequest, opts ...scw.RequestOption) 
 	}
 
 	defer lockServer(req.Zone, *volume.ServerID).Unlock()
-	// get server with volumes
-	getServerResponse, err := s.GetServer(&GetServerRequest{
+
+	resp, err := s.DetachServerVolume(&DetachServerVolumeRequest{
 		Zone:     req.Zone,
 		ServerID: *volume.ServerID,
-	})
-	if err != nil {
-		return nil, err
-	}
-	volumes := getServerResponse.Server.Volumes
-	// remove volume from volumes list
-	for key, volume := range volumes {
-		if volume.ID == req.VolumeID {
-			delete(volumes, key)
-		}
-	}
-
-	newVolumes := volumesToVolumeTemplates(volumes)
-
-	// update server
-	updateServerResponse, err := s.updateServer(&UpdateServerRequest{
-		Zone:     req.Zone,
-		ServerID: *volume.ServerID,
-		Volumes:  &newVolumes,
-	})
+		VolumeID: volume.ID,
+	}, opts...)
 	if err != nil {
 		return nil, err
 	}
 
-	return &DetachVolumeResponse{Server: updateServerResponse.Server}, nil
+	return &DetachVolumeResponse{Server: resp.Server}, nil
 }
 
 // UnsafeSetTotalCount should not be used
@@ -363,7 +290,6 @@ func (s *API) WaitForPrivateNIC(req *WaitForPrivateNICRequest, opts ...scw.Reque
 				Zone:         req.Zone,
 				PrivateNicID: req.PrivateNicID,
 			}, opts...)
-
 			if err != nil {
 				return nil, false, err
 			}
@@ -431,4 +357,49 @@ func (s *API) WaitForMACAddress(req *WaitForMACAddressRequest, opts ...scw.Reque
 // Internal usage only
 func (r *GetServerTypesAvailabilityResponse) UnsafeSetTotalCount(totalCount int) {
 	r.TotalCount = uint32(totalCount)
+}
+
+// WaitForServerRDPPasswordRequest is used by WaitForServerRDPPassword method.
+type WaitForServerRDPPasswordRequest struct {
+	ServerID      string
+	Zone          scw.Zone
+	Timeout       *time.Duration
+	RetryInterval *time.Duration
+}
+
+// WaitForServerRDPPassword wait for an RDP password to be generated for an instance before returning.
+// This function can be used to wait for a windows instance to boot up.
+func (s *API) WaitForServerRDPPassword(req *WaitForServerRDPPasswordRequest, opts ...scw.RequestOption) (*Server, error) {
+	timeout := defaultTimeout
+	if req.Timeout != nil {
+		timeout = *req.Timeout
+	}
+	retryInterval := defaultRetryInterval
+	if req.RetryInterval != nil {
+		retryInterval = *req.RetryInterval
+	}
+
+	server, err := async.WaitSync(&async.WaitSyncConfig{
+		Get: func() (interface{}, bool, error) {
+			res, err := s.GetServer(&GetServerRequest{
+				ServerID: req.ServerID,
+				Zone:     req.Zone,
+			}, opts...)
+			if err != nil {
+				return nil, false, err
+			}
+
+			if res.Server.AdminPasswordEncryptedValue != nil && *res.Server.AdminPasswordEncryptedValue != "" {
+				return res.Server, true, err
+			}
+
+			return res.Server, false, err
+		},
+		Timeout:          timeout,
+		IntervalStrategy: async.LinearIntervalStrategy(retryInterval),
+	})
+	if err != nil {
+		return nil, errors.Wrap(err, "waiting for server failed")
+	}
+	return server.(*Server), nil
 }

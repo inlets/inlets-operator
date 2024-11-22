@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"time"
 
-	"github.com/go-resty/resty/v2"
 	"github.com/linode/linodego/internal/parseabletime"
 )
 
@@ -57,40 +56,18 @@ const (
 	NotificationMaintenance        NotificationType = "maintenance"
 )
 
-// NotificationsPagedResponse represents a paginated Notifications API response
-type NotificationsPagedResponse struct {
-	*PageOptions
-	Data []Notification `json:"data"`
-}
-
-// endpoint gets the endpoint URL for Notification
-func (NotificationsPagedResponse) endpoint(_ ...any) string {
-	return "account/notifications"
-}
-
-func (resp *NotificationsPagedResponse) castResult(r *resty.Request, e string) (int, int, error) {
-	res, err := coupleAPIErrors(r.SetResult(NotificationsPagedResponse{}).Get(e))
-	if err != nil {
-		return 0, 0, err
-	}
-	castedRes := res.Result().(*NotificationsPagedResponse)
-	resp.Data = append(resp.Data, castedRes.Data...)
-	return castedRes.Pages, castedRes.Results, nil
-}
-
 // ListNotifications gets a collection of Notification objects representing important,
 // often time-sensitive items related to the Account. An account cannot interact directly with
 // Notifications, and a Notification will disappear when the circumstances causing it
 // have been resolved. For example, if the account has an important Ticket open, a response
 // to the Ticket will dismiss the Notification.
 func (c *Client) ListNotifications(ctx context.Context, opts *ListOptions) ([]Notification, error) {
-	response := NotificationsPagedResponse{}
-	err := c.listHelper(ctx, &response, opts)
+	response, err := getPaginatedResults[Notification](ctx, c, "account/notifications", opts)
 	if err != nil {
 		return nil, err
 	}
 
-	return response.Data, nil
+	return response, nil
 }
 
 // UnmarshalJSON implements the json.Unmarshaler interface

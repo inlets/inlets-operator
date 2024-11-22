@@ -2,9 +2,6 @@ package linodego
 
 import (
 	"context"
-	"encoding/json"
-	"fmt"
-	"net/url"
 )
 
 type GrantPermissionLevel string
@@ -69,30 +66,21 @@ type UserGrantsUpdateOptions struct {
 }
 
 func (c *Client) GetUserGrants(ctx context.Context, username string) (*UserGrants, error) {
-	username = url.PathEscape(username)
-	e := fmt.Sprintf("account/users/%s/grants", username)
-	req := c.R(ctx).SetResult(&UserGrants{})
-	r, err := coupleAPIErrors(req.Get(e))
+	e := formatAPIPath("account/users/%s/grants", username)
+	response, err := doGETRequest[UserGrants](ctx, c, e)
 	if err != nil {
 		return nil, err
 	}
 
-	return r.Result().(*UserGrants), nil
+	return response, nil
 }
 
 func (c *Client) UpdateUserGrants(ctx context.Context, username string, opts UserGrantsUpdateOptions) (*UserGrants, error) {
-	body, err := json.Marshal(opts)
+	e := formatAPIPath("account/users/%s/grants", username)
+	response, err := doPUTRequest[UserGrants](ctx, c, e, opts)
 	if err != nil {
 		return nil, err
 	}
 
-	username = url.PathEscape(username)
-	e := fmt.Sprintf("account/users/%s/grants", username)
-	req := c.R(ctx).SetResult(&UserGrants{}).SetBody(string(body))
-	r, err := coupleAPIErrors(req.Put(e))
-	if err != nil {
-		return nil, err
-	}
-
-	return r.Result().(*UserGrants), nil
+	return response, nil
 }

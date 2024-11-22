@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/go-resty/resty/v2"
 	"github.com/linode/linodego/internal/parseabletime"
 )
 
@@ -36,36 +35,10 @@ func (v *VLAN) UnmarshalJSON(b []byte) error {
 	return nil
 }
 
-// VLANsPagedResponse represents a Linode API response for listing of VLANs
-type VLANsPagedResponse struct {
-	*PageOptions
-	Data []VLAN `json:"data"`
-}
-
-func (VLANsPagedResponse) endpoint(_ ...any) string {
-	return "networking/vlans"
-}
-
-func (resp *VLANsPagedResponse) castResult(r *resty.Request, e string) (int, int, error) {
-	res, err := coupleAPIErrors(r.SetResult(VLANsPagedResponse{}).Get(e))
-	if err != nil {
-		return 0, 0, err
-	}
-	castedRes := res.Result().(*VLANsPagedResponse)
-	resp.Data = append(resp.Data, castedRes.Data...)
-	return castedRes.Pages, castedRes.Results, nil
-}
-
 // ListVLANs returns a paginated list of VLANs
 func (c *Client) ListVLANs(ctx context.Context, opts *ListOptions) ([]VLAN, error) {
-	response := VLANsPagedResponse{}
-
-	err := c.listHelper(ctx, &response, opts)
-	if err != nil {
-		return nil, err
-	}
-
-	return response.Data, nil
+	response, err := getPaginatedResults[VLAN](ctx, c, "networking/vlans", opts)
+	return response, err
 }
 
 // GetVLANIPAMAddress returns the IPAM Address for a given VLAN Label as a string (10.0.0.1/24)

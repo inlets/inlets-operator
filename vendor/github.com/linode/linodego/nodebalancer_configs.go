@@ -2,10 +2,6 @@ package linodego
 
 import (
 	"context"
-	"encoding/json"
-	"fmt"
-
-	"github.com/go-resty/resty/v2"
 )
 
 // NodeBalancerConfig objects allow a NodeBalancer to accept traffic on a new port
@@ -120,22 +116,30 @@ type NodeBalancerConfigCreateOptions struct {
 
 // NodeBalancerConfigRebuildOptions used by RebuildNodeBalancerConfig
 type NodeBalancerConfigRebuildOptions struct {
-	Port          int                             `json:"port"`
-	Protocol      ConfigProtocol                  `json:"protocol,omitempty"`
-	ProxyProtocol ConfigProxyProtocol             `json:"proxy_protocol,omitempty"`
-	Algorithm     ConfigAlgorithm                 `json:"algorithm,omitempty"`
-	Stickiness    ConfigStickiness                `json:"stickiness,omitempty"`
-	Check         ConfigCheck                     `json:"check,omitempty"`
-	CheckInterval int                             `json:"check_interval,omitempty"`
-	CheckAttempts int                             `json:"check_attempts,omitempty"`
-	CheckPath     string                          `json:"check_path,omitempty"`
-	CheckBody     string                          `json:"check_body,omitempty"`
-	CheckPassive  *bool                           `json:"check_passive,omitempty"`
-	CheckTimeout  int                             `json:"check_timeout,omitempty"`
-	CipherSuite   ConfigCipher                    `json:"cipher_suite,omitempty"`
-	SSLCert       string                          `json:"ssl_cert,omitempty"`
-	SSLKey        string                          `json:"ssl_key,omitempty"`
-	Nodes         []NodeBalancerNodeCreateOptions `json:"nodes"`
+	Port          int                                    `json:"port"`
+	Protocol      ConfigProtocol                         `json:"protocol,omitempty"`
+	ProxyProtocol ConfigProxyProtocol                    `json:"proxy_protocol,omitempty"`
+	Algorithm     ConfigAlgorithm                        `json:"algorithm,omitempty"`
+	Stickiness    ConfigStickiness                       `json:"stickiness,omitempty"`
+	Check         ConfigCheck                            `json:"check,omitempty"`
+	CheckInterval int                                    `json:"check_interval,omitempty"`
+	CheckAttempts int                                    `json:"check_attempts,omitempty"`
+	CheckPath     string                                 `json:"check_path,omitempty"`
+	CheckBody     string                                 `json:"check_body,omitempty"`
+	CheckPassive  *bool                                  `json:"check_passive,omitempty"`
+	CheckTimeout  int                                    `json:"check_timeout,omitempty"`
+	CipherSuite   ConfigCipher                           `json:"cipher_suite,omitempty"`
+	SSLCert       string                                 `json:"ssl_cert,omitempty"`
+	SSLKey        string                                 `json:"ssl_key,omitempty"`
+	Nodes         []NodeBalancerConfigRebuildNodeOptions `json:"nodes"`
+}
+
+// NodeBalancerConfigRebuildNodeOptions represents a node defined when rebuilding a
+// NodeBalancer config.
+type NodeBalancerConfigRebuildNodeOptions struct {
+	NodeBalancerNodeCreateOptions
+
+	ID int `json:"id,omitempty"`
 }
 
 // NodeBalancerConfigUpdateOptions are permitted by UpdateNodeBalancerConfig
@@ -201,104 +205,67 @@ func (i NodeBalancerConfig) GetRebuildOptions() NodeBalancerConfigRebuildOptions
 		CipherSuite:   i.CipherSuite,
 		SSLCert:       i.SSLCert,
 		SSLKey:        i.SSLKey,
-		Nodes:         make([]NodeBalancerNodeCreateOptions, 0),
+		Nodes:         make([]NodeBalancerConfigRebuildNodeOptions, 0),
 	}
-}
-
-// NodeBalancerConfigsPagedResponse represents a paginated NodeBalancerConfig API response
-type NodeBalancerConfigsPagedResponse struct {
-	*PageOptions
-	Data []NodeBalancerConfig `json:"data"`
-}
-
-// endpoint gets the endpoint URL for NodeBalancerConfig
-func (NodeBalancerConfigsPagedResponse) endpoint(ids ...any) string {
-	id := ids[0].(int)
-	return fmt.Sprintf("nodebalancers/%d/configs", id)
-}
-
-func (resp *NodeBalancerConfigsPagedResponse) castResult(r *resty.Request, e string) (int, int, error) {
-	res, err := coupleAPIErrors(r.SetResult(NodeBalancerConfigsPagedResponse{}).Get(e))
-	if err != nil {
-		return 0, 0, err
-	}
-	castedRes := res.Result().(*NodeBalancerConfigsPagedResponse)
-	resp.Data = append(resp.Data, castedRes.Data...)
-	return castedRes.Pages, castedRes.Results, nil
 }
 
 // ListNodeBalancerConfigs lists NodeBalancerConfigs
 func (c *Client) ListNodeBalancerConfigs(ctx context.Context, nodebalancerID int, opts *ListOptions) ([]NodeBalancerConfig, error) {
-	response := NodeBalancerConfigsPagedResponse{}
-	err := c.listHelper(ctx, &response, opts, nodebalancerID)
+	response, err := getPaginatedResults[NodeBalancerConfig](ctx, c, formatAPIPath("nodebalancers/%d/configs", nodebalancerID), opts)
 	if err != nil {
 		return nil, err
 	}
-	return response.Data, nil
+
+	return response, nil
 }
 
 // GetNodeBalancerConfig gets the template with the provided ID
 func (c *Client) GetNodeBalancerConfig(ctx context.Context, nodebalancerID int, configID int) (*NodeBalancerConfig, error) {
-	e := fmt.Sprintf("nodebalancers/%d/configs/%d", nodebalancerID, configID)
-	req := c.R(ctx).SetResult(&NodeBalancerConfig{})
-	r, err := coupleAPIErrors(req.Get(e))
+	e := formatAPIPath("nodebalancers/%d/configs/%d", nodebalancerID, configID)
+	response, err := doGETRequest[NodeBalancerConfig](ctx, c, e)
 	if err != nil {
 		return nil, err
 	}
-	return r.Result().(*NodeBalancerConfig), nil
+
+	return response, nil
 }
 
 // CreateNodeBalancerConfig creates a NodeBalancerConfig
 func (c *Client) CreateNodeBalancerConfig(ctx context.Context, nodebalancerID int, opts NodeBalancerConfigCreateOptions) (*NodeBalancerConfig, error) {
-	body, err := json.Marshal(opts)
+	e := formatAPIPath("nodebalancers/%d/configs", nodebalancerID)
+	response, err := doPOSTRequest[NodeBalancerConfig](ctx, c, e, opts)
 	if err != nil {
 		return nil, err
 	}
 
-	e := fmt.Sprintf("nodebalancers/%d/configs", nodebalancerID)
-	req := c.R(ctx).SetResult(&NodeBalancerConfig{}).SetBody(string(body))
-	r, err := coupleAPIErrors(req.Post(e))
-	if err != nil {
-		return nil, err
-	}
-	return r.Result().(*NodeBalancerConfig), nil
+	return response, nil
 }
 
 // UpdateNodeBalancerConfig updates the NodeBalancerConfig with the specified id
 func (c *Client) UpdateNodeBalancerConfig(ctx context.Context, nodebalancerID int, configID int, opts NodeBalancerConfigUpdateOptions) (*NodeBalancerConfig, error) {
-	body, err := json.Marshal(opts)
+	e := formatAPIPath("nodebalancers/%d/configs/%d", nodebalancerID, configID)
+	response, err := doPUTRequest[NodeBalancerConfig](ctx, c, e, opts)
 	if err != nil {
 		return nil, err
 	}
 
-	e := fmt.Sprintf("nodebalancers/%d/configs/%d", nodebalancerID, configID)
-	req := c.R(ctx).SetResult(&NodeBalancerConfig{}).SetBody(string(body))
-	r, err := coupleAPIErrors(req.Put(e))
-	if err != nil {
-		return nil, err
-	}
-	return r.Result().(*NodeBalancerConfig), nil
+	return response, nil
 }
 
 // DeleteNodeBalancerConfig deletes the NodeBalancerConfig with the specified id
 func (c *Client) DeleteNodeBalancerConfig(ctx context.Context, nodebalancerID int, configID int) error {
-	e := fmt.Sprintf("nodebalancers/%d/configs/%d", nodebalancerID, configID)
-	_, err := coupleAPIErrors(c.R(ctx).Delete(e))
+	e := formatAPIPath("nodebalancers/%d/configs/%d", nodebalancerID, configID)
+	err := doDELETERequest(ctx, c, e)
 	return err
 }
 
 // RebuildNodeBalancerConfig updates the NodeBalancer with the specified id
 func (c *Client) RebuildNodeBalancerConfig(ctx context.Context, nodeBalancerID int, configID int, opts NodeBalancerConfigRebuildOptions) (*NodeBalancerConfig, error) {
-	body, err := json.Marshal(opts)
+	e := formatAPIPath("nodebalancers/%d/configs/%d/rebuild", nodeBalancerID, configID)
+	response, err := doPOSTRequest[NodeBalancerConfig](ctx, c, e, opts)
 	if err != nil {
 		return nil, err
 	}
 
-	e := fmt.Sprintf("nodebalancers/%d/configs/%d/rebuild", nodeBalancerID, configID)
-	req := c.R(ctx).SetResult(&NodeBalancerConfig{}).SetBody(string(body))
-	r, err := coupleAPIErrors(req.Post(e))
-	if err != nil {
-		return nil, err
-	}
-	return r.Result().(*NodeBalancerConfig), nil
+	return response, nil
 }

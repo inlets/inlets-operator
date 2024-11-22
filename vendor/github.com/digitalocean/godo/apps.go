@@ -40,6 +40,7 @@ type AppsService interface {
 	CreateDeployment(ctx context.Context, appID string, create ...*DeploymentCreateRequest) (*Deployment, *Response, error)
 
 	GetLogs(ctx context.Context, appID, deploymentID, component string, logType AppLogType, follow bool, tailLines int) (*AppLogs, *Response, error)
+	GetExec(ctx context.Context, appID, deploymentID, component string) (*AppExec, *Response, error)
 
 	ListRegions(ctx context.Context) ([]*AppRegion, *Response, error)
 
@@ -56,6 +57,19 @@ type AppsService interface {
 
 	ListBuildpacks(ctx context.Context) ([]*Buildpack, *Response, error)
 	UpgradeBuildpack(ctx context.Context, appID string, opts UpgradeBuildpackOptions) (*UpgradeBuildpackResponse, *Response, error)
+
+	GetAppDatabaseConnectionDetails(ctx context.Context, appID string) ([]*GetDatabaseConnectionDetailsResponse, *Response, error)
+	ResetDatabasePassword(ctx context.Context, appID string, component string) (*Deployment, *Response, error)
+	ToggleDatabaseTrustedSource(
+		ctx context.Context,
+		appID string,
+		component string,
+		opts ToggleDatabaseTrustedSourceOptions,
+	) (
+		*ToggleDatabaseTrustedSourceResponse,
+		*Response,
+		error,
+	)
 }
 
 // AppLogs represent app logs.
@@ -64,9 +78,16 @@ type AppLogs struct {
 	HistoricURLs []string `json:"historic_urls"`
 }
 
+// AppExec represents the websocket URL used for sending/receiving console input and output.
+type AppExec struct {
+	URL string `json:"url"`
+}
+
 // AppUpdateRequest represents a request to update an app.
 type AppUpdateRequest struct {
 	Spec *AppSpec `json:"spec"`
+	// Whether or not to update the source versions (for example fetching a new commit or image digest) of all components. By default (when this is false) only newly added sources will be updated to avoid changes like updating the scale of a component from also updating the respective code.
+	UpdateAllSourceVersions bool `json:"update_all_source_versions"`
 }
 
 // DeploymentCreateRequest represents a request to create a deployment.
@@ -88,6 +109,12 @@ type UpgradeBuildpackOptions struct {
 	MajorVersion int32 `json:"major_version,omitempty"`
 	// Whether or not to trigger a deployment for the app after upgrading the buildpack.
 	TriggerDeployment bool `json:"trigger_deployment,omitempty"`
+}
+
+// ToggleDatabaseTrustedSourceOptions provides optional parameters for ToggleDatabaseTrustedSource.
+type ToggleDatabaseTrustedSourceOptions struct {
+	// Enable, if true, indicates the database should enable the trusted sources firewall.
+	Enable bool
 }
 
 type appRoot struct {
@@ -347,6 +374,27 @@ func (s *AppsServiceOp) GetLogs(ctx context.Context, appID, deploymentID, compon
 	return logs, resp, nil
 }
 
+// GetExec retrieves the websocket URL used for sending/receiving console input and output.
+func (s *AppsServiceOp) GetExec(ctx context.Context, appID, deploymentID, component string) (*AppExec, *Response, error) {
+	var url string
+	if deploymentID == "" {
+		url = fmt.Sprintf("%s/%s/components/%s/exec", appsBasePath, appID, component)
+	} else {
+		url = fmt.Sprintf("%s/%s/deployments/%s/components/%s/exec", appsBasePath, appID, deploymentID, component)
+	}
+
+	req, err := s.client.NewRequest(ctx, http.MethodGet, url, nil)
+	if err != nil {
+		return nil, nil, err
+	}
+	logs := new(AppExec)
+	resp, err := s.client.Do(ctx, req, logs)
+	if err != nil {
+		return nil, resp, err
+	}
+	return logs, resp, nil
+}
+
 // ListRegions lists all regions supported by App Platform.
 func (s *AppsServiceOp) ListRegions(ctx context.Context) ([]*AppRegion, *Response, error) {
 	path := fmt.Sprintf("%s/regions", appsBasePath)
@@ -363,6 +411,9 @@ func (s *AppsServiceOp) ListRegions(ctx context.Context) ([]*AppRegion, *Respons
 }
 
 // ListTiers lists available app tiers.
+//
+// Deprecated: The '/v2/apps/tiers' endpoint has been deprecated as app tiers
+// are no longer tied to instance sizes. The concept of tiers is being retired.
 func (s *AppsServiceOp) ListTiers(ctx context.Context) ([]*AppTier, *Response, error) {
 	path := fmt.Sprintf("%s/tiers", appsBasePath)
 	req, err := s.client.NewRequest(ctx, http.MethodGet, path, nil)
@@ -378,6 +429,9 @@ func (s *AppsServiceOp) ListTiers(ctx context.Context) ([]*AppTier, *Response, e
 }
 
 // GetTier retrieves information about a specific app tier.
+//
+// Deprecated: The '/v2/apps/tiers/{slug}' endpoints have been deprecated as app
+// tiers are no longer tied to instance sizes. The concept of tiers is being retired.
 func (s *AppsServiceOp) GetTier(ctx context.Context, slug string) (*AppTier, *Response, error) {
 	path := fmt.Sprintf("%s/tiers/%s", appsBasePath, slug)
 	req, err := s.client.NewRequest(ctx, http.MethodGet, path, nil)
@@ -491,6 +545,60 @@ func (s *AppsServiceOp) UpgradeBuildpack(ctx context.Context, appID string, opts
 		return nil, nil, err
 	}
 	root := new(UpgradeBuildpackResponse)
+	resp, err := s.client.Do(ctx, req, root)
+	if err != nil {
+		return nil, resp, err
+	}
+	return root, resp, nil
+}
+
+// GetAppDatabaseConnectionDetails retrieves credentials for databases associated with the app.
+func (s *AppsServiceOp) GetAppDatabaseConnectionDetails(ctx context.Context, appID string) ([]*GetDatabaseConnectionDetailsResponse, *Response, error) {
+	path := fmt.Sprintf("%s/%s/database_connection_details", appsBasePath, appID)
+	req, err := s.client.NewRequest(ctx, http.MethodGet, path, nil)
+	if err != nil {
+		return nil, nil, err
+	}
+	root := new(GetAppDatabaseConnectionDetailsResponse)
+	resp, err := s.client.Do(ctx, req, root)
+	if err != nil {
+		return nil, resp, err
+	}
+	return root.ConnectionDetails, resp, nil
+}
+
+// ResetDatabasePassword resets credentials for a database component associated with the app.
+func (s *AppsServiceOp) ResetDatabasePassword(ctx context.Context, appID string, component string) (*Deployment, *Response, error) {
+	path := fmt.Sprintf("%s/%s/components/%s/reset_password", appsBasePath, appID, component)
+	req, err := s.client.NewRequest(ctx, http.MethodPost, path, nil)
+	if err != nil {
+		return nil, nil, err
+	}
+	root := new(deploymentRoot)
+	resp, err := s.client.Do(ctx, req, root)
+	if err != nil {
+		return nil, resp, err
+	}
+	return root.Deployment, resp, nil
+}
+
+// ToggleDatabaseTrustedSource enables/disables trusted sources on the specified dev database component.
+func (s *AppsServiceOp) ToggleDatabaseTrustedSource(
+	ctx context.Context,
+	appID string,
+	component string,
+	opts ToggleDatabaseTrustedSourceOptions,
+) (
+	*ToggleDatabaseTrustedSourceResponse,
+	*Response,
+	error,
+) {
+	path := fmt.Sprintf("%s/%s/components/%s/trusted_sources", appsBasePath, appID, component)
+	req, err := s.client.NewRequest(ctx, http.MethodPost, path, opts)
+	if err != nil {
+		return nil, nil, err
+	}
+	root := new(ToggleDatabaseTrustedSourceResponse)
 	resp, err := s.client.Do(ctx, req, root)
 	if err != nil {
 		return nil, resp, err

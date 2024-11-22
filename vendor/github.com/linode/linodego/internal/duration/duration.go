@@ -51,7 +51,7 @@ func durationToSeconds(s string) (int, error) {
 
 	l := len(segs)
 
-	for i := 0; i < l; i++ {
+	for i := range l {
 		m, err := strconv.Atoi(segs[i])
 		if err != nil {
 			return 0, err

@@ -2,7 +2,6 @@ package linodego
 
 import (
 	"context"
-	"fmt"
 )
 
 // StatsNet represents a network stats object
@@ -35,22 +34,22 @@ type InstanceStats struct {
 
 // GetInstanceStats gets the template with the provided ID
 func (c *Client) GetInstanceStats(ctx context.Context, linodeID int) (*InstanceStats, error) {
-	e := fmt.Sprintf("linode/instances/%d/stats", linodeID)
-	req := c.R(ctx).SetResult(&InstanceStats{})
-	r, err := coupleAPIErrors(req.Get(e))
+	e := formatAPIPath("linode/instances/%d/stats", linodeID)
+	response, err := doGETRequest[InstanceStats](ctx, c, e)
 	if err != nil {
 		return nil, err
 	}
-	return r.Result().(*InstanceStats), nil
+
+	return response, nil
 }
 
 // GetInstanceStatsByDate gets the template with the provided ID, year, and month
 func (c *Client) GetInstanceStatsByDate(ctx context.Context, linodeID int, year int, month int) (*InstanceStats, error) {
-	e := fmt.Sprintf("linode/instances/%d/stats/%d/%d", linodeID, year, month)
-	req := c.R(ctx).SetResult(&InstanceStats{})
-	r, err := coupleAPIErrors(req.Get(e))
+	e := formatAPIPath("linode/instances/%d/stats/%d/%d", linodeID, year, month)
+	response, err := doGETRequest[InstanceStats](ctx, c, e)
 	if err != nil {
 		return nil, err
 	}
-	return r.Result().(*InstanceStats), nil
+
+	return response, nil
 }

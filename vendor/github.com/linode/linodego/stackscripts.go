@@ -3,10 +3,8 @@ package linodego
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"time"
 
-	"github.com/go-resty/resty/v2"
 	"github.com/linode/linodego/internal/parseabletime"
 )
 
@@ -111,83 +109,36 @@ func (i Stackscript) GetUpdateOptions() StackscriptUpdateOptions {
 	}
 }
 
-// StackscriptsPagedResponse represents a paginated Stackscript API response
-type StackscriptsPagedResponse struct {
-	*PageOptions
-	Data []Stackscript `json:"data"`
-}
-
-// endpoint gets the endpoint URL for Stackscript
-func (StackscriptsPagedResponse) endpoint(_ ...any) string {
-	return "linode/stackscripts"
-}
-
-func (resp *StackscriptsPagedResponse) castResult(r *resty.Request, e string) (int, int, error) {
-	res, err := coupleAPIErrors(r.SetResult(StackscriptsPagedResponse{}).Get(e))
-	if err != nil {
-		return 0, 0, err
-	}
-	castedRes := res.Result().(*StackscriptsPagedResponse)
-	resp.Data = append(resp.Data, castedRes.Data...)
-	return castedRes.Pages, castedRes.Results, nil
-}
-
 // ListStackscripts lists Stackscripts
 func (c *Client) ListStackscripts(ctx context.Context, opts *ListOptions) ([]Stackscript, error) {
-	response := StackscriptsPagedResponse{}
-	err := c.listHelper(ctx, &response, opts)
-	if err != nil {
-		return nil, err
-	}
-	return response.Data, nil
+	response, err := getPaginatedResults[Stackscript](ctx, c, "linode/stackscripts", opts)
+	return response, err
 }
 
 // GetStackscript gets the Stackscript with the provided ID
 func (c *Client) GetStackscript(ctx context.Context, scriptID int) (*Stackscript, error) {
-	e := fmt.Sprintf("linode/stackscripts/%d", scriptID)
-	req := c.R(ctx).SetResult(&Stackscript{})
-	r, err := coupleAPIErrors(req.Get(e))
-	if err != nil {
-		return nil, err
-	}
-	return r.Result().(*Stackscript), nil
+	e := formatAPIPath("linode/stackscripts/%d", scriptID)
+	response, err := doGETRequest[Stackscript](ctx, c, e)
+	return response, err
 }
 
 // CreateStackscript creates a StackScript
 func (c *Client) CreateStackscript(ctx context.Context, opts StackscriptCreateOptions) (*Stackscript, error) {
-	body, err := json.Marshal(opts)
-	if err != nil {
-		return nil, err
-	}
-
 	e := "linode/stackscripts"
-	req := c.R(ctx).SetResult(&Stackscript{}).SetBody(string(body))
-	r, err := coupleAPIErrors(req.Post(e))
-	if err != nil {
-		return nil, err
-	}
-	return r.Result().(*Stackscript), nil
+	response, err := doPOSTRequest[Stackscript](ctx, c, e, opts)
+	return response, err
 }
 
 // UpdateStackscript updates the StackScript with the specified id
 func (c *Client) UpdateStackscript(ctx context.Context, scriptID int, opts StackscriptUpdateOptions) (*Stackscript, error) {
-	body, err := json.Marshal(opts)
-	if err != nil {
-		return nil, err
-	}
-
-	req := c.R(ctx).SetResult(&Stackscript{}).SetBody(string(body))
-	e := fmt.Sprintf("linode/stackscripts/%d", scriptID)
-	r, err := coupleAPIErrors(req.Put(e))
-	if err != nil {
-		return nil, err
-	}
-	return r.Result().(*Stackscript), nil
+	e := formatAPIPath("linode/stackscripts/%d", scriptID)
+	response, err := doPUTRequest[Stackscript](ctx, c, e, opts)
+	return response, err
 }
 
 // DeleteStackscript deletes the StackScript with the specified id
 func (c *Client) DeleteStackscript(ctx context.Context, scriptID int) error {
-	e := fmt.Sprintf("linode/stackscripts/%d", scriptID)
-	_, err := coupleAPIErrors(c.R(ctx).Delete(e))
+	e := formatAPIPath("linode/stackscripts/%d", scriptID)
+	err := doDELETERequest(ctx, c, e)
 	return err
 }

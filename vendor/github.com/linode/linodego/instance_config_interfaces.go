@@ -2,8 +2,6 @@ package linodego
 
 import (
 	"context"
-	"encoding/json"
-	"fmt"
 )
 
 // InstanceConfigInterface contains information about a configuration's network interface
@@ -16,13 +14,13 @@ type InstanceConfigInterface struct {
 	Active      bool                   `json:"active"`
 	VPCID       *int                   `json:"vpc_id"`
 	SubnetID    *int                   `json:"subnet_id"`
-	IPv4        VPCIPv4                `json:"ipv4"`
+	IPv4        *VPCIPv4               `json:"ipv4"`
 	IPRanges    []string               `json:"ip_ranges"`
 }
 
 type VPCIPv4 struct {
-	VPC     string `json:"vpc,omitempty"`
-	NAT1To1 string `json:"nat_1_1,omitempty"`
+	VPC     string  `json:"vpc,omitempty"`
+	NAT1To1 *string `json:"nat_1_1,omitempty"`
 }
 
 type InstanceConfigInterfaceCreateOptions struct {
@@ -36,9 +34,9 @@ type InstanceConfigInterfaceCreateOptions struct {
 }
 
 type InstanceConfigInterfaceUpdateOptions struct {
-	Primary  bool     `json:"primary,omitempty"`
-	IPv4     *VPCIPv4 `json:"ipv4,omitempty"`
-	IPRanges []string `json:"ip_ranges,omitempty"`
+	Primary  bool      `json:"primary,omitempty"`
+	IPv4     *VPCIPv4  `json:"ipv4,omitempty"`
+	IPRanges *[]string `json:"ip_ranges,omitempty"`
 }
 
 type InstanceConfigInterfacesReorderOptions struct {
@@ -67,20 +65,14 @@ func (i InstanceConfigInterface) GetCreateOptions() InstanceConfigInterfaceCreat
 		opts.IPRanges = i.IPRanges
 	}
 
-	if i.Purpose == InterfacePurposeVPC &&
-		i.IPv4.NAT1To1 != "" && i.IPv4.VPC != "" {
+	if i.Purpose == InterfacePurposeVPC && i.IPv4 != nil {
 		opts.IPv4 = &VPCIPv4{
 			VPC:     i.IPv4.VPC,
 			NAT1To1: i.IPv4.NAT1To1,
 		}
 	}
 
-	// workaround for API issue
-	if i.IPAMAddress == "222" {
-		opts.IPAMAddress = ""
-	} else {
-		opts.IPAMAddress = i.IPAMAddress
-	}
+	opts.IPAMAddress = i.IPAMAddress
 
 	return opts
 }
@@ -90,15 +82,20 @@ func (i InstanceConfigInterface) GetUpdateOptions() InstanceConfigInterfaceUpdat
 		Primary: i.Primary,
 	}
 
-	if i.Purpose == InterfacePurposeVPC {
+	if i.Purpose == InterfacePurposeVPC && i.IPv4 != nil {
 		opts.IPv4 = &VPCIPv4{
 			VPC:     i.IPv4.VPC,
 			NAT1To1: i.IPv4.NAT1To1,
 		}
 	}
 
-	if len(i.IPRanges) > 0 {
-		opts.IPRanges = i.IPRanges
+	if i.IPRanges != nil {
+		// Copy the slice to prevent accidental
+		// mutations
+		copiedIPRanges := make([]string, len(i.IPRanges))
+		copy(copiedIPRanges, i.IPRanges)
+
+		opts.IPRanges = &copiedIPRanges
 	}
 
 	return opts
@@ -110,19 +107,13 @@ func (c *Client) AppendInstanceConfigInterface(
 	configID int,
 	opts InstanceConfigInterfaceCreateOptions,
 ) (*InstanceConfigInterface, error) {
-	body, err := json.Marshal(opts)
+	e := formatAPIPath("/linode/instances/%d/configs/%d/interfaces", linodeID, configID)
+	response, err := doPOSTRequest[InstanceConfigInterface](ctx, c, e, opts)
 	if err != nil {
 		return nil, err
 	}
 
-	req := c.R(ctx).SetResult(&InstanceConfigInterface{}).SetBody(string(body))
-	e := fmt.Sprintf("/linode/instances/%d/configs/%d/interfaces", linodeID, configID)
-	r, err := coupleAPIErrors(req.Post(e))
-	if err != nil {
-		return nil, err
-	}
-
-	return r.Result().(*InstanceConfigInterface), nil
+	return response, nil
 }
 
 func (c *Client) GetInstanceConfigInterface(
@@ -131,18 +122,18 @@ func (c *Client) GetInstanceConfigInterface(
 	configID int,
 	interfaceID int,
 ) (*InstanceConfigInterface, error) {
-	e := fmt.Sprintf(
+	e := formatAPIPath(
 		"linode/instances/%d/configs/%d/interfaces/%d",
 		linodeID,
 		configID,
 		interfaceID,
 	)
-	req := c.R(ctx).SetResult(&InstanceConfigInterface{})
-	r, err := coupleAPIErrors(req.Get(e))
+	response, err := doGETRequest[InstanceConfigInterface](ctx, c, e)
 	if err != nil {
 		return nil, err
 	}
-	return r.Result().(*InstanceConfigInterface), nil
+
+	return response, nil
 }
 
 func (c *Client) ListInstanceConfigInterfaces(
@@ -150,17 +141,17 @@ func (c *Client) ListInstanceConfigInterfaces(
 	linodeID int,
 	configID int,
 ) ([]InstanceConfigInterface, error) {
-	e := fmt.Sprintf(
+	e := formatAPIPath(
 		"linode/instances/%d/configs/%d/interfaces",
 		linodeID,
 		configID,
 	)
-	req := c.R(ctx).SetResult([]InstanceConfigInterface{})
-	r, err := coupleAPIErrors(req.Get(e))
+	response, err := doGETRequest[[]InstanceConfigInterface](ctx, c, e)
 	if err != nil {
 		return nil, err
 	}
-	return *r.Result().(*[]InstanceConfigInterface), nil
+
+	return *response, nil
 }
 
 func (c *Client) UpdateInstanceConfigInterface(
@@ -170,23 +161,18 @@ func (c *Client) UpdateInstanceConfigInterface(
 	interfaceID int,
 	opts InstanceConfigInterfaceUpdateOptions,
 ) (*InstanceConfigInterface, error) {
-	body, err := json.Marshal(opts)
-	if err != nil {
-		return nil, err
-	}
-
-	e := fmt.Sprintf(
+	e := formatAPIPath(
 		"linode/instances/%d/configs/%d/interfaces/%d",
 		linodeID,
 		configID,
 		interfaceID,
 	)
-	req := c.R(ctx).SetResult(&InstanceConfigInterface{}).SetBody(string(body))
-	r, err := coupleAPIErrors(req.Put(e))
+	response, err := doPUTRequest[InstanceConfigInterface](ctx, c, e, opts)
 	if err != nil {
 		return nil, err
 	}
-	return r.Result().(*InstanceConfigInterface), nil
+
+	return response, nil
 }
 
 func (c *Client) DeleteInstanceConfigInterface(
@@ -195,13 +181,13 @@ func (c *Client) DeleteInstanceConfigInterface(
 	configID int,
 	interfaceID int,
 ) error {
-	e := fmt.Sprintf(
+	e := formatAPIPath(
 		"linode/instances/%d/configs/%d/interfaces/%d",
 		linodeID,
 		configID,
 		interfaceID,
 	)
-	_, err := coupleAPIErrors(c.R(ctx).Delete(e))
+	err := doDELETERequest(ctx, c, e)
 	return err
 }
 
@@ -211,18 +197,12 @@ func (c *Client) ReorderInstanceConfigInterfaces(
 	configID int,
 	opts InstanceConfigInterfacesReorderOptions,
 ) error {
-	body, err := json.Marshal(opts)
-	if err != nil {
-		return err
-	}
-	e := fmt.Sprintf(
+	e := formatAPIPath(
 		"linode/instances/%d/configs/%d/interfaces/order",
 		linodeID,
 		configID,
 	)
-
-	req := c.R(ctx).SetBody(string(body))
-	_, err = coupleAPIErrors(req.Post(e))
+	_, err := doPOSTRequest[OAuthClient](ctx, c, e, opts)
 
 	return err
 }

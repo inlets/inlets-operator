@@ -3,64 +3,50 @@ package linodego
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"time"
 
-	"github.com/go-resty/resty/v2"
 	"github.com/linode/linodego/internal/parseabletime"
 )
 
 // Invoice structs reflect an invoice for billable activity on the account.
 type Invoice struct {
-	ID    int        `json:"id"`
-	Label string     `json:"label"`
-	Total float32    `json:"total"`
-	Date  *time.Time `json:"-"`
+	ID            int                 `json:"id"`
+	Label         string              `json:"label"`
+	Total         float32             `json:"total"`
+	Date          *time.Time          `json:"-"`
+	Tax           float32             `json:"tax"`
+	Subtotal      float32             `json:"subtotal"`
+	BillingSource string              `json:"billing_source"`
+	TaxSummary    []InvoiceTaxSummary `json:"tax_summary"`
+}
+
+type InvoiceTaxSummary struct {
+	Tax  float32 `json:"tax"`
+	Name string  `json:"name"`
 }
 
 // InvoiceItem structs reflect a single billable activity associate with an Invoice
 type InvoiceItem struct {
 	Label     string     `json:"label"`
 	Type      string     `json:"type"`
-	UnitPrice int        `json:"unitprice"`
+	UnitPrice float32    `json:"unit_price"`
 	Quantity  int        `json:"quantity"`
 	Amount    float32    `json:"amount"`
 	Tax       float32    `json:"tax"`
 	Region    *string    `json:"region"`
 	From      *time.Time `json:"-"`
 	To        *time.Time `json:"-"`
-}
-
-// InvoicesPagedResponse represents a paginated Invoice API response
-type InvoicesPagedResponse struct {
-	*PageOptions
-	Data []Invoice `json:"data"`
-}
-
-// endpoint gets the endpoint URL for Invoice
-func (InvoicesPagedResponse) endpoint(_ ...any) string {
-	return "account/invoices"
-}
-
-func (resp *InvoicesPagedResponse) castResult(r *resty.Request, e string) (int, int, error) {
-	res, err := coupleAPIErrors(r.SetResult(InvoicesPagedResponse{}).Get(e))
-	if err != nil {
-		return 0, 0, err
-	}
-	castedRes := res.Result().(*InvoicesPagedResponse)
-	resp.Data = append(resp.Data, castedRes.Data...)
-	return castedRes.Pages, castedRes.Results, nil
+	Total     float32    `json:"total"`
 }
 
 // ListInvoices gets a paginated list of Invoices against the Account
 func (c *Client) ListInvoices(ctx context.Context, opts *ListOptions) ([]Invoice, error) {
-	response := InvoicesPagedResponse{}
-	err := c.listHelper(ctx, &response, opts)
+	response, err := getPaginatedResults[Invoice](ctx, c, "account/invoices", opts)
 	if err != nil {
 		return nil, err
 	}
 
-	return response.Data, nil
+	return response, nil
 }
 
 // UnmarshalJSON implements the json.Unmarshaler interface
@@ -107,45 +93,21 @@ func (i *InvoiceItem) UnmarshalJSON(b []byte) error {
 
 // GetInvoice gets a single Invoice matching the provided ID
 func (c *Client) GetInvoice(ctx context.Context, invoiceID int) (*Invoice, error) {
-	req := c.R(ctx).SetResult(&Invoice{})
-	e := fmt.Sprintf("account/invoices/%d", invoiceID)
-	r, err := coupleAPIErrors(req.Get(e))
+	e := formatAPIPath("account/invoices/%d", invoiceID)
+	response, err := doGETRequest[Invoice](ctx, c, e)
 	if err != nil {
 		return nil, err
 	}
 
-	return r.Result().(*Invoice), nil
-}
-
-// InvoiceItemsPagedResponse represents a paginated Invoice Item API response
-type InvoiceItemsPagedResponse struct {
-	*PageOptions
-	Data []InvoiceItem `json:"data"`
-}
-
-// endpoint gets the endpoint URL for InvoiceItems associated with a specific Invoice
-func (InvoiceItemsPagedResponse) endpoint(ids ...any) string {
-	id := ids[0].(int)
-	return fmt.Sprintf("account/invoices/%d/items", id)
-}
-
-func (resp *InvoiceItemsPagedResponse) castResult(r *resty.Request, e string) (int, int, error) {
-	res, err := coupleAPIErrors(r.SetResult(InvoiceItemsPagedResponse{}).Get(e))
-	if err != nil {
-		return 0, 0, err
-	}
-	castedRes := res.Result().(*InvoiceItemsPagedResponse)
-	resp.Data = append(resp.Data, castedRes.Data...)
-	return castedRes.Pages, castedRes.Results, nil
+	return response, nil
 }
 
 // ListInvoiceItems gets the invoice items associated with a specific Invoice
 func (c *Client) ListInvoiceItems(ctx context.Context, invoiceID int, opts *ListOptions) ([]InvoiceItem, error) {
-	response := InvoiceItemsPagedResponse{}
-	err := c.listHelper(ctx, &response, opts, invoiceID)
+	response, err := getPaginatedResults[InvoiceItem](ctx, c, formatAPIPath("account/invoices/%d/items", invoiceID), opts)
 	if err != nil {
 		return nil, err
 	}
 
-	return response.Data, nil
+	return response, nil
 }

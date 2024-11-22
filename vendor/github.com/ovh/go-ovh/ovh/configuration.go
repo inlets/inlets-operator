@@ -1,11 +1,14 @@
 package ovh
 
 import (
+	"context"
+	"errors"
 	"fmt"
 	"os"
 	"os/user"
 	"strings"
 
+	"golang.org/x/oauth2/clientcredentials"
 	"gopkg.in/ini.v1"
 )
 
@@ -102,6 +105,10 @@ func (c *Client) loadConfig(endpointName string) error {
 		endpointName = getConfigValue(cfg, "default", "endpoint", "ovh-eu")
 	}
 
+	if c.AccessToken == "" {
+		c.AccessToken = getConfigValue(cfg, endpointName, "access_token", "")
+	}
+
 	if c.AppKey == "" {
 		c.AppKey = getConfigValue(cfg, endpointName, "application_key", "")
 	}
@@ -114,6 +121,41 @@ func (c *Client) loadConfig(endpointName string) error {
 		c.ConsumerKey = getConfigValue(cfg, endpointName, "consumer_key", "")
 	}
 
+	if c.ClientID == "" {
+		c.ClientID = getConfigValue(cfg, endpointName, "client_id", "")
+	}
+
+	if c.ClientSecret == "" {
+		c.ClientSecret = getConfigValue(cfg, endpointName, "client_secret", "")
+	}
+
+	configuredAuthMethods := []string{}
+	if c.AppKey != "" || c.AppSecret != "" || c.ConsumerKey != "" {
+		configuredAuthMethods = append(configuredAuthMethods, "application_key/application_secret")
+	}
+	if c.ClientID != "" || c.ClientSecret != "" {
+		configuredAuthMethods = append(configuredAuthMethods, "client_id/client_secret")
+	}
+	if c.AccessToken != "" {
+		configuredAuthMethods = append(configuredAuthMethods, "access_token")
+	}
+
+	if len(configuredAuthMethods) > 1 {
+		return fmt.Errorf("can't use multiple authentication methods: %s", strings.Join(configuredAuthMethods, ", "))
+	}
+	if len(configuredAuthMethods) == 0 {
+		return errors.New(
+			"missing authentication information, you need to provide one of the following: application_key/application_secret, client_id/client_secret, or access_token",
+		)
+	}
+
+	if (c.ClientID != "") != (c.ClientSecret != "") {
+		return errors.New("invalid oauth2 config, both client_id and client_secret must be given")
+	}
+	if (c.AppKey != "") != (c.AppSecret != "") {
+		return errors.New("invalid authentication config, both application_key and application_secret must be given")
+	}
+
 	// Load real endpoint URL by name. If endpoint contains a '/', consider it as a URL
 	if strings.Contains(endpointName, "/") {
 		c.endpoint = endpointName
@@ -123,13 +165,22 @@ func (c *Client) loadConfig(endpointName string) error {
 
 	// If we still have no valid endpoint, AppKey or AppSecret, return an error
 	if c.endpoint == "" {
-		return fmt.Errorf("unknown endpoint '%s', consider checking 'Endpoints' list of using an URL", endpointName)
+		return fmt.Errorf("unknown endpoint '%s', consider checking 'Endpoints' list or using an URL", endpointName)
 	}
-	if c.AppKey == "" {
-		return fmt.Errorf("missing application key, please check your configuration or consult the documentation to create one")
-	}
-	if c.AppSecret == "" {
-		return fmt.Errorf("missing application secret, please check your configuration or consult the documentation to create one")
+
+	if c.ClientID != "" {
+		if _, ok := tokensURLs[c.endpoint]; !ok {
+			return fmt.Errorf("oauth2 authentication is not compatible with endpoint %q", c.endpoint)
+		}
+
+		conf := &clientcredentials.Config{
+			ClientID:     c.ClientID,
+			ClientSecret: c.ClientSecret,
+			TokenURL:     tokensURLs[c.endpoint],
+			Scopes:       []string{"all"},
+		}
+
+		c.oauth2TokenSource = conf.TokenSource(context.Background())
 	}
 
 	return nil

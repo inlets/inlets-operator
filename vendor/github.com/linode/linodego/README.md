@@ -1,11 +1,11 @@
 # linodego
 
-![Tests](https://img.shields.io/github/actions/workflow/status/linode/linodego/test.yml?branch=main)
+![Tests](https://img.shields.io/github/actions/workflow/status/linode/linodego/ci.yml?branch=main)
 [![Release](https://img.shields.io/github/v/release/linode/linodego)](https://github.com/linode/linodego/releases/latest)
 [![GoDoc](https://godoc.org/github.com/linode/linodego?status.svg)](https://godoc.org/github.com/linode/linodego)
 [![Go Report Card](https://goreportcard.com/badge/github.com/linode/linodego)](https://goreportcard.com/report/github.com/linode/linodego)
 
-Go client for [Linode REST v4 API](https://developers.linode.com/api/v4)
+Go client for [Linode REST v4 API](https://techdocs.akamai.com/linode-api/reference/api)
 
 ## Installation
 
@@ -17,7 +17,7 @@ go get -u github.com/linode/linodego
 
 See [godoc](https://godoc.org/github.com/linode/linodego) for a complete reference.
 
-The API generally follows the naming patterns prescribed in the [OpenAPIv3 document for Linode APIv4](https://developers.linode.com/api/v4).
+The API generally follows the naming patterns prescribed in the [OpenAPIv3 document for Linode APIv4](https://techdocs.akamai.com/linode-api/reference/api).
 
 Deviations in naming have been made to avoid using "Linode" and "Instance" redundantly or inconsistently.
 
@@ -33,36 +33,35 @@ package main
 import (
 	"context"
 	"fmt"
-
-	"github.com/linode/linodego"
-	"golang.org/x/oauth2"
-
 	"log"
 	"net/http"
 	"os"
+
+	"github.com/linode/linodego"
+	"golang.org/x/oauth2"
 )
 
 func main() {
-  apiKey, ok := os.LookupEnv("LINODE_TOKEN")
-  if !ok {
-    log.Fatal("Could not find LINODE_TOKEN, please assert it is set.")
-  }
-  tokenSource := oauth2.StaticTokenSource(&oauth2.Token{AccessToken: apiKey})
+	apiKey, ok := os.LookupEnv("LINODE_TOKEN")
+	if !ok {
+		log.Fatal("Could not find LINODE_TOKEN, please assert it is set.")
+	}
+	tokenSource := oauth2.StaticTokenSource(&oauth2.Token{AccessToken: apiKey})
 
-  oauth2Client := &http.Client{
-    Transport: &oauth2.Transport{
-      Source: tokenSource,
-    },
-  }
+	oauth2Client := &http.Client{
+		Transport: &oauth2.Transport{
+			Source: tokenSource,
+		},
+	}
 
-  linodeClient := linodego.NewClient(oauth2Client)
-  linodeClient.SetDebug(true)
-  
-  res, err := linodeClient.GetInstance(context.Background(), 4090913)
-  if err != nil {
-    log.Fatal(err)
-  }
-  fmt.Printf("%v", res)
+	linodeClient := linodego.NewClient(oauth2Client)
+	linodeClient.SetDebug(true)
+
+	res, err := linodeClient.GetInstance(context.Background(), 4090913)
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Printf("%v", res)
 }
 ```
 
@@ -98,6 +97,11 @@ values are set in the supplied ListOptions.
 ```go
 // opts.Results == 218
 ```
+
+> **_NOTES:_**  
+>	- The ListOptions will be mutated by list endpoint functions.
+>	- Instances of ListOptions should NOT be shared across multiple list endpoint functions.
+>	- The resulting number of results and pages can be accessed through the user-supplied ListOptions instance.
 
 #### Filtering
 

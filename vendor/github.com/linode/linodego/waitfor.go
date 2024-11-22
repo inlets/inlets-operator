@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"slices"
 	"strconv"
 	"time"
 
@@ -75,7 +76,6 @@ func (client Client) WaitForInstanceDiskStatus(ctx context.Context, instanceID i
 			}
 
 			for _, disk := range disks {
-				disk := disk
 				if disk.ID == diskID {
 					complete := (disk.Status == status)
 					if complete {
@@ -442,6 +442,40 @@ func (client Client) WaitForImageStatus(ctx context.Context, imageID string, sta
 	}
 }
 
+// WaitForImageRegionStatus waits for an Image's replica to reach the desired state
+// before returning.
+func (client Client) WaitForImageRegionStatus(ctx context.Context, imageID, region string, status ImageRegionStatus) (*Image, error) {
+	ticker := time.NewTicker(client.pollInterval)
+	defer ticker.Stop()
+
+	for {
+		select {
+		case <-ticker.C:
+			image, err := client.GetImage(ctx, imageID)
+			if err != nil {
+				return image, err
+			}
+
+			replicaIdx := slices.IndexFunc(
+				image.Regions,
+				func(r ImageRegion) bool {
+					return r.Region == region
+				},
+			)
+
+			// If no replica was found or the status doesn't match, try again
+			if replicaIdx < 0 || image.Regions[replicaIdx].Status != status {
+				continue
+			}
+
+			return image, nil
+
+		case <-ctx.Done():
+			return nil, fmt.Errorf("failed to wait for Image %s status %s: %w", imageID, status, ctx.Err())
+		}
+	}
+}
+
 // WaitForMySQLDatabaseBackup waits for the backup with the given label to be available.
 func (client Client) WaitForMySQLDatabaseBackup(ctx context.Context, dbID int, label string, timeoutSeconds int) (*MySQLDatabaseBackup, error) {
 	ctx, cancel := context.WithTimeout(ctx, time.Duration(timeoutSeconds)*time.Second)
@@ -705,7 +739,7 @@ func (p *EventPoller) WaitForFinished(
 	for {
 		select {
 		case <-ticker.C:
-			event, err := p.client.GetEvent(ctx, event.ID)
+			event, err = p.client.GetEvent(ctx, event.ID)
 			if err != nil {
 				return nil, fmt.Errorf("failed to get event: %w", err)
 			}

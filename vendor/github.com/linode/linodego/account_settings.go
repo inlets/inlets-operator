@@ -2,7 +2,6 @@ package linodego
 
 import (
 	"context"
-	"encoding/json"
 )
 
 // AccountSettings are the account wide flags or plans that effect new resources
@@ -38,29 +37,24 @@ type AccountSettingsUpdateOptions struct {
 
 // GetAccountSettings gets the account wide flags or plans that effect new resources
 func (c *Client) GetAccountSettings(ctx context.Context) (*AccountSettings, error) {
-	req := c.R(ctx).SetResult(&AccountSettings{})
 	e := "account/settings"
-	r, err := coupleAPIErrors(req.Get(e))
+
+	response, err := doGETRequest[AccountSettings](ctx, c, e)
 	if err != nil {
 		return nil, err
 	}
 
-	return r.Result().(*AccountSettings), nil
+	return response, nil
 }
 
 // UpdateAccountSettings updates the settings associated with the account
 func (c *Client) UpdateAccountSettings(ctx context.Context, opts AccountSettingsUpdateOptions) (*AccountSettings, error) {
-	body, err := json.Marshal(opts)
-	if err != nil {
-		return nil, err
-	}
-
-	req := c.R(ctx).SetResult(&AccountSettings{}).SetBody(string(body))
 	e := "account/settings"
-	r, err := coupleAPIErrors(req.Put(e))
+
+	response, err := doPUTRequest[AccountSettings](ctx, c, e, opts)
 	if err != nil {
 		return nil, err
 	}
 
-	return r.Result().(*AccountSettings), nil
+	return response, nil
 }

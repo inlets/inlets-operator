@@ -3,10 +3,8 @@ package linodego
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"time"
 
-	"github.com/go-resty/resty/v2"
 	"github.com/linode/linodego/internal/parseabletime"
 )
 
@@ -19,6 +17,9 @@ type InstanceDisk struct {
 	Filesystem DiskFilesystem `json:"filesystem"`
 	Created    *time.Time     `json:"-"`
 	Updated    *time.Time     `json:"-"`
+
+	// NOTE: Disk encryption may not currently be available to all users.
+	DiskEncryption InstanceDiskEncryption `json:"disk_encryption"`
 }
 
 // DiskFilesystem constants start with Filesystem and include Linode API Filesystems
@@ -43,12 +44,6 @@ const (
 	DiskDeleting DiskStatus = "deleting"
 )
 
-// InstanceDisksPagedResponse represents a paginated InstanceDisk API response
-type InstanceDisksPagedResponse struct {
-	*PageOptions
-	Data []InstanceDisk `json:"data"`
-}
-
 // InstanceDiskCreateOptions are InstanceDisk settings that can be used at creation
 type InstanceDiskCreateOptions struct {
 	Label string `json:"label"`
@@ -61,41 +56,25 @@ type InstanceDiskCreateOptions struct {
 	Filesystem      string            `json:"filesystem,omitempty"`
 	AuthorizedKeys  []string          `json:"authorized_keys,omitempty"`
 	AuthorizedUsers []string          `json:"authorized_users,omitempty"`
-	ReadOnly        bool              `json:"read_only,omitempty"`
 	StackscriptID   int               `json:"stackscript_id,omitempty"`
 	StackscriptData map[string]string `json:"stackscript_data,omitempty"`
 }
 
 // InstanceDiskUpdateOptions are InstanceDisk settings that can be used in updates
 type InstanceDiskUpdateOptions struct {
-	Label    string `json:"label"`
-	ReadOnly bool   `json:"read_only"`
+	Label string `json:"label"`
 }
 
-// endpoint gets the endpoint URL for InstanceDisks of a given Instance
-func (InstanceDisksPagedResponse) endpoint(ids ...any) string {
-	id := ids[0].(int)
-	return fmt.Sprintf("linode/instances/%d/disks", id)
-}
-
-func (resp *InstanceDisksPagedResponse) castResult(r *resty.Request, e string) (int, int, error) {
-	res, err := coupleAPIErrors(r.SetResult(InstanceDisksPagedResponse{}).Get(e))
-	if err != nil {
-		return 0, 0, err
-	}
-	castedRes := res.Result().(*InstanceDisksPagedResponse)
-	resp.Data = append(resp.Data, castedRes.Data...)
-	return castedRes.Pages, castedRes.Results, nil
-}
+type InstanceDiskCloneOptions struct{}
 
 // ListInstanceDisks lists InstanceDisks
 func (c *Client) ListInstanceDisks(ctx context.Context, linodeID int, opts *ListOptions) ([]InstanceDisk, error) {
-	response := InstanceDisksPagedResponse{}
-	err := c.listHelper(ctx, &response, opts, linodeID)
+	response, err := getPaginatedResults[InstanceDisk](ctx, c, formatAPIPath("linode/instances/%d/disks", linodeID), opts)
 	if err != nil {
 		return nil, err
 	}
-	return response.Data, nil
+
+	return response, nil
 }
 
 // UnmarshalJSON implements the json.Unmarshaler interface
@@ -122,47 +101,35 @@ func (i *InstanceDisk) UnmarshalJSON(b []byte) error {
 
 // GetInstanceDisk gets the template with the provided ID
 func (c *Client) GetInstanceDisk(ctx context.Context, linodeID int, diskID int) (*InstanceDisk, error) {
-	e := fmt.Sprintf("linode/instances/%d/disks/%d", linodeID, diskID)
-	req := c.R(ctx).SetResult(&InstanceDisk{})
-	r, err := coupleAPIErrors(req.Get(e))
+	e := formatAPIPath("linode/instances/%d/disks/%d", linodeID, diskID)
+	response, err := doGETRequest[InstanceDisk](ctx, c, e)
 	if err != nil {
 		return nil, err
 	}
-	return r.Result().(*InstanceDisk), nil
+
+	return response, nil
 }
 
 // CreateInstanceDisk creates a new InstanceDisk for the given Instance
 func (c *Client) CreateInstanceDisk(ctx context.Context, linodeID int, opts InstanceDiskCreateOptions) (*InstanceDisk, error) {
-	body, err := json.Marshal(opts)
+	e := formatAPIPath("linode/instances/%d/disks", linodeID)
+	response, err := doPOSTRequest[InstanceDisk](ctx, c, e, opts)
 	if err != nil {
 		return nil, err
 	}
 
-	e := fmt.Sprintf("linode/instances/%d/disks", linodeID)
-	req := c.R(ctx).SetResult(&InstanceDisk{}).SetBody(string(body))
-	r, err := coupleAPIErrors(req.Post(e))
-	if err != nil {
-		return nil, err
-	}
-
-	return r.Result().(*InstanceDisk), nil
+	return response, nil
 }
 
 // UpdateInstanceDisk creates a new InstanceDisk for the given Instance
 func (c *Client) UpdateInstanceDisk(ctx context.Context, linodeID int, diskID int, opts InstanceDiskUpdateOptions) (*InstanceDisk, error) {
-	body, err := json.Marshal(opts)
+	e := formatAPIPath("linode/instances/%d/disks/%d", linodeID, diskID)
+	response, err := doPUTRequest[InstanceDisk](ctx, c, e, opts)
 	if err != nil {
 		return nil, err
 	}
 
-	e := fmt.Sprintf("linode/instances/%d/disks/%d", linodeID, diskID)
-	req := c.R(ctx).SetResult(&InstanceDisk{}).SetBody(string(body))
-	r, err := coupleAPIErrors(req.Put(e))
-	if err != nil {
-		return nil, err
-	}
-
-	return r.Result().(*InstanceDisk), nil
+	return response, nil
 }
 
 // RenameInstanceDisk renames an InstanceDisk
@@ -176,14 +143,9 @@ func (c *Client) ResizeInstanceDisk(ctx context.Context, linodeID int, diskID in
 		"size": size,
 	}
 
-	body, err := json.Marshal(opts)
-	if err != nil {
-		return err
-	}
+	e := formatAPIPath("linode/instances/%d/disks/%d/resize", linodeID, diskID)
+	_, err := doPOSTRequest[InstanceDisk](ctx, c, e, opts)
 
-	e := fmt.Sprintf("linode/instances/%d/disks/%d/resize", linodeID, diskID)
-	req := c.R(ctx).SetResult(&InstanceDisk{}).SetBody(body)
-	_, err = coupleAPIErrors(req.Post(e))
 	return err
 }
 
@@ -193,20 +155,21 @@ func (c *Client) PasswordResetInstanceDisk(ctx context.Context, linodeID int, di
 		"password": password,
 	}
 
-	body, err := json.Marshal(opts)
-	if err != nil {
-		return err
-	}
+	e := formatAPIPath("linode/instances/%d/disks/%d/password", linodeID, diskID)
+	_, err := doPOSTRequest[InstanceDisk](ctx, c, e, opts)
 
-	e := fmt.Sprintf("linode/instances/%d/disks/%d/password", linodeID, diskID)
-	req := c.R(ctx).SetResult(&InstanceDisk{}).SetBody(string(body))
-	_, err = coupleAPIErrors(req.SetBody(body).Post(e))
 	return err
 }
 
 // DeleteInstanceDisk deletes a Linode Instance Disk
 func (c *Client) DeleteInstanceDisk(ctx context.Context, linodeID int, diskID int) error {
-	e := fmt.Sprintf("linode/instances/%d/disks/%d", linodeID, diskID)
-	_, err := coupleAPIErrors(c.R(ctx).Delete(e))
+	e := formatAPIPath("linode/instances/%d/disks/%d", linodeID, diskID)
+	err := doDELETERequest(ctx, c, e)
 	return err
+}
+
+// CloneInstanceDisk clones the given InstanceDisk for the given Instance
+func (c *Client) CloneInstanceDisk(ctx context.Context, linodeID, diskID int, opts InstanceDiskCloneOptions) (*InstanceDisk, error) {
+	e := formatAPIPath("linode/instances/%d/disks/%d/clone", linodeID, diskID)
+	return doPOSTRequest[InstanceDisk](ctx, c, e, opts)
 }
