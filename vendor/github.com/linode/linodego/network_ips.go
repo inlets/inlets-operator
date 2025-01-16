@@ -4,9 +4,21 @@ import (
 	"context"
 )
 
-// IPAddressUpdateOptions fields are those accepted by UpdateToken
-type IPAddressUpdateOptions struct {
+// IPAddressUpdateOptionsV2 fields are those accepted by UpdateIPAddress.
+// NOTE: An IP's RDNS can be reset to default using the following pattern:
+//
+//	IPAddressUpdateOptionsV2{
+//		RDNS: linodego.Pointer[*string](nil),
+//	}
+type IPAddressUpdateOptionsV2 struct {
 	// The reverse DNS assigned to this address. For public IPv4 addresses, this will be set to a default value provided by Linode if set to nil.
+	Reserved *bool    `json:"reserved,omitempty"`
+	RDNS     **string `json:"rdns,omitempty"`
+}
+
+// IPAddressUpdateOptions fields are those accepted by UpdateIPAddress.
+// Deprecated: Please use IPAddressUpdateOptionsV2 for all new implementations.
+type IPAddressUpdateOptions struct {
 	RDNS *string `json:"rdns"`
 }
 
@@ -14,6 +26,14 @@ type IPAddressUpdateOptions struct {
 type LinodeIPAssignment struct {
 	Address  string `json:"address"`
 	LinodeID int    `json:"linode_id"`
+}
+
+type AllocateReserveIPOptions struct {
+	Type     string `json:"type"`
+	Public   bool   `json:"public"`
+	Reserved bool   `json:"reserved,omitempty"`
+	Region   string `json:"region,omitempty"`
+	LinodeID int    `json:"linode_id,omitempty"`
 }
 
 // LinodesAssignIPsOptions fields are those accepted by InstancesAssignIPs.
@@ -35,13 +55,24 @@ type ListIPAddressesQuery struct {
 	SkipIPv6RDNS bool `query:"skip_ipv6_rdns"`
 }
 
-// GetUpdateOptions converts a IPAddress to IPAddressUpdateOptions for use in UpdateIPAddress
+// GetUpdateOptionsV2 converts a IPAddress to IPAddressUpdateOptionsV2 for use in UpdateIPAddressV2.
+func (i InstanceIP) GetUpdateOptionsV2() IPAddressUpdateOptionsV2 {
+	rdns := copyString(&i.RDNS)
+
+	return IPAddressUpdateOptionsV2{
+		RDNS:     &rdns,
+		Reserved: copyBool(&i.Reserved),
+	}
+}
+
+// GetUpdateOptions converts a IPAddress to IPAddressUpdateOptions for use in UpdateIPAddress.
+// Deprecated: Please use GetUpdateOptionsV2 for all new implementations.
 func (i InstanceIP) GetUpdateOptions() (o IPAddressUpdateOptions) {
 	o.RDNS = copyString(&i.RDNS)
 	return
 }
 
-// ListIPAddresses lists IPAddresses
+// ListIPAddresses lists IPAddresses.
 func (c *Client) ListIPAddresses(ctx context.Context, opts *ListOptions) ([]InstanceIP, error) {
 	response, err := getPaginatedResults[InstanceIP](ctx, c, "networking/ips", opts)
 	if err != nil {
@@ -51,7 +82,7 @@ func (c *Client) ListIPAddresses(ctx context.Context, opts *ListOptions) ([]Inst
 	return response, nil
 }
 
-// GetIPAddress gets the IPAddress with the provided IP
+// GetIPAddress gets the IPAddress with the provided IP.
 func (c *Client) GetIPAddress(ctx context.Context, id string) (*InstanceIP, error) {
 	e := formatAPIPath("networking/ips/%s", id)
 	response, err := doGETRequest[InstanceIP](ctx, c, e)
@@ -62,7 +93,19 @@ func (c *Client) GetIPAddress(ctx context.Context, id string) (*InstanceIP, erro
 	return response, nil
 }
 
-// UpdateIPAddress updates the IPAddress with the specified id
+// UpdateIPAddressV2 updates the IP address with the specified address.
+func (c *Client) UpdateIPAddressV2(ctx context.Context, address string, opts IPAddressUpdateOptionsV2) (*InstanceIP, error) {
+	e := formatAPIPath("networking/ips/%s", address)
+	response, err := doPUTRequest[InstanceIP](ctx, c, e, opts)
+	if err != nil {
+		return nil, err
+	}
+
+	return response, nil
+}
+
+// UpdateIPAddress updates the IP address with the specified id.
+// Deprecated: Please use UpdateIPAddressV2 for all new implementation.
 func (c *Client) UpdateIPAddress(ctx context.Context, id string, opts IPAddressUpdateOptions) (*InstanceIP, error) {
 	e := formatAPIPath("networking/ips/%s", id)
 	response, err := doPUTRequest[InstanceIP](ctx, c, e, opts)
@@ -87,4 +130,15 @@ func (c *Client) ShareIPAddresses(ctx context.Context, opts IPAddressesShareOpti
 	e := "networking/ips/share"
 	_, err := doPOSTRequest[InstanceIP](ctx, c, e, opts)
 	return err
+}
+
+// AllocateReserveIP allocates a new IPv4 address to the Account, with the option to reserve it
+// and optionally assign it to a Linode.
+func (c *Client) AllocateReserveIP(ctx context.Context, opts AllocateReserveIPOptions) (*InstanceIP, error) {
+	e := "networking/ips"
+	result, err := doPOSTRequest[InstanceIP](ctx, c, e, opts)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
 }

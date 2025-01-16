@@ -35,6 +35,8 @@ type Volume struct {
 	LinodeID       *int         `json:"linode_id"`
 	FilesystemPath string       `json:"filesystem_path"`
 	Tags           []string     `json:"tags"`
+	HardwareType   string       `json:"hardware_type"`
+	LinodeLabel    string       `json:"linode_label"`
 	Created        *time.Time   `json:"-"`
 	Updated        *time.Time   `json:"-"`
 

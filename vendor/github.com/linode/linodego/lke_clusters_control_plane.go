@@ -18,8 +18,9 @@ type LKEClusterControlPlaneACLAddresses struct {
 // for an LKE cluster's control plane.
 // NOTE: Control Plane ACLs may not currently be available to all users.
 type LKEClusterControlPlaneACL struct {
-	Enabled   bool                                `json:"enabled"`
-	Addresses *LKEClusterControlPlaneACLAddresses `json:"addresses"`
+	Enabled    bool                                `json:"enabled"`
+	Addresses  *LKEClusterControlPlaneACLAddresses `json:"addresses"`
+	RevisionID string                              `json:"revision_id,omitempty"`
 }
 
 // LKEClusterControlPlaneACLAddressesOptions are the options used to
@@ -33,8 +34,9 @@ type LKEClusterControlPlaneACLAddressesOptions struct {
 // configuring an LKE cluster's control plane ACL policy.
 // NOTE: Control Plane ACLs may not currently be available to all users.
 type LKEClusterControlPlaneACLOptions struct {
-	Enabled   *bool                                      `json:"enabled,omitempty"`
-	Addresses *LKEClusterControlPlaneACLAddressesOptions `json:"addresses,omitempty"`
+	Enabled    *bool                                      `json:"enabled,omitempty"`
+	Addresses  *LKEClusterControlPlaneACLAddressesOptions `json:"addresses,omitempty"`
+	RevisionID string                                     `json:"revision_id"`
 }
 
 // LKEClusterControlPlaneOptions represents the options used when

@@ -72,11 +72,12 @@ type Instance struct {
 
 // InstanceSpec represents a linode spec
 type InstanceSpec struct {
-	Disk     int `json:"disk"`
-	Memory   int `json:"memory"`
-	VCPUs    int `json:"vcpus"`
-	Transfer int `json:"transfer"`
-	GPUs     int `json:"gpus"`
+	Disk               int `json:"disk"`
+	Memory             int `json:"memory"`
+	VCPUs              int `json:"vcpus"`
+	Transfer           int `json:"transfer"`
+	GPUs               int `json:"gpus"`
+	AcceleratedDevices int `json:"accelerated_devices"`
 }
 
 // InstanceAlert represents a metric alert
@@ -90,9 +91,10 @@ type InstanceAlert struct {
 
 // InstanceBackup represents backup settings for an instance
 type InstanceBackup struct {
-	Available bool `json:"available,omitempty"` // read-only
-	Enabled   bool `json:"enabled,omitempty"`   // read-only
-	Schedule  struct {
+	Available      bool       `json:"available,omitempty"` // read-only
+	Enabled        bool       `json:"enabled,omitempty"`   // read-only
+	LastSuccessful *time.Time `json:"-"`                   // read-only
+	Schedule       struct {
 		Day    string `json:"day,omitempty"`
 		Window string `json:"window,omitempty"`
 	} `json:"schedule,omitempty"`
@@ -136,6 +138,7 @@ type InstancePlacementGroup struct {
 	Label                string               `json:"label"`
 	PlacementGroupType   PlacementGroupType   `json:"placement_group_type"`
 	PlacementGroupPolicy PlacementGroupPolicy `json:"placement_group_policy"`
+	MigratingTo          string               `json:"migrating_to"` // read-only
 }
 
 // InstanceMetadataOptions specifies various Instance creation fields
@@ -221,6 +224,26 @@ func (i *Instance) UnmarshalJSON(b []byte) error {
 
 	i.Created = (*time.Time)(p.Created)
 	i.Updated = (*time.Time)(p.Updated)
+
+	return nil
+}
+
+// UnmarshalJSON implements the json.Unmarshaler interface
+func (backup *InstanceBackup) UnmarshalJSON(b []byte) error {
+	type Mask InstanceBackup
+
+	p := struct {
+		*Mask
+		LastSuccessful *parseabletime.ParseableTime `json:"last_successful"`
+	}{
+		Mask: (*Mask)(backup),
+	}
+
+	if err := json.Unmarshal(b, &p); err != nil {
+		return err
+	}
+
+	backup.LastSuccessful = (*time.Time)(p.LastSuccessful)
 
 	return nil
 }
@@ -448,16 +471,29 @@ func (c *Client) ShutdownInstance(ctx context.Context, id int) error {
 	return c.simpleInstanceAction(ctx, "shutdown", id)
 }
 
+// Deprecated: Please use UpgradeInstance instead.
 // MutateInstance Upgrades a Linode to its next generation.
 func (c *Client) MutateInstance(ctx context.Context, id int) error {
 	return c.simpleInstanceAction(ctx, "mutate", id)
 }
 
+// InstanceUpgradeOptions is a struct representing the options for upgrading a Linode
+type InstanceUpgradeOptions struct {
+	// Automatically resize disks when resizing a Linode.
+	// When resizing down to a smaller plan your Linode's data must fit within the smaller disk size.
+	AllowAutoDiskResize bool `json:"allow_auto_disk_resize"`
+}
+
+// UpgradeInstance upgrades a Linode to its next generation.
+func (c *Client) UpgradeInstance(ctx context.Context, linodeID int, opts InstanceUpgradeOptions) error {
+	e := formatAPIPath("linode/instances/%d/mutate", linodeID)
+	return doPOSTRequestNoResponseBody(ctx, c, e, opts)
+}
+
 // MigrateInstance - Migrate an instance
 func (c *Client) MigrateInstance(ctx context.Context, linodeID int, opts InstanceMigrateOptions) error {
 	e := formatAPIPath("linode/instances/%d/migrate", linodeID)
-	_, err := doPOSTRequest[Instance](ctx, c, e, opts)
-	return err
+	return doPOSTRequestNoResponseBody(ctx, c, e, opts)
 }
 
 // simpleInstanceAction is a helper for Instance actions that take no parameters

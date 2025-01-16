@@ -165,6 +165,15 @@ const (
 	DomainStatusHasErrors DomainStatus = "has_errors"
 )
 
+type DomainCloneOptions struct {
+	Domain string `json:"domain"`
+}
+
+type DomainImportOptions struct {
+	Domain           string `json:"domain"`
+	RemoteNameserver string `json:"remove_nameserver"`
+}
+
 // GetUpdateOptions converts a Domain to DomainUpdateOptions for use in UpdateDomain
 func (d Domain) GetUpdateOptions() (du DomainUpdateOptions) {
 	du.Domain = d.Domain
@@ -243,4 +252,18 @@ func (c *Client) GetDomainZoneFile(ctx context.Context, domainID int) (*DomainZo
 	}
 
 	return response, nil
+}
+
+// CloneDomain clones a Domain and all associated DNS records from a Domain that is registered in Linode's DNS manager.
+func (c *Client) CloneDomain(ctx context.Context, domainID int, opts DomainCloneOptions) (*Domain, error) {
+	e := formatAPIPath("domains/%d/clone", domainID)
+
+	return doPOSTRequest[Domain](ctx, c, e, opts)
+}
+
+// ImportDomain imports a domain zone from a remote nameserver.
+func (c *Client) ImportDomain(ctx context.Context, opts DomainImportOptions) (*Domain, error) {
+	e := "domains/import"
+
+	return doPOSTRequest[Domain](ctx, c, e, opts)
 }

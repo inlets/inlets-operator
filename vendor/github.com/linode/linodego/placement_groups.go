@@ -28,13 +28,25 @@ type PlacementGroupMember struct {
 
 // PlacementGroup represents a Linode placement group.
 type PlacementGroup struct {
-	ID                   int                    `json:"id"`
-	Label                string                 `json:"label"`
-	Region               string                 `json:"region"`
-	PlacementGroupType   PlacementGroupType     `json:"placement_group_type"`
-	PlacementGroupPolicy PlacementGroupPolicy   `json:"placement_group_policy"`
-	IsCompliant          bool                   `json:"is_compliant"`
-	Members              []PlacementGroupMember `json:"members"`
+	ID                   int                       `json:"id"`
+	Label                string                    `json:"label"`
+	Region               string                    `json:"region"`
+	PlacementGroupType   PlacementGroupType        `json:"placement_group_type"`
+	PlacementGroupPolicy PlacementGroupPolicy      `json:"placement_group_policy"`
+	IsCompliant          bool                      `json:"is_compliant"`
+	Members              []PlacementGroupMember    `json:"members"`
+	Migrations           *PlacementGroupMigrations `json:"migrations"`
+}
+
+// PlacementGroupMigrations represent the instances that are being migrated to or from the placement group.
+type PlacementGroupMigrations struct {
+	Inbound  []PlacementGroupMigrationInstance `json:"inbound"`
+	Outbound []PlacementGroupMigrationInstance `json:"outbound"`
+}
+
+// PlacementGroupMigrationInstance represents the unique identifier for a compute instance being migrated to/from the placement group.
+type PlacementGroupMigrationInstance struct {
+	LinodeID int `json:"linode_id"`
 }
 
 // PlacementGroupCreateOptions represents the options to use

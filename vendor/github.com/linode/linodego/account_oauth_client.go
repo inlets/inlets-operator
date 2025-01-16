@@ -129,3 +129,14 @@ func (c *Client) DeleteOAuthClient(ctx context.Context, clientID string) error {
 	err := doDELETERequest(ctx, c, e)
 	return err
 }
+
+// ResetOAuthClientSecret resets the OAuth Client secret for a client with a specified id
+func (c *Client) ResetOAuthClientSecret(ctx context.Context, clientID string) (*OAuthClient, error) {
+	e := formatAPIPath("account/oauth-clients/%s/reset-secret", clientID)
+	response, err := doPOSTRequest[OAuthClient, any](ctx, c, e)
+	if err != nil {
+		return nil, err
+	}
+
+	return response, nil
+}

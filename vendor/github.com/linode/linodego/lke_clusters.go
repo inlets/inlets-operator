@@ -28,6 +28,9 @@ type LKECluster struct {
 	K8sVersion   string                 `json:"k8s_version"`
 	Tags         []string               `json:"tags"`
 	ControlPlane LKEClusterControlPlane `json:"control_plane"`
+
+	// NOTE: Tier may not currently be available to all users and can only be used with v4beta.
+	Tier string `json:"tier"`
 }
 
 // LKEClusterCreateOptions fields are those accepted by CreateLKECluster
@@ -38,6 +41,9 @@ type LKEClusterCreateOptions struct {
 	K8sVersion   string                         `json:"k8s_version"`
 	Tags         []string                       `json:"tags,omitempty"`
 	ControlPlane *LKEClusterControlPlaneOptions `json:"control_plane,omitempty"`
+
+	// NOTE: Tier may not currently be available to all users and can only be used with v4beta.
+	Tier string `json:"tier,omitempty"`
 }
 
 // LKEClusterUpdateOptions fields are those accepted by UpdateLKECluster
@@ -55,7 +61,7 @@ type LKEClusterAPIEndpoint struct {
 
 // LKEClusterKubeconfig fields are those returned by GetLKEClusterKubeconfig
 type LKEClusterKubeconfig struct {
-	KubeConfig string `json:"kubeconfig"`
+	KubeConfig string `json:"kubeconfig"` // Base64-encoded Kubeconfig file for this Cluster.
 }
 
 // LKEClusterDashboard fields are those returned by GetLKEClusterDashboard

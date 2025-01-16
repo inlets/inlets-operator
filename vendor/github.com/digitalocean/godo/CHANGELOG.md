@@ -1,5 +1,27 @@
 # Change Log
 
+##  [v1.134.0] - 2025-01-15
+- #771 - @d-honeybadger - add ID field to KubernetesClusterUser response
+- #768 - @lee-aaron - support Spaces Keys API
+
+##  [v1.133.0] - 2025-01-10
+- #769 - @guptado - support partner interconnect attachment operations
+- #767 - @loosla - [kubernetes]: make kubernetes maintenance_policy day case insensitive
+
+##  [v1.132.0] - 2024-12-17
+- #764 - @greeshmapill - APPS-9365: Add bitbucket source to App Spec
+
+##  [v1.131.1] - 2024-12-10
+- #762 - @imaskm - Updated list ipv6 response
+
+##  [v1.131.0] - 2024-11-25
+
+- #760 - @jvasilevsky - LBAAS: add ipv6 field to loadbalancer model
+- #759 - @imaskm - Add reserved ipv6 changes as Beta
+- #758 - @dvigueras - Add Rules field to create Databases with Firewall Rules
+- #751 - @blesswinsamuel - APPS-9766 Add method to restart apps
+
+
 ## [v1.130.0] - 2024-11-14
 
 - #755 - @vsharma6855  - Add Missing Database Configs for Postgresql and MYSQL

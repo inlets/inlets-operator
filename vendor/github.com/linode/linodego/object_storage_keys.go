@@ -5,8 +5,9 @@ import (
 )
 
 type ObjectStorageKeyRegion struct {
-	ID         string `json:"id"`
-	S3Endpoint string `json:"s3_endpoint"`
+	ID           string                    `json:"id"`
+	S3Endpoint   string                    `json:"s3_endpoint"`
+	EndpointType ObjectStorageEndpointType `json:"endpoint_type"`
 }
 
 // ObjectStorageKey represents a linode object storage key object
