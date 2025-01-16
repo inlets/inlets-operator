@@ -47,6 +47,7 @@ type UserCreateOptions struct {
 type UserUpdateOptions struct {
 	Username   string `json:"username,omitempty"`
 	Restricted *bool  `json:"restricted,omitempty"`
+	Email      string `json:"email,omitempty"`
 }
 
 // UnmarshalJSON implements the json.Unmarshaler interface
@@ -102,6 +103,7 @@ func (i User) GetCreateOptions() (o UserCreateOptions) {
 func (i User) GetUpdateOptions() (o UserUpdateOptions) {
 	o.Username = i.Username
 	o.Restricted = copyBool(&i.Restricted)
+	o.Email = i.Email
 
 	return
 }

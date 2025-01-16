@@ -738,7 +738,7 @@ func NewClient(hc *http.Client) (client Client) {
 
 	certPath, certPathExists := os.LookupEnv(APIHostCert)
 
-	if certPathExists && !isCustomTransport(hc.Transport) {
+	if certPathExists && !hasCustomTransport(hc) {
 		cert, err := os.ReadFile(filepath.Clean(certPath))
 		if err != nil {
 			log.Fatalf("[ERROR] Error when reading cert at %s: %s\n", certPath, err.Error())
@@ -881,8 +881,11 @@ func generateListCacheURL(endpoint string, opts *ListOptions) (string, error) {
 	return fmt.Sprintf("%s:%s", endpoint, hashedOpts), nil
 }
 
-func isCustomTransport(transport http.RoundTripper) bool {
-	if transport != http.DefaultTransport.(*http.Transport) {
+func hasCustomTransport(hc *http.Client) bool {
+	if hc == nil {
+		return false
+	}
+	if hc.Transport != http.DefaultTransport.(*http.Transport) {
 		log.Println("[WARN] Custom transport is not allowed with a custom root CA.")
 		return true
 	}

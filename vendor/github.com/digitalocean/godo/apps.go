@@ -35,6 +35,7 @@ type AppsService interface {
 	Delete(ctx context.Context, appID string) (*Response, error)
 	Propose(ctx context.Context, propose *AppProposeRequest) (*AppProposeResponse, *Response, error)
 
+	Restart(ctx context.Context, appID string, opts *AppRestartRequest) (*Deployment, *Response, error)
 	GetDeployment(ctx context.Context, appID, deploymentID string) (*Deployment, *Response, error)
 	ListDeployments(ctx context.Context, appID string, opts *ListOptions) ([]*Deployment, *Response, error)
 	CreateDeployment(ctx context.Context, appID string, create ...*DeploymentCreateRequest) (*Deployment, *Response, error)
@@ -93,6 +94,11 @@ type AppUpdateRequest struct {
 // DeploymentCreateRequest represents a request to create a deployment.
 type DeploymentCreateRequest struct {
 	ForceBuild bool `json:"force_build"`
+}
+
+// AppRestartRequest represents a request to restart an app.
+type AppRestartRequest struct {
+	Components []string `json:"components"`
 }
 
 // AlertDestinationUpdateRequest represents a request to update alert destinations.
@@ -283,6 +289,22 @@ func (s *AppsServiceOp) Propose(ctx context.Context, propose *AppProposeRequest)
 		return nil, resp, err
 	}
 	return res, resp, nil
+}
+
+// Restart restarts an app.
+func (s *AppsServiceOp) Restart(ctx context.Context, appID string, opts *AppRestartRequest) (*Deployment, *Response, error) {
+	path := fmt.Sprintf("%s/%s/restart", appsBasePath, appID)
+
+	req, err := s.client.NewRequest(ctx, http.MethodPost, path, opts)
+	if err != nil {
+		return nil, nil, err
+	}
+	root := new(deploymentRoot)
+	resp, err := s.client.Do(ctx, req, root)
+	if err != nil {
+		return nil, resp, err
+	}
+	return root.Deployment, resp, nil
 }
 
 // GetDeployment gets an app deployment.
@@ -667,6 +689,7 @@ type AppBuildableComponentSpec interface {
 	GetGit() *GitSourceSpec
 	GetGitHub() *GitHubSourceSpec
 	GetGitLab() *GitLabSourceSpec
+	GetBitbucket() *BitbucketSourceSpec
 
 	GetSourceDir() string
 
@@ -709,15 +732,21 @@ type AppRoutableComponentSpec interface {
 type AppSourceType string
 
 const (
-	AppSourceTypeGitHub AppSourceType = "github"
-	AppSourceTypeGitLab AppSourceType = "gitlab"
-	AppSourceTypeGit    AppSourceType = "git"
-	AppSourceTypeImage  AppSourceType = "image"
+	AppSourceTypeBitbucket AppSourceType = "bitbucket"
+	AppSourceTypeGitHub    AppSourceType = "github"
+	AppSourceTypeGitLab    AppSourceType = "gitlab"
+	AppSourceTypeGit       AppSourceType = "git"
+	AppSourceTypeImage     AppSourceType = "image"
 )
 
 // SourceSpec represents a source.
 type SourceSpec interface {
 	GetType() AppSourceType
+}
+
+// GetType returns the Bitbucket source type.
+func (s *BitbucketSourceSpec) GetType() AppSourceType {
+	return AppSourceTypeBitbucket
 }
 
 // GetType returns the GitHub source type.
