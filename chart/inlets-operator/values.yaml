@@ -15,10 +15,10 @@ annotatedOnly: false
 # These two versions should match for the client and server
 # For the client which will run as a Deployment in Kubernetes
 inletsClient:
-  image: "ghcr.io/inlets/inlets-pro:0.9.32"
+  image: "ghcr.io/inlets/inlets-pro:0.9.40"
 
 # For the server which will run a binary via systemd
-inletsRelease: "0.9.32"
+inletsRelease: "0.9.40"
 
 #plan: <The plan or size for your cloud instance>
 
@@ -49,7 +49,7 @@ vpcId: ""
 # The Subnet ID where the exit-server should be placed (EC2)
 subnetId: ""
 
-image: "ghcr.io/inlets/inlets-operator:0.17.9"
+image: "ghcr.io/inlets/inlets-operator:0.17.11"
 pullPolicy: "IfNotPresent"
 
 nameOverride: ""
