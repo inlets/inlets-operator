@@ -42,7 +42,7 @@ const defaultRelease = "0.9.40"
 
 func main() {
 	infra := &InfraConfig{
-		ProConfig: InletsProConfig{},
+		TunnelConfig: TunnelConfig{},
 	}
 
 	flag.StringVar(&infra.Provider, "provider", "", "Your infrastructure provider - 'equinix-metal', 'digitalocean', 'scaleway', 'gce', 'linode', 'azure', 'ec2' or 'hetzner'")
@@ -57,10 +57,10 @@ func main() {
 	flag.StringVar(&infra.VpcID, "vpc-id", "", "The VPC ID to create the exit-server in (ec2)")
 	flag.StringVar(&infra.SubnetID, "subnet-id", "", "The Subnet ID where the exit-server should be placed (ec2)")
 	flag.StringVar(&infra.ProjectID, "project-id", "", "The project ID if using equinix-metal, or gce as the provider")
-	flag.StringVar(&infra.ProConfig.License, "license", "", "Supply a license for use with inlets-pro")
-	flag.StringVar(&infra.ProConfig.LicenseFile, "license-file", "", "Supply a file to read for the inlets-pro license")
-	flag.StringVar(&infra.ProConfig.ClientImage, "client-image", "ghcr.io/inlets/inlets-pro:"+defaultRelease, "Container image for inlets tunnel clients run in the cluster")
-	flag.StringVar(&infra.ProConfig.InletsRelease, "inlets-release", defaultRelease, "Inlets version to use to create tunnel servers")
+	flag.StringVar(&infra.TunnelConfig.License, "license", "", "Supply a license for use with inlets-pro")
+	flag.StringVar(&infra.TunnelConfig.LicenseFile, "license-file", "", "Supply a file to read for the inlets-pro license")
+	flag.StringVar(&infra.TunnelConfig.ClientImage, "client-image", "ghcr.io/inlets/inlets-pro:"+defaultRelease, "Container image for inlets tunnel clients run in the cluster")
+	flag.StringVar(&infra.TunnelConfig.InletsRelease, "inlets-release", defaultRelease, "Inlets version to use to create tunnel servers")
 
 	flag.StringVar(&infra.MaxClientMemory, "max-client-memory", "128Mi", "Maximum memory limit for the tunnel clients")
 
@@ -89,7 +89,7 @@ func main() {
 		infra.GetInletsClientImage(),
 		infra.GetInletsRelease())
 
-	if _, err := infra.ProConfig.GetLicenseKey(); err != nil {
+	if _, err := infra.TunnelConfig.GetLicenseKey(); err != nil {
 		fmt.Fprintf(os.Stderr, "%s\n", err.Error())
 		os.Exit(1)
 	}
@@ -133,18 +133,18 @@ func main() {
 
 // GetInletsClientImage returns the image for the client-side tunnel
 func (i *InfraConfig) GetInletsClientImage() string {
-	if i.ProConfig.ClientImage == "" {
+	if i.TunnelConfig.ClientImage == "" {
 		return fmt.Sprintf("ghcr.io/inlets/inlets-pro:%s", defaultRelease)
 	}
-	return strings.TrimSpace(i.ProConfig.ClientImage)
+	return strings.TrimSpace(i.TunnelConfig.ClientImage)
 }
 
 func (i *InfraConfig) GetInletsRelease() string {
-	if i.ProConfig.InletsRelease == "" {
+	if i.TunnelConfig.InletsRelease == "" {
 		return defaultRelease
 	}
 
-	return strings.TrimSpace(i.ProConfig.InletsRelease)
+	return strings.TrimSpace(i.TunnelConfig.InletsRelease)
 }
 
 // GetAccessKey from parameter or file trimming

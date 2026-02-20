@@ -9,7 +9,7 @@ import (
 func Test_GetLicenseKey_FromLiteral(t *testing.T) {
 	want := "static.key.text"
 
-	c := InletsProConfig{
+	c := TunnelConfig{
 		License: want,
 	}
 
@@ -38,7 +38,7 @@ func Test_GetLicenseKey_FromFile(t *testing.T) {
 	f.Close()
 	defer os.Remove(name)
 
-	c := InletsProConfig{
+	c := TunnelConfig{
 		LicenseFile: name,
 	}
 
@@ -70,7 +70,7 @@ func Test_GetLicenseKey_FromFileTrimsWhitespace_JWT(t *testing.T) {
 	f.Close()
 	defer os.Remove(name)
 
-	c := InletsProConfig{
+	c := TunnelConfig{
 		LicenseFile: name,
 	}
 
@@ -88,7 +88,7 @@ func Test_GetLicenseKey_FromFileTrimsWhitespace_JWT(t *testing.T) {
 func Test_GetLicenseKey_FromLiteral_WithDashes(t *testing.T) {
 	want := `static-dashes-key-text`
 
-	c := InletsProConfig{
+	c := TunnelConfig{
 		License: want,
 	}
 

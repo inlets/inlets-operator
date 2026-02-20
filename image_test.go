@@ -5,7 +5,7 @@ import "testing"
 func Test_GetInletsReleaseDefault(t *testing.T) {
 
 	c := InfraConfig{
-		ProConfig: InletsProConfig{
+		TunnelConfig: TunnelConfig{
 			License: "non-empty",
 		},
 		AccessKey: "key",
@@ -22,7 +22,7 @@ func Test_GetInletsReleaseDefault(t *testing.T) {
 func Test_GetInletsReleaseOverride(t *testing.T) {
 
 	c := InfraConfig{
-		ProConfig: InletsProConfig{
+		TunnelConfig: TunnelConfig{
 			License:       "non-empty",
 			InletsRelease: "0.9.40",
 		},
@@ -41,7 +41,7 @@ func Test_GetInletsReleaseOverride(t *testing.T) {
 func Test_InletsClientImageDefault(t *testing.T) {
 
 	c := InfraConfig{
-		ProConfig: InletsProConfig{
+		TunnelConfig: TunnelConfig{
 			License: "non-empty",
 		},
 		AccessKey: "key",
@@ -57,7 +57,7 @@ func Test_InletsClientImageDefault(t *testing.T) {
 func Test_InletsClientImageOverride(t *testing.T) {
 
 	c := InfraConfig{
-		ProConfig: InletsProConfig{
+		TunnelConfig: TunnelConfig{
 			License:     "non-empty",
 			ClientImage: "alexellis2/inlets-pro:0.9.40",
 		},

@@ -49,6 +49,7 @@ import (
 const controllerAgentName = "inlets-operator"
 const inletsPROControlPort = 8123
 const inletsPortsAnnotation = "inlets.dev/ports"
+const proxyProtoAnnotation = "operator.inlets.dev/proxy-proto"
 const licenseSecretName = "inlets-license"
 
 const (
@@ -384,8 +385,7 @@ func (c *Controller) syncHandler(key string) error {
 		// No pre-created secret ref, and no generated secret name either
 		// so create one.
 		if getSecretName(tunnel) == "" {
-			_, err = createTunnelAuthTokenSecret(tunnel, c)
-			if err != nil {
+			if _, err = createTunnelAuthTokenSecret(tunnel, c); err != nil {
 				klog.Infof("Error creating tunnel auth token: %s", err)
 				return fmt.Errorf("error creating tunnel auth token: %s", err)
 			}
@@ -593,6 +593,13 @@ func createTunnelResource(service *corev1.Service, c *Controller) error {
 			return nil
 		}
 
+		var proxyProto string
+		if v, ok := service.Annotations[proxyProtoAnnotation]; ok && v != "" && v != "v1" && v != "v2" {
+			return fmt.Errorf("%s annotation must be 'v1', 'v2', or empty string, got: %s", proxyProtoAnnotation, v)
+		} else {
+			proxyProto = v
+		}
+
 		klog.Infof("Creating Tunnel: %s.%s\n", name, namespace)
 
 		tunnel := &inletsv1alpha1.Tunnel{
@@ -602,6 +609,7 @@ func createTunnelResource(service *corev1.Service, c *Controller) error {
 					Namespace: service.Namespace,
 				},
 				UpdateServiceIP: true,
+				ProxyProto:      proxyProto,
 			},
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      name,
@@ -658,7 +666,7 @@ func createClientDeployment(tunnel *inletsv1alpha1.Tunnel, c *Controller) error 
 		return err
 	}
 
-	licenseKey, _ := c.infraConfig.ProConfig.GetLicenseKey()
+	licenseKey, _ := c.infraConfig.TunnelConfig.GetLicenseKey()
 
 	ports := getPortsString(service)
 
@@ -721,7 +729,7 @@ func updateClientDeploymentRef(tunnel *inletsv1alpha1.Tunnel, c *Controller) err
 	if deployment.ObjectMeta.Annotations != nil &&
 		deployment.ObjectMeta.Annotations[inletsPortsAnnotation] != getPortsString(service) {
 
-		licenseKey, _ := c.infraConfig.ProConfig.GetLicenseKey()
+		licenseKey, _ := c.infraConfig.TunnelConfig.GetLicenseKey()
 
 		ports := getPortsString(service)
 		clientDeployment := makeClientDeployment(tunnel,
@@ -749,7 +757,12 @@ func getHostConfig(c *Controller, tunnel *inletsv1alpha1.Tunnel, service *corev1
 		return provision.BasicHost{}, err
 	}
 
-	userData := provision.MakeExitServerUserdata(tokenValue, inletsVersion)
+	proxyProto := ""
+	if v, ok := service.Annotations[proxyProtoAnnotation]; ok {
+		proxyProto = v
+	}
+
+	userData := makeExitServerUserdata(tokenValue, inletsVersion, proxyProto)
 
 	var host provision.BasicHost
 

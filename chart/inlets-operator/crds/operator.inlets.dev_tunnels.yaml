@@ -2,8 +2,7 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.11.1
-  creationTimestamp: null
+    controller-gen.kubebuilder.io/version: v0.14.0
   name: tunnels.operator.inlets.dev
 spec:
   group: operator.inlets.dev
@@ -29,7 +28,7 @@ spec:
           name: HostIP
           type: string
         - jsonPath: .metadata.creationTimestamp
-          name: Created
+          name: Age
           type: date
         - jsonPath: .status.hostId
           name: HostID
@@ -50,10 +49,19 @@ spec:
           type: object
           properties:
             apiVersion:
-              description: 'APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+              description: |-
+                APIVersion defines the versioned schema of this representation of an object.
+                Servers should convert recognized schemas to the latest internal value, and
+                may reject unrecognized values.
+                More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
               type: string
             kind:
-              description: 'Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+              description: |-
+                Kind is a string value representing the REST resource this object represents.
+                Servers may infer this from the endpoint the client submits requests to.
+                Cannot be updated.
+                In CamelCase.
+                More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
               type: string
             metadata:
               type: object
@@ -71,13 +79,22 @@ spec:
                       type: string
                   nullable: true
                 licenseRef:
-                  description: LicenseRef is the secret used to load the inlets-client license, and is the same for each tunnel within the cluster
+                  description: |-
+                    LicenseRef is the secret used to load the inlets-client
+                    license, and is the same for each tunnel within the cluster
                   type: object
                   properties:
                     name:
                       type: string
                     namespace:
                       type: string
+                  nullable: true
+                proxyProto:
+                  description: |-
+                    ProxyProto when set, is passed onto the tunnel server
+                    in order to have it send the original source IP.
+                    Note: any upstream must be able to read the Proxy Protocol header
+                  type: string
                   nullable: true
                 serviceRef:
                   description: ServiceRef is the internal service to tunnel to the remote host
@@ -112,7 +129,9 @@ spec:
                       type: string
                   nullable: true
                 generated:
-                  description: Generated is set to true when the tunnel is created by the operator and false when a user creates the Tunnel via YAML
+                  description: |-
+                    Generated is set to true when the tunnel is created by the operator and false
+                    when a user creates the Tunnel via YAML
                   type: boolean
                 hostIP:
                   type: string

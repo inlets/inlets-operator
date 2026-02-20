@@ -37,6 +37,7 @@ func validateFlags(c InfraConfig) error {
 			return fmt.Errorf("region required for provider: %s", c.Provider)
 		}
 	}
+
 	if len(c.MaxClientMemory) > 0 {
 		if _, err := resource.ParseQuantity(c.MaxClientMemory); err != nil {
 			return fmt.Errorf("invalid memory value: %s", err.Error())

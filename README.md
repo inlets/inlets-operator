@@ -63,6 +63,18 @@ Install the chart with `annotatedOnly: true`, then run:
 kubectl annotate service nginx-1 operator.inlets.dev/manage=1
 ```
 
+## Proxy Protocol support
+
+Proxy protocol can be enabled on tunnel exit servers so that the original client IP address is preserved and forwarded to your services. This is controlled by an annotation.
+
+Allowed values are `v1`, `v2`, or `""` (disabled).
+
+```bash
+kubectl annotate service nginx-1 operator.inlets.dev/proxy-proto=v2
+```
+
+> **Important**: The proxy protocol configuration is applied when the tunnel exit server VM is provisioned and **cannot be changed afterwards**. If you need to change the proxy protocol setting for an existing service, you must delete the service (which will delete the tunnel and VM), then recreate it with the new annotation.
+
 ## Using IPVS for your Kubernetes networking?
 
 For IPVS, you need to declare a Tunnel Custom Resource instead of using the LoadBalancer field.

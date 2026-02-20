@@ -63,6 +63,13 @@ type TunnelSpec struct {
 	// +nullable
 	// +kubebuilder:validation:Optional
 	UpdateServiceIP bool `json:"updateServiceIP,omitempty"`
+
+	// +nullable
+	// +kubebuilder:validation:Optional
+	// ProxyProto when set, is passed onto the tunnel server
+	// in order to have it send the original source IP.
+	// Note: any upstream must be able to read the Proxy Protocol header
+	ProxyProto string `json:"proxyProto,omitempty"`
 }
 
 // TunnelStatus is the status for a Tunnel resource

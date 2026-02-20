@@ -24,17 +24,17 @@ type InfraConfig struct {
 	AnnotatedOnly   bool
 	MaxClientMemory string
 	Plan            string
-	ProConfig       InletsProConfig
+	TunnelConfig    TunnelConfig
 }
 
-type InletsProConfig struct {
+type TunnelConfig struct {
 	License       string
 	LicenseFile   string
 	ClientImage   string
 	InletsRelease string
 }
 
-func (c InletsProConfig) GetLicenseKey() (string, error) {
+func (c TunnelConfig) GetLicenseKey() (string, error) {
 	val := ""
 	if len(c.License) > 0 {
 		val = c.License
