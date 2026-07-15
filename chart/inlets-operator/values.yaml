@@ -15,11 +15,11 @@ annotatedOnly: false
 # These two versions should match for the client and server
 # For the client which will run as a Deployment in Kubernetes
 inletsClient:
-  image: "ghcr.io/inlets/inlets-pro:0.11.8"
+  image: "ghcr.io/inlets/inlets-pro:0.11.14"
 
 # Note: This needs to be updated manually to match inletsClient.image
 # For the server which will run a binary via systemd
-inletsRelease: "0.11.8"
+inletsRelease: "0.11.14"
 
 #plan: <The plan or size for your cloud instance>
 
