@@ -9,6 +9,14 @@ You can view the client API docs here: [http://godoc.org/github.com/digitalocean
 
 You can view DigitalOcean API docs here: [https://docs.digitalocean.com/reference/api/api-reference/](https://docs.digitalocean.com/reference/api/api-reference/)
 
+> **🚀 New in v1.191.0 — AI & Inference support**
+>
+> `godo` now ships first-class support for DigitalOcean's
+> [DigitalOcean Inference](https://docs.digitalocean.com/products/inference/): chat
+> completions (with streaming), image generation, embeddings, batch inference,
+> model listing, and more — all from the same `Client`. Jump to
+> [**AI & Inference**](#ai--inference) to get started.
+
 ## Install
 ```sh
 go get github.com/digitalocean/godo@vX.Y.Z
@@ -33,11 +41,8 @@ access different parts of the DigitalOcean API.
 
 ### Authentication
 
-Currently, Personal Access Token (PAT) is the only method of
-authenticating with the API. You can manage your tokens
-at the DigitalOcean Control Panel [Applications Page](https://cloud.digitalocean.com/settings/applications).
-
-You can then use your token to create a new client:
+You can manage API tokens at the DigitalOcean Control Panel
+[Applications Page](https://cloud.digitalocean.com/settings/applications).
 
 ```go
 package main
@@ -51,7 +56,100 @@ func main() {
 }
 ```
 
+> **Credentials for inference APIs**
+>
+> What matters is the **credential** you pass to `godo.NewFromToken`, not which
+> DigitalOcean API you call:
+>
+> | What you're calling | What you need |
+> | --- | --- |
+> | Infrastructure APIs (`Droplets`, `Kubernetes`, `Volumes`, …) | A DigitalOcean API token (PAT). |
+> | Inference APIs (`Chat`, `Models`, `Embeddings`, `ImageGenerations`, `Messages`, `Responses`, `BatchInference`, …) | A PAT created with **full access** scope, **or** a **model access key**. |
+>
+> If you only have a limited-scope PAT, infrastructure calls will work but
+> inference calls will fail with `401`. Create a new PAT with full access, or use
+> a Model Access Key instead.
+>
+> ```go
+> // Either credential works with godo.NewFromToken:
+> client := godo.NewFromToken(os.Getenv("DIGITALOCEAN_TOKEN"))  // full-access PAT
+> client := godo.NewFromToken(os.Getenv("MODEL_ACCESS_KEY"))    // model access key
+> ```
+
 If you need to provide a `context.Context` to your new client, you should use [`godo.NewClient`](https://godoc.org/github.com/digitalocean/godo#NewClient) to manually construct a client instead.
+
+## Action Gateway
+
+`client.ActionGateway` exposes the Action Gateway control-plane resources: tools,
+toolbelts, output views, MCP servers, connections, sessions, users, and end-user
+limits. Use a PAT with the corresponding `action_gateway` scopes. For example:
+
+```go
+toolbelts, _, err := client.ActionGateway.Toolbelts.List(ctx, &godo.ActionGatewayToolbeltsListOptions{Status: "active"})
+if err != nil { return err }
+fmt.Println(toolbelts.Toolbelts)
+
+session, _, err := client.ActionGateway.Sessions.CreateRuntime(ctx, &godo.ActionGatewaySessionCreateRequest{
+    ActorID: "alice",
+})
+if err != nil { return err }
+tools, _, err := session.ChatTools(ctx, nil) // action_search, action_invoke, action_code
+if err != nil { return err }
+completion, _, err := client.Chat.Completions.New(ctx, &godo.ChatCompletionNewParams{
+    Model: "llama3.3-70b-instruct", Messages: []godo.ChatCompletionMessage{godo.UserMessage("Find recent news")}, Tools: tools,
+})
+if err != nil { return err }
+toolMessages, _, err := session.HandleChatToolCalls(ctx, completion)
+if err != nil { return err }
+fmt.Println(toolMessages)
+```
+
+`session.Tools` supports direct discovery and invocation, while `session.Code`
+runs sandboxed code. `MessageTools`/`HandleMessageToolCalls` and
+`ResponseTools`/`HandleResponseToolCalls` integrate with the other inference
+formats. `CreateRuntime` defaults to an ask-before-executing policy; provide an
+explicit policy to change it. Omitted `Tools` enables all tools, while an empty
+non-nil slice enables none. MCP calls accept only HTTPS session URLs on
+`actions.do-ai.run`; `WithActionGatewayMCPBaseURL` overrides the origin for
+development or tests.
+
+## AI & Inference
+
+> Talk to models on [DigitalOcean Inference](https://docs.digitalocean.com/products/inference/) with the same `godo.Client`.
+
+The [Serverless Inference API](https://docs.digitalocean.com/reference/api/reference/serverless-inference/) is available at `https://inference.do-ai.run/`. Use a **DigitalOcean PAT with full access scope** or a **model access key** — see the [credentials note](#authentication) above.
+
+#### Chat completion
+
+```go
+completion, _, err := client.Chat.Completions.New(ctx, &godo.ChatCompletionNewParams{
+    Model: "llama3.3-70b-instruct",
+    Messages: []godo.ChatCompletionMessage{
+        godo.UserMessage("Write me a haiku"),
+    },
+})
+```
+
+#### List models
+
+```go
+page, _, err := client.Models.List(ctx)
+for _, m := range page.Data {
+    fmt.Println(m.ID)
+}
+```
+
+#### Image generation
+
+```go
+image, _, err := client.ImageGenerations.Generate(ctx, &godo.ImageGenerateParams{
+    Model:  "stable-diffusion-3.5-large",
+    Prompt: "A friendly cartoon shark typing on a laptop at a sunny beach",
+    N:      1,
+})
+```
+
+For streaming, embeddings, messages, responses, async invocations, batch inference, agent inference, and full runnable programs, see [`examples/serverless-inference/`](examples/serverless-inference/) and [`examples/agent-inference/`](examples/agent-inference/).
 
 ## Examples
 

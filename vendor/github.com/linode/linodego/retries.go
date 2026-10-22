@@ -87,7 +87,7 @@ func requestGOAWAYRetryCondition(_ *resty.Response, e error) bool {
 func requestNGINXRetryCondition(r *resty.Response, _ error) bool {
 	return r.StatusCode() == http.StatusBadRequest &&
 		r.Header().Get("Server") == "nginx" &&
-		r.Header().Get("Content-Type") == "text/html"
+		r.Header().Get("Content-Type") == "text/html" //nolint:goconst
 }
 
 func respectRetryAfter(client *resty.Client, resp *resty.Response) (time.Duration, error) {

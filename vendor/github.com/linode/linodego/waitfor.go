@@ -820,3 +820,35 @@ func (client Client) WaitForAlertDefinitionStatus(
 		}
 	}
 }
+
+// WaitForVolumeIOReadyStatus waits for the io_ready status to verify whether the volume is
+// successfully attached to a Linode instance and ready for read and write operations
+func (client Client) WaitForVolumeIOReadyStatus(
+	ctx context.Context,
+	volumeID int,
+	status bool,
+	timeoutSeconds int,
+) (*Volume, error) {
+	ctx, cancel := context.WithTimeout(ctx, time.Duration(timeoutSeconds)*time.Second)
+	defer cancel()
+
+	ticker := time.NewTicker(client.pollInterval)
+	defer ticker.Stop()
+
+	for {
+		select {
+		case <-ticker.C:
+			volume, err := client.GetVolume(ctx, volumeID)
+			if err != nil {
+				return volume, err
+			}
+
+			if volume.IOReady == status {
+				return volume, nil
+			}
+
+		case <-ctx.Done():
+			return nil, fmt.Errorf("failed to wait for Volume %d IO Ready status %t: %w", volumeID, status, ctx.Err())
+		}
+	}
+}

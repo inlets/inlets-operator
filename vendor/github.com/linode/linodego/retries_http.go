@@ -115,7 +115,7 @@ func httpRequestGOAWAYRetryCondition(_ *http.Response, err error) bool {
 func httpRequestNGINXRetryCondition(resp *http.Response, _ error) bool {
 	return resp.StatusCode == http.StatusBadRequest &&
 		resp.Header.Get("Server") == "nginx" &&
-		resp.Header.Get("Content-Type") == "text/html"
+		resp.Header.Get("Content-Type") == "text/html" //nolint:goconst
 }
 
 // Helper function to extract APIError from response
