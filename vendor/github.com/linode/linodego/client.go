@@ -755,7 +755,7 @@ func (c *Client) addCachedResponse(endpoint string, response any, expiry *time.D
 	}
 
 	switch responseValue.Kind() {
-	case reflect.Ptr:
+	case reflect.Pointer:
 		// We want to automatically deref pointers to
 		// avoid caching mutable data.
 		entry.Data = responseValue.Elem().Interface()

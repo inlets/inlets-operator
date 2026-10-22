@@ -30,7 +30,6 @@ type AccountSettings struct {
 	// A string like "disabled", "suspended", or "active" describing the status of this account’s Object Storage service enrollment.
 	ObjectStorage *string `json:"object_storage"`
 
-	// NOTE: Interfaces for new linode setting may not currently be available to all users.
 	// A new configuration flag defines whether new Linodes can use Linode and/or legacy config interfaces.
 	InterfacesForNewLinodes InterfacesForNewLinodes `json:"interfaces_for_new_linodes"`
 

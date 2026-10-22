@@ -1,5 +1,243 @@
 # Change Log
 
+## [1.231.0] - 2026-10-22
+
+- #1178 - @sanpj2292 - feat(MARSOHS-2336): rename the workspace size to SizeLimitGiB (size_limit_gib)
+
+## [1.230.0] - 2026-10-21
+
+- #1179 - @dmamidala-glitch - COBS-1696: Align Insights tracing wire contract
+- #1174 - @schakraborty-do - microvms: add URL add/remove and ingress opt-out
+
+## [1.229.0] - 2026-10-19
+
+- #1173 - @potturu-vamsi - agent platform: remove MaxTokens from CandidateInferenceConfig
+
+## [1.228.0] - 2026-10-19
+
+- #1166 - @kishlay-singh-DO - Add Insights enablement endpoints
+- #1171 - @BadhriDO - hosted agents: carry deletion_protected on connections (MARSOHS-2173)
+
+## [1.227.0] - 2026-10-16
+
+- #1168 - @SSharma-10 - Expand serverless inference for server-side tools, VLMs, TTS, and video
+
+## [1.226.0] - 2026-10-15
+
+- #1167 - @m3co-code - INFERNO-152 map new gpu_operator_ready cluster property
+
+## [1.225.0] - 2026-10-12
+
+- #1162 - @srajputdo - COBS-1350: Add Insights traces query support
+- #1156 - @adityasingh-beep - COBS-1351: Add Insights spans query support
+- #1161 - @aupadhyay-shark - docs(FI-609): clarify Signals CreateDeletion godoc
+
+## [1.224.0] - 2026-10-11
+
+- #1159 - @venkatranabothu - Rename simulation journeys to episodes in the Agent Platform client
+
+## [1.223.0] - 2026-10-09
+
+- #1157 - @rvdfox - signals: add team-level inference consent (source=inference) to SignalsService
+
+## [1.222.0] - 2026-10-09
+
+- #1153 - @sauravk-digitalocean - Remove GetSegment and GetSegmentSignalReport from SignalsService
+- #1152 - @aupadhyay-shark - signals: rename deletion type managed_agent → agent
+- #1151 - @smirdha-source - Add SessionIDs to SignalsCreateExportRequest
+
+## [1.221.0] - 2026-10-09
+
+- #1149 - @sauravk-digitalocean - Remove Allowed from SignalsAgentConsent
+- #1144 - @satyambhalla - feat(FI-609): add data deletion methods to SignalsService
+
+## [1.220.0] - 2026-10-08
+
+- #1138 - @sanpj2292 - feat(MARSOHS-1935): add persistent workspaces to the hosted agents client
+
+## [1.219.0] - 2026-10-08
+
+- #1143 - @jkosanam - hosted agents: add external-provider connection management methods
+- #1141 - @dmamidala-glitch - COBS-1352: Add Insights logs query support
+
+## [1.218.0] - 2026-10-07
+
+- #1140 - @sauravk-digitalocean - feat(FI-610): add Signals consent and export client
+- #1139 - @smirdha-source - Add Signals client for investigation GETs and consent enable/disable
+- #1137 - @kishlay-singh-DO - Add an Insights client for channels, alert rules, instances, and PromQL.
+
+## [1.217.0] - 2026-10-01
+
+- #1130 - @aguan-hue - Syncing Model Evaluation fields from gen-ai Public API
+
+## [1.216.0] - 2026-09-30
+
+- #1134 - @kishlay-singh-DO - Rename the GradientAI client to Agent Platform.
+- #1133 - @tgillam-do - Add Action Gateway SDK
+- #1129 - @sanpj2292 - Add Cancel to HostedAgentTriggersService
+- #1132 - @fumblehool - Update HostedAgentSandboxSize struct to include PricePerHourUSD and PricePerMonthUSD
+
+## [1.215.0] - 2026-09-24
+
+- #1127 - @vrindavinod-do - hosted_agents: add ZeroBalance pause reason, deprecate LowBalance
+
+## [1.214.0] - 2026-09-24
+
+- #1125 - @SSharma-10 - Add Environment aliases for Managed Agents
+- #1123 - @SSharma-10 -  Add post-release checksum verification steps to CONTRIBUTING.md
+
+## [1.213.0] - 2026-09-23
+
+- #1102 - @kgautam676 - Adding nfs_csi_plugin to kubernetes cluster types
+- #1120 - @sgupta832 - microvm: decode http_protocol, checkpoint size, and combined list filters
+
+## [1.212.0] - 2026-09-22
+
+- #1117 - @sgupta832 - MicroVM URN flip + Exec/ConsoleURL (MDROP-392, MDROP-427)
+
+## [1.211.0] - 2026-09-22
+
+- #1021 - @SSharma-10 - Add OHS endpoints
+
+## [1.210.0] - 2026-09-18
+
+- #1110 - @kwadhwa-source - Mdrop 391/create options sizes
+
+## [1.209.0] - 2026-09-17
+
+- #1107 - @rodrigoea - billing(prepayment): add public config and status client methods
+
+## [1.208.0] - 2026-09-15
+
+- #1105 - @AKatruwar - registry: expose registry UUID and add ListByUUID
+
+## [1.207.0] - 2026-09-15
+
+- #1090 - @abhishekk-fcb10 - MNFS-794: Add NFS client methods for CSI
+- #1103 - @arkahood - firewall: accept and return action optionally
+- #1101 - @ddatta-do - droplet: accept and return subnetUUID optionally
+- #1100 - @johannaratliff - VPC Subnets CRUD support
+- #1098 - @sgupta832 - microdroplets: reshape onto api-v2 contract (MDROP-336)
+
+## [1.206.0] - 2026-08-31
+
+- #1094 - @sshirolkar - add godo support for simulations rpcs
+
+## [1.205.0] - 2026-08-25
+
+- #1089 - @ddatta-do - feat : add routes endpoints
+
+## [1.204.0] - 2026-08-10
+
+- #1080 - @nayanjd-do - Add constant to string match against volume capacity errors
+
+## [1.203.0] - 2026-08-05
+
+- #1076 - @rak16 - microdroplets: add image region, fix image URN, drop https protocol
+
+## [1.202.0] - 2026-07-29
+
+- #1069 - @varshavaradarajan - doks: add isolated workers to kubernetes create call
+- #1067 - @nveerdixit - MARSOHS-551: Session.origin on HostedAgents (stack on OHS_endpoints)
+
+## [1.201.0] - 2026-07-24
+
+- #1060 - @DO-rrao - Add GPU partition mode support to Droplets and Sizes
+
+## [1.200.0] - 2026-07-22
+
+- #1058 - @kwadhwa-source - MDROP-23:add godo support for microdroplets
+- #1061 - @gangasingh01 - added support for ADVANCED MySQL config patch and get operations
+- #1059 - @johannaratliff - Add VPCSubnetUUID support for LoadBalancer
+- #1053 - @rbhatia-code - support byoip for load balancer and nat-gateway
+
+## [1.199.0] - 2026-07-15
+
+- #1052 - @llDrLove - CON-13386 Add P2pOciRegistry plugin information to Kubernetes api calls (Create, Update, Get)
+
+## [1.198.0] - 2026-07-07
+
+- #1043 - @johannaratliff - Support subnet_uuid in vpcnatgateway
+- #1049 - @ritheek-pitti-do - gradientai: remove deprecated SaveAsPreset field
+- #1041 - @sshirolkar - add support for custom metrics rpcs
+- #1044 - @lprasanth-nadiminti - DBAAS-8142: Add GetDOSettings and UpdateDOSettings
+
+## [1.197.0] - 2026-06-25
+
+- #1038 - @v-amanjain-afk - nfs access point apis
+- #1039 - @venkatranabothu - Add ErrorMessage to GradientAI CustomModel
+- #1037 - @ritheek-pitti-do - Add run progress model and update tests
+- #1032 - @MaxLivesInTheMatrix - Adding in secrets API support
+
+## [1.196.0] - 2026-06-16
+
+- #1035 - @bpatra-drop - Add support for evaluation dataset delete api
+- #1022 - @nbhoot157 - Add ProjectID to VectorDBCreateRequest
+
+## [1.195.0] - 2026-06-09
+
+- #1033 - @chandrudo - Add UpdateModelEvaluationRun to GradientAI service
+- #1030 - @ritheek-pitti-do - Add ListEvaluationDatasets API and example
+- #1028 - @gangasingh01 - added support for ADVANCED PG configuration
+- #1026 - @gangasingh01 - Added support for ADVANCED_MYSQL and ADVANCED_PG engines in listoptions endpoint
+- #1027 - @SSharma-10 - rename beta release
+
+## [1.194.1] - 2026-06-03
+
+- #1023 - @SSharma-10 - godo beta release
+- #1024 - @venkatranabothu - Add Spaces editable fields to Custom Model metadata
+- #1019 - @ritheek-pitti-do - Added evals endpoints
+- #1017 - @d-isaacson - Add inference router APIs
+
+## [1.193.0] - 2026-05-26
+
+- #1015 - @nbhoot157 - Add VectorDBs service for vector database API support
+- #1018 - @gangasingh01 - mod: added support for get and update StorageAutoscale endpoints
+- #1016 - @ritheek-pitti-do - Added Cancel Eval and DeletePreset Endpoints
+- #1014 - @venkatranabothu - Add Delete Model Evaluation Run API support
+- #1013 - @d-honeybadger - add worker_subnet_uuid field to doks methods
+- #1012 - @sshirolkar - add pricing for non-token based models in godo 
+
+## [1.192.0] - 2026-05-19
+
+- #1010 - @SSharma-10 - Update readme
+- #1007 - @venkatranabothu - Add GetCustomModel API
+
+## [1.191.0] - 2026-05-14
+
+- #1005 - Add Serverless Inference APIs
+
+## [1.190.0] - 2026-05-14
+
+- #1001 - ensure that kubernetes GetKubeConfigWithExpiry fetches a token-based kubeconfig
+- #1004 - Add custom models API and tests
+- #970 - Make HA flag optional in Kubernetes cluster create request for version-based API defaults
+
+## [1.189.0] - 2026-05-04
+
+**BREAKING CHANGE:** `AppIngressSpecRuleStringMatch.Prefix` and `.Exact` changed from `string` to `*string` to fix empty-string matching. Consumers that directly read or assign these fields will need to update their code. Use `godo.PtrTo("value")` for assignment and the `GetPrefix()`/`GetExact()` accessors for reading.
+
+- #994 - @aupadhyay-shark - App Ingress authority routing only supports exact matching #937
+
+## [1.188.0] - 2026-04-27
+
+- #1000 - @m3co-code - add new fields to k8s node pool template for auto-scaler
+
+## [1.187.0] - 2026-04-22
+
+- #998 - @nhenning-do - Add BatchInferenceService for the inference proxy batch API
+- #995 - @d-honeybadger - DOKS: per cluster sso config
+
+## [1.186.0] - 2026-04-15
+
+- #992 - @venkatranabothu - Add model benchmark_score and pricing
+
+## [1.185.0] - 2026-04-14
+
+- #990 - @greeshmapill - APPS-12973: Add request based autoscaling changes to app spec
+- #989 - @andrehernandez0 - NfsAction - type inconsistency bug fix
+- #988 - @divyanshgupta-dodeveloper - NFRNC-701: Added provider model id to accommodate schema updates in DI Creation request
+
 ## [1.184.0] - 2026-04-01
 
 - #984 - Change ContextWindow to string

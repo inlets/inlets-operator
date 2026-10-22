@@ -19,25 +19,52 @@ const (
 	AlertDefinitionStatusFailed       AlertDefinitionStatus = "failed"
 )
 
+// AlertDefinitionScope represents the scope of an alert definition: "account", "entity", or "region". Defaults to "entity".
+type AlertDefinitionScope string
+
+const (
+	AlertDefinitionScopeAccount AlertDefinitionScope = "account"
+	AlertDefinitionScopeEntity  AlertDefinitionScope = "entity"
+	AlertDefinitionScopeRegion  AlertDefinitionScope = "region"
+)
+
+// AlertDefinitionEntities represents entity metadata for an alert definition.
+// For entity scoped alerts, entities contains the URL to list entities, a count, and a has_more_resources flag.
+// For region/account scoped alerts, the entities are returned as an empty object.
+type AlertDefinitionEntities struct {
+	URL              string `json:"url"`
+	Count            int    `json:"count"`
+	HasMoreResources bool   `json:"has_more_resources"`
+}
+
+// AlertDefinitionEntity represents a single entity associated with an alert definition.
+type AlertDefinitionEntity struct {
+	ID    string `json:"id"`
+	Label string `json:"label"`
+	URL   string `json:"url"`
+	Type  string `json:"type"`
+}
+
 // AlertDefinition represents an ACLP Alert Definition object
 type AlertDefinition struct {
-	ID                int                    `json:"id"`
-	Label             string                 `json:"label"`
-	Severity          int                    `json:"severity"`
-	Type              string                 `json:"type"`
-	ServiceType       string                 `json:"service_type"`
-	Status            AlertDefinitionStatus  `json:"status"`
-	HasMoreResources  bool                   `json:"has_more_resources"`
-	RuleCriteria      RuleCriteria           `json:"rule_criteria"`
-	TriggerConditions TriggerConditions      `json:"trigger_conditions"`
-	AlertChannels     []AlertChannelEnvelope `json:"alert_channels"`
-	Created           *time.Time             `json:"-"`
-	Updated           *time.Time             `json:"-"`
-	UpdatedBy         string                 `json:"updated_by"`
-	CreatedBy         string                 `json:"created_by"`
-	EntityIDs         []string               `json:"entity_ids"`
-	Description       string                 `json:"description"`
-	Class             string                 `json:"class"`
+	ID                int                     `json:"id"`
+	Label             string                  `json:"label"`
+	Severity          int                     `json:"severity"`
+	Type              string                  `json:"type"`
+	ServiceType       string                  `json:"service_type"`
+	Status            AlertDefinitionStatus   `json:"status"`
+	RuleCriteria      RuleCriteria            `json:"rule_criteria"`
+	TriggerConditions TriggerConditions       `json:"trigger_conditions"`
+	AlertChannels     []AlertChannelEnvelope  `json:"alert_channels"`
+	Created           *time.Time              `json:"-"`
+	Updated           *time.Time              `json:"-"`
+	UpdatedBy         string                  `json:"updated_by"`
+	CreatedBy         string                  `json:"created_by"`
+	Description       string                  `json:"description"`
+	Class             string                  `json:"class"`
+	Scope             AlertDefinitionScope    `json:"scope"`
+	Regions           []string                `json:"regions"`
+	Entities          AlertDefinitionEntities `json:"entities"`
 }
 
 // Backwards-compatible alias
@@ -143,6 +170,8 @@ type AlertDefinitionCreateOptions struct {
 	TriggerConditions *TriggerConditions   `json:"trigger_conditions,omitempty"`
 	EntityIDs         []string             `json:"entity_ids,omitempty"`
 	Description       *string              `json:"description,omitempty"`
+	Scope             AlertDefinitionScope `json:"scope,omitempty"`
+	Regions           []string             `json:"regions,omitzero"`
 }
 
 // AlertDefinitionUpdateOptions are the options used to update an alert definition.
@@ -155,6 +184,7 @@ type AlertDefinitionUpdateOptions struct {
 	EntityIDs         []string               `json:"entity_ids,omitempty"`
 	Description       *string                `json:"description,omitempty"`
 	Status            *AlertDefinitionStatus `json:"status,omitempty"`
+	Regions           []string               `json:"regions,omitzero"`
 }
 
 // UnmarshalJSON implements the json.Unmarshaler interface
@@ -267,4 +297,15 @@ func (c *Client) UpdateMonitorAlertDefinition(
 func (c *Client) DeleteMonitorAlertDefinition(ctx context.Context, serviceType string, alertID int) error {
 	e := formatAPIPath("monitor/services/%s/alert-definitions/%d", serviceType, alertID)
 	return doDELETERequest(ctx, c, e)
+}
+
+// ListMonitorAlertDefinitionEntities gets the entities associated with an ACLP Monitor Alert Definition.
+func (c *Client) ListMonitorAlertDefinitionEntities(
+	ctx context.Context,
+	serviceType string,
+	alertID int,
+	opts *ListOptions,
+) ([]AlertDefinitionEntity, error) {
+	e := formatAPIPath("monitor/services/%s/alert-definitions/%d/entities", serviceType, alertID)
+	return getPaginatedResults[AlertDefinitionEntity](ctx, c, e, opts)
 }
