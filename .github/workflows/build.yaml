@@ -16,7 +16,7 @@ jobs:
 
     runs-on: actuated-8cpu-12gb
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 1
       # - name: Set up Docker Buildx
